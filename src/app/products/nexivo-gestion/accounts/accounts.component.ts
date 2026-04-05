@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { MessageService } from 'primeng/api';
@@ -104,16 +105,14 @@ export interface SalePoint {
 })
 export class AccountsComponent implements OnInit {
 
+  private destroyRef = inject(DestroyRef);
+
   visible = false;
   active: number = 0;
 
   accountForm!: FormGroup;
   ownerUserForm!: FormGroup;
   salePointForm!: FormGroup;
-
-  showDialog() {
-    this.visible = false;
-  }
 
   showDialog1() {
     this.accountForm.reset();
@@ -136,8 +135,6 @@ export class AccountsComponent implements OnInit {
   selectedAccounts: Account[] = [];
 
   submitted: boolean = false;
-
-  cols: any[] = [];
 
   statuses: any[] = [];
 
@@ -168,16 +165,12 @@ export class AccountsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.accountsService.getAccounts().subscribe(data => this.accounts = data);
-    this.subscriptionService.getActivePlans().subscribe(p => this.plans = p);
-    this.cols = [
-      { field: 'name', header: 'Nombre' },
-      { field: 'description', header: 'Price' },
-      { field: 'email', header: 'Email' },
-      { field: 'phone', header: 'Teléfono' },
-      { field: 'ownerUsername', header: 'Dueño' },
-      { field: 'status', header: 'Estado' }
-    ];
+    this.accountsService.getAccounts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => this.accounts = data);
+    this.subscriptionService.getActivePlans()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(p => this.plans = p);
 
     this.statuses = [
       { label: 'ACTIVA', value: 'active' },
@@ -241,7 +234,7 @@ export class AccountsComponent implements OnInit {
         email: this.accountForm.value.email,
         phone: this.accountForm.value.phone,
         icon: this.accountForm.value.icon || 'https://cdn-icons-png.flaticon.com/512/8345/8345328.png',
-        status: this.validStatuses.includes(this.account.status as any) ? (this.account.status as any) : 'active',
+        status: (this.accountForm.value.status as 'active' | 'inactive' | 'suspended') ?? 'active',
         ownerUsername: this.ownerUserForm.value.username,
         ownerEmail: this.ownerUserForm.value.email,
         ownerFirstName: this.ownerUserForm.value.first_name,
@@ -254,8 +247,8 @@ export class AccountsComponent implements OnInit {
         freeMonths: this.subscriptionForm.value.freeMonths || 0
       };
       this.isSaving = true;
-      this.accountsService.createAccountAndOwnerUserAndPoint(createAccountDto).subscribe(
-        (response: any) => {
+      this.accountsService.createAccountAndOwnerUserAndPoint(createAccountDto).subscribe({
+        next: (response: any) => {
           this.isSaving = false;
           this.handleNext(nextCallback);
           this.accounts.push(response);
@@ -265,7 +258,7 @@ export class AccountsComponent implements OnInit {
           this.ownerUser = {} as any;
           this.salePoint = {} as any;
         },
-        (error: any) => {
+        error: (error: any) => {
           this.isSaving = false;
           console.error('Error creating account:', error);
           this.messageService.add({
@@ -274,8 +267,8 @@ export class AccountsComponent implements OnInit {
             detail: 'Error al crear cuenta',
             life: 3000
           });
-        }
-      );
+        },
+      });
     }
   }
 
@@ -291,22 +284,6 @@ export class AccountsComponent implements OnInit {
       detail: 'Cuenta, usuario y punto creados con éxito',
       life: 3000
     });
-  }
-
-  openNew() {
-    this.accountForm.reset();
-    this.ownerUserForm.reset();
-    this.salePointForm.reset();
-    this.subscriptionForm.reset({ planId: '', billingCycle: 'monthly', freeMonths: 0 });
-
-    this.account = {} as Account;
-    this.ownerUser = {} as Owner;
-    this.salePoint = {} as SalePoint;
-
-    this.account.status = 'active';
-
-    this.submitted = false;
-    this.accountDialog = true;
   }
 
   hideDialog(type: string) {
@@ -389,74 +366,29 @@ export class AccountsComponent implements OnInit {
   }
 
   saveAccount() {
-    if (!this.accountOwnerDialog && this.isOwnerUserIncomplete() && !this.isUpdate) {
-      this.accountOwnerDialog = true;
-      setTimeout(() => {
-        this.messageService.add({ severity: 'info', summary: 'Información', detail: 'Debe crear un usuario propietario de la cuenta!', life: 8000 });
-      }, 200);
-      return;
-    }
     this.submitted = true;
     if (this.account.name?.trim()) {
-      if (this.isUpdate) {
-        const updateAccount: UpdateAccountDto = {
-          name: this.account.name,
-          email: this.account.email,
-          description: this.account.description,
-          icon: this.account.icon,
-          phone: this.account.phone,
-          status: this.validStatuses.includes(this.account.status as any) ? (this.account.status as any) : 'active',
-        };
-        this.accountsService.updateAccount(this.account.id, updateAccount).subscribe((response: any) => {
+      const updateAccount: UpdateAccountDto = {
+        name: this.account.name,
+        email: this.account.email,
+        description: this.account.description,
+        icon: this.account.icon,
+        phone: this.account.phone,
+        status: this.validStatuses.includes(this.account.status as any) ? (this.account.status as any) : 'active',
+      };
+      this.accountsService.updateAccount(this.account.id, updateAccount).subscribe({
+        next: (response: any) => {
           this.accounts[this.findIndexById(this.account.id)] = this.account;
           this.messageService.add({ severity: 'success', summary: 'Operación exitosa', detail: 'Cuenta actualizada', life: 3000 });
           this.accountDialog = false;
           this.submitted = false;
-        });
-      } else {
-        this.account.id = this.createId();
-        this.accounts = [...this.accounts];
-        if (this.account.name?.trim() && this.ownerUser.username?.trim()) {
-          const createAccountDto: CreateAccountDto = {
-            name: this.accountForm.value.name,
-            description: this.accountForm.value.description,
-            email: this.accountForm.value.email,
-            phone: this.accountForm.value.phone,
-            icon: this.accountForm.value.icon || 'https://cdn-icons-png.flaticon.com/512/8345/8345328.png',
-            status: this.validStatuses.includes(this.account.status as any) ? (this.account.status as any) : 'active',
-            ownerUsername: this.ownerUserForm.value.username,
-            ownerEmail: this.ownerUserForm.value.email,
-            ownerFirstName: this.ownerUserForm.value.first_name,
-            ownerLastName: this.ownerUserForm.value.last_name,
-            salePointName: this.salePointForm.value.name,
-            salePointAddress: this.salePointForm.value.address,
-            salePointPhone: this.salePointForm.value.phone,
-            planId: this.subscriptionForm?.value?.planId || '',
-            billingCycle: this.subscriptionForm?.value?.billingCycle || 'monthly',
-            freeMonths: this.subscriptionForm?.value?.freeMonths || 0
-          };
-          this.isSaving = true;
-          this.accountsService.createAccountAndOwnerUserAndPoint(createAccountDto).subscribe((response: any) => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Operación exitosa',
-              detail: 'Cuenta y usuario creados con éxito',
-              life: 3000
-            });
-            this.isSaving = false;
-            this.accounts.push(response);
-            this.accountDialog = false;
-            this.submitted = false;
-            this.account = {} as any;
-            this.ownerUser = {} as any;
-          });
-        }
-      }
+        },
+        error: (err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Error al actualizar la cuenta' });
+          this.isSaving = false;
+        },
+      });
     }
-  }
-
-  private isOwnerUserIncomplete(): boolean {
-    return !this.ownerUser || Object.values(this.ownerUser).every(value => value === '' || value === null || value === undefined);
   }
 
   findIndexById(id: string): number {
@@ -468,15 +400,6 @@ export class AccountsComponent implements OnInit {
       }
     }
     return index;
-  }
-
-  createId(): string {
-    let id = '';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
   }
 
   onGlobalFilter(table: Table, event: Event) {

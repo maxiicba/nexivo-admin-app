@@ -426,7 +426,7 @@
     </div>
   </div>
 
-  <p-table #dt [value]="accounts" [columns]="cols" responsiveLayout="scroll" [rows]="10"
+  <p-table #dt [value]="accounts" responsiveLayout="scroll" [rows]="10"
     [globalFilterFields]="['name','country.name','representative.name','status']" [paginator]="true"
     [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true"
     currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} registros"
