@@ -139,7 +139,10 @@ export class PanelAdminComponent implements OnInit {
       this.loadActivity();
       this.loadControllerOptions();
     }
-    if (index === 5) {
+    if (index === 4 && this.accountOptions.length === 0) {
+      this.loadAccounts();
+    }
+    if (index === 5 && this.recentDemos.length === 0) {
       this.loadDemoData();
     }
   }
@@ -196,14 +199,7 @@ export class PanelAdminComponent implements OnInit {
   }
 
   getStoreUrl(slug: string): string {
-    const env = environment as any;
-    if (env.baseDomain) {
-      return `https://${slug}.${env.baseDomain}`;
-    }
-    if (env.appUrl) {
-      return `${env.appUrl}/tienda/${slug}`;
-    }
-    return `/tienda/${slug}`;
+    return `${environment.appUrl}/tienda/${slug}`;
   }
 
   openAccountDetail(account: AccountSummary): void {

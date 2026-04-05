@@ -5,4 +5,5 @@ export const environment = {
   ssoUrl: 'https://app.nexivo.com.ar',
   wsUrl: 'https://api.nexivo.com.ar',
   localLogin: false,
+  appUrl: 'https://app.nexivo.com.ar',
 };
