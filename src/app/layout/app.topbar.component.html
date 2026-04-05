@@ -1,0 +1,172 @@
+<div class="layout-topbar">
+  <!-- Mobile: menu toggle -->
+  <button #menubutton class="p-link layout-menu-button layout-topbar-button" (click)="layoutService.onMenuToggle()">
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <!-- App title -->
+  <span class="layout-topbar-logo-text font-semibold">Nexivo Admin</span>
+
+  <!-- Mobile: open topbar menu -->
+  <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
+    (click)="layoutService.showProfileSidebar()">
+    <i class="pi pi-ellipsis-v"></i>
+  </button>
+
+  <div #topbarmenu class="layout-topbar-menu"
+    [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+
+    <!-- ═══ Separator (desktop only) ═══ -->
+    <div class="topbar-separator"></div>
+
+    <!-- ═══ Dark mode toggle ═══ -->
+    <button class="topbar-icon-btn" (click)="toggleDarkMode()"
+      [pTooltip]="isDarkMode ? 'Modo claro' : 'Modo oscuro'" tooltipPosition="bottom">
+      <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"></i>
+      <span class="topbar-mobile-label">{{ isDarkMode ? 'Modo claro' : 'Modo oscuro' }}</span>
+    </button>
+
+    <!-- ═══ User Menu (Desktop: overlay, Mobile: inline) ═══ -->
+    <button class="topbar-user-btn topbar-desktop-only" (click)="userPanel.toggle($event)" type="button">
+      <div class="topbar-avatar">
+        {{ userData?.first_name?.charAt(0) | uppercase }}
+      </div>
+      <i class="pi pi-chevron-down topbar-user-chevron"></i>
+    </button>
+
+    <p-overlayPanel #userPanel [styleClass]="'topbar-user-panel'">
+      <div class="topbar-user-panel-header">
+        <div class="topbar-user-panel-avatar">
+          {{ userData?.first_name?.charAt(0) | uppercase }}
+        </div>
+        <div class="topbar-user-panel-info">
+          <span class="topbar-user-panel-name">{{ userData?.first_name }} {{ userData?.last_name }}</span>
+          <span class="topbar-user-panel-email">{{ userData?.email }}</span>
+          <span class="topbar-user-panel-role" *ngIf="userData?.role">{{ userData?.role?.alias || userData?.role?.name }}</span>
+        </div>
+      </div>
+      <div class="topbar-user-panel-divider"></div>
+      <div class="topbar-user-panel-menu">
+        <button class="topbar-user-panel-item" (click)="showDialog(); userPanel.hide()">
+          <i class="pi pi-key"></i>
+          <span>Cambiar contraseña</span>
+        </button>
+        <div class="topbar-user-panel-divider"></div>
+        <button class="topbar-user-panel-item topbar-user-panel-item--danger" (click)="logout(); userPanel.hide()">
+          <i class="pi pi-sign-out"></i>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </p-overlayPanel>
+
+    <!-- ═══ Mobile-only: inline user actions ═══ -->
+    <div class="topbar-mobile-only">
+      <div class="topbar-separator"></div>
+      <button class="topbar-mobile-menu-item" (click)="showDialog(); layoutService.state.profileSidebarVisible = false">
+        <i class="pi pi-key"></i>
+        <span>Cambiar contraseña</span>
+      </button>
+      <button class="topbar-mobile-menu-item topbar-mobile-menu-item--danger" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+        <span>Cerrar sesión</span>
+      </button>
+      <div class="topbar-separator"></div>
+      <div class="topbar-mobile-user-footer">
+        <div class="topbar-avatar-sm">
+          {{ userData?.first_name?.charAt(0) | uppercase }}
+        </div>
+        <span class="topbar-mobile-user-label">{{ userData?.first_name }} {{ userData?.last_name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Toast & Confirm ═══ -->
+  <p-toast />
+  <p-confirmPopup key="topbar" [styleClass]="'mt-2'" #confirmPopupRef>
+    <ng-template pTemplate="headless" let-message let-test>
+      <div class="border-round p-3">
+        <span>{{ message.message }}</span>
+        <div class="flex align-items-center gap-2 mt-3">
+          <p-button (onClick)="accept()" label="Cerrar sesión" size="small" />
+          <p-button (onClick)="reject()" label="Cancelar" [outlined]="true" size="small" />
+        </div>
+      </div>
+    </ng-template>
+  </p-confirmPopup>
+
+  <!-- ═══ Password Change Dialog ═══ -->
+  <p-dialog header="Cambiar Contraseña" [(visible)]="pswdDialogVisible" [modal]="true" [draggable]="false"
+    [resizable]="false" [style]="{width: '420px', borderRadius: '10px'}">
+
+    <ng-template pTemplate="header">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-lock" style="font-size: 1.1rem; color: var(--nx-primary);"></i>
+        <span class="font-semibold text-lg">Cambiar Contraseña</span>
+      </div>
+    </ng-template>
+
+    <div class="p-fluid">
+      <p class="text-color-secondary mb-4 text-sm">Completa los campos para actualizar tu contraseña.</p>
+
+      <div class="field mb-4">
+        <label for="currentPassword" class="block font-medium mb-2 text-sm">Contraseña actual</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-lock"></i>
+          </span>
+          <input pInputText id="currentPassword" [(ngModel)]="currentPassword"
+            [type]="showCurrentPassword ? 'text' : 'password'" placeholder="Ingresa tu contraseña actual"
+            autocomplete="current-password" [ngClass]="{'ng-invalid ng-dirty': submitted && !currentPassword}" />
+          <button pButton type="button" icon="pi {{showCurrentPassword ? 'pi-eye-slash' : 'pi-eye'}}"
+            (click)="showCurrentPassword = !showCurrentPassword" class="p-button-outlined"></button>
+        </div>
+        <small *ngIf="submitted && !currentPassword" class="p-error">La contraseña actual es requerida</small>
+      </div>
+
+      <div class="field mb-4">
+        <label for="newPassword" class="block font-medium mb-2 text-sm">Nueva contraseña</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-lock"></i>
+          </span>
+          <input pInputText id="newPassword" [(ngModel)]="newPassword" [type]="showNewPassword ? 'text' : 'password'"
+            placeholder="Ingresa tu nueva contraseña" autocomplete="new-password"
+            [ngClass]="{'ng-invalid ng-dirty': submitted && (!newPassword || newPassword.length < 8)}" />
+          <button pButton type="button" icon="pi {{showNewPassword ? 'pi-eye-slash' : 'pi-eye'}}"
+            (click)="showNewPassword = !showNewPassword" class="p-button-outlined"></button>
+        </div>
+        <small *ngIf="submitted && !newPassword" class="p-error">La nueva contraseña es requerida</small>
+        <small *ngIf="submitted && newPassword && newPassword.length < 8" class="p-error">Debe tener al menos 8 caracteres</small>
+      </div>
+
+      <div class="field mb-4">
+        <label for="confirmPassword" class="block font-medium mb-2 text-sm">Confirmar contraseña</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-lock"></i>
+          </span>
+          <input pInputText id="confirmPassword" [(ngModel)]="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'" placeholder="Confirma tu nueva contraseña"
+            autocomplete="new-password"
+            [ngClass]="{'ng-invalid ng-dirty': submitted && (!confirmPassword || confirmPassword !== newPassword)}" />
+          <button pButton type="button" icon="pi {{showConfirmPassword ? 'pi-eye-slash' : 'pi-eye'}}"
+            (click)="showConfirmPassword = !showConfirmPassword" class="p-button-outlined"></button>
+        </div>
+        <small *ngIf="submitted && !confirmPassword" class="p-error">Debes confirmar tu contraseña</small>
+        <small *ngIf="submitted && confirmPassword && confirmPassword !== newPassword" class="p-error">Las contraseñas no coinciden</small>
+      </div>
+
+      <div *ngIf="errorMessage" class="p-message p-message-error mb-4">
+        <i class="pi pi-exclamation-circle p-message-icon"></i>
+        <span class="p-message-text">{{errorMessage}}</span>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-content-end gap-2">
+        <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-outlined p-button-sm" (onClick)="cancelPasswordChange()"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" styleClass="p-button-sm" (onClick)="changeUserPassword()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

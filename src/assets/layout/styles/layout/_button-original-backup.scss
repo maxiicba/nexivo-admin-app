@@ -1,0 +1,13 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// BACKUP: Estilos originales de .p-button antes del cambio hero-style
+// Fecha: 2026-03-22
+// Para revertir: reemplazar el bloque de botones en styles.scss (líneas ~120-341)
+//                con el contenido de este archivo.
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Buttons
+.p-button {
+  border-radius: var(--nx-btn-radius);
+  font-weight: var(--nx-btn-font-weight);
+  transition: all var(--nx-btn-transition);
+}

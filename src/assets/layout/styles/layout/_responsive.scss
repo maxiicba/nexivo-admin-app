@@ -1,0 +1,130 @@
+@media screen and (min-width: 1960px) {
+    .layout-main,
+    .landing-wrapper {
+        width: 1504px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .layout-wrapper {
+        &.layout-overlay {
+            .layout-main-container {
+                margin-left: 0;
+                padding-left: 1.5rem;
+            }
+
+            .layout-topbar {
+                left: 0;
+            }
+
+            .layout-sidebar {
+                transform: translateX(-100%);
+                left: 0;
+            }
+
+            &.layout-overlay-active {
+                .layout-sidebar {
+                    transform: translateX(0);
+                }
+            }
+        }
+
+        &.layout-static {
+            .layout-main-container {
+                margin-left: $sidebarWidth;
+            }
+
+            .layout-topbar {
+                left: $sidebarWidth;
+            }
+
+            // Collapsed state — sidebar shrinks to icon-only
+            &.layout-static-inactive {
+                .layout-main-container {
+                    margin-left: $sidebarWidthCollapsed;
+                }
+
+                .layout-topbar {
+                    left: $sidebarWidthCollapsed;
+                }
+            }
+        }
+
+        .layout-mask {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    .blocked-scroll {
+        overflow: hidden;
+    }
+
+    .layout-wrapper {
+        .layout-main-container {
+            margin-left: 0;
+            padding-left: 1.5rem;
+        }
+
+        .layout-topbar {
+            left: 0;
+        }
+
+        .layout-sidebar {
+            transform: translateX(-100%);
+            left: 0;
+            z-index: 999;
+        }
+
+        .layout-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 998;
+        }
+
+        &.layout-mobile-active {
+            .layout-sidebar {
+                transform: translateX(0);
+            }
+
+            .layout-mask {
+                display: block;
+                animation: fadein $transitionDuration;
+            }
+        }
+    }
+}
+
+// When mobile sidebar is open, push chat widget, FAB and Nexia toast behind overlay
+body.blocked-scroll {
+    app-chat-widget {
+        position: relative;
+        z-index: 997 !important;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .nx-mobile-fab {
+        z-index: 997 !important;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .nexia-toast {
+        z-index: 997 !important;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+}

@@ -1,0 +1,66 @@
+h1, h2, h3, h4, h5, h6 {
+    margin: 1.25rem 0 0.75rem 0;
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--nx-text-primary);
+    letter-spacing: -0.02em;
+
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 1.25rem;
+}
+
+h3 {
+    font-size: 1.125rem;
+}
+
+h4 {
+    font-size: 1rem;
+}
+
+h5 {
+    font-size: 0.875rem;
+}
+
+h6 {
+    font-size: 0.8rem;
+}
+
+mark {
+    background: var(--nx-warning-soft);
+    padding: .2rem .4rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+blockquote {
+    margin: 1rem 0;
+    padding: 0 1.5rem;
+    border-left: 3px solid var(--nx-border);
+    color: var(--nx-text-secondary);
+}
+
+hr {
+    border-top: solid var(--nx-border-subtle);
+    border-width: 1px 0 0 0;
+    margin: 1rem 0;
+}
+
+p {
+    margin: 0 0 0.75rem 0;
+    line-height: 1.6;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}

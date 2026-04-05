@@ -1,0 +1,18 @@
+<div class="sidebar-header">
+    <div class="sidebar-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#6366f1"/>
+            <path d="M10 24V8h3l6 10.5V8h3v16h-3L13 13.5V24z" fill="white"/>
+        </svg>
+    </div>
+    <div class="sidebar-brand">
+        <span class="sidebar-brand-name">Nexivo Admin</span>
+    </div>
+    <button class="sidebar-collapse-btn" (click)="toggleCollapse()" type="button"
+        pTooltip="Colapsar" tooltipPosition="right" [tooltipDisabled]="!isCollapsed">
+        <i class="pi pi-chevron-left"></i>
+    </button>
+</div>
+<div class="sidebar-content">
+    <app-menu></app-menu>
+</div>

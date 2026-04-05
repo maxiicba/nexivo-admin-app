@@ -1,0 +1,49 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    font-size: $scale;
+}
+
+body {
+    font-family: var(--nx-font);
+    font-feature-settings: var(--nx-font-feature);
+    color: var(--nx-text-primary);
+    background-color: var(--nx-bg-ground);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+a {
+    text-decoration: none;
+    color: var(--nx-primary);
+}
+
+.layout-wrapper {
+    min-height: 100vh;
+}
+
+// Route loading progress bar
+.nx-route-loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 9999;
+    background: linear-gradient(90deg, var(--nx-primary), var(--nx-primary-hover), var(--nx-primary));
+    background-size: 200% 100%;
+    animation: nx-loading-slide 1.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes nx-loading-slide {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}

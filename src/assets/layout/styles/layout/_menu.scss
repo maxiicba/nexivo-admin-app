@@ -1,0 +1,682 @@
+// Sidebar — full-height, theme-aware, collapsible
+.layout-sidebar {
+    position: fixed;
+    width: $sidebarWidth;
+    height: 100vh;
+    z-index: 200;
+    overflow: hidden;
+    user-select: none;
+    top: 0;
+    left: 0;
+    transition: width $transitionDuration ease, transform $transitionDuration ease;
+    background-color: var(--nx-sidebar-bg);
+    display: flex;
+    flex-direction: column;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--nx-sidebar-scrollbar-thumb);
+        border-radius: 4px;
+
+        &:hover {
+            background: var(--nx-sidebar-scrollbar-hover);
+        }
+    }
+
+    // Firefox scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: var(--nx-sidebar-scrollbar-thumb) transparent;
+
+    // Light mode: add right border for separation
+    .layout-theme-light & {
+        border-right: 1px solid var(--nx-slate-200);
+        box-shadow: 1px 0 3px rgba(0, 0, 0, 0.04);
+    }
+}
+
+// Sidebar brand/logo area
+.sidebar-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    min-height: $topbarHeight;
+    border-bottom: 1px solid var(--nx-sidebar-divider);
+    flex-shrink: 0;
+
+    .sidebar-logo {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: var(--nx-radius-md);
+        background: var(--nx-indigo-500);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        svg {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    .sidebar-brand {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        white-space: nowrap;
+        opacity: 1;
+        transition: opacity var(--nx-transition-fast);
+
+        .sidebar-brand-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--nx-sidebar-brand-text);
+            line-height: 1.3;
+        }
+
+        .sidebar-brand-detail {
+            font-size: 0.68rem;
+            color: var(--nx-sidebar-text-muted);
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-brand-mode {
+            font-size: 0.58rem;
+            font-weight: 500;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+            background: var(--nx-sidebar-brand-mode-bg);
+            color: var(--nx-sidebar-brand-mode-text);
+            border: 1px solid var(--nx-sidebar-brand-mode-border);
+            letter-spacing: 0.02em;
+            width: fit-content;
+        }
+    }
+
+    .sidebar-collapse-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        margin-left: auto;
+        border: none;
+        border-radius: var(--nx-radius-sm);
+        background: transparent;
+        color: var(--nx-sidebar-text-muted);
+        cursor: pointer;
+        transition: background-color var(--nx-transition-fast), color var(--nx-transition-fast), transform var(--nx-transition-fast);
+
+        &:hover {
+            background: var(--nx-sidebar-item-hover);
+            color: var(--nx-sidebar-text);
+        }
+
+        i {
+            font-size: 0.85rem;
+            transition: transform $transitionDuration;
+        }
+    }
+}
+
+// Account switcher (name row + dropdown)
+.sidebar-brand-name-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &--clickable {
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: -2px -4px;
+
+        &:hover {
+            background: var(--nx-sidebar-switch-hover);
+        }
+    }
+}
+
+.sidebar-brand-switch-icon {
+    font-size: 10px;
+    opacity: 0.6;
+    transition: transform 0.2s;
+}
+
+.sidebar-account-switcher {
+    position: relative;
+
+    &__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+    }
+
+    &__menu {
+        position: absolute;
+        top: 4px;
+        left: 12px;
+        right: 12px;
+        z-index: 999;
+        background: var(--nx-sidebar-bg);
+        border: 1px solid var(--nx-sidebar-divider);
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    &__title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--nx-sidebar-text-muted);
+        padding: 4px 8px 8px;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+            background: var(--nx-sidebar-item-hover);
+        }
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+
+        ::ng-deep svg {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    &__info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__name {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--nx-sidebar-brand-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__role {
+        display: block;
+        font-size: 11px;
+        color: var(--nx-sidebar-text-muted);
+    }
+
+    &__badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(139, 92, 246, 0.15);
+        color: #a78bfa;
+        white-space: nowrap;
+
+        &--simple {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+    }
+}
+
+// Sidebar scrollable menu area
+.sidebar-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.75rem;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--nx-sidebar-scrollbar-thumb);
+        border-radius: 4px;
+
+        &:hover {
+            background: var(--nx-sidebar-scrollbar-hover);
+        }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--nx-sidebar-scrollbar-thumb) transparent;
+
+    &--disabled {
+        pointer-events: none;
+        opacity: 0.4;
+        filter: grayscale(0.5);
+        user-select: none;
+    }
+}
+
+// Sidebar footer (reactivate Nexia)
+.sidebar-footer {
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--nx-sidebar-divider);
+}
+
+.reactivate-nexia-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--nx-accent-purple, #6366f1);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: inherit;
+    padding: 0.5rem;
+    border-radius: var(--nx-sidebar-item-radius, 8px);
+    width: 100%;
+    transition: background 0.2s;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .reactivate-nexia-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+}
+
+// Tour button (compact, at bottom of menu)
+.sidebar-tour-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0 0.25rem;
+    border-radius: var(--nx-sidebar-item-radius);
+    color: var(--nx-sidebar-text-muted);
+    cursor: pointer;
+    min-height: 2.5rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-size: 0.8rem;
+
+    &:hover {
+        background: var(--nx-sidebar-item-hover);
+        color: var(--nx-sidebar-text);
+    }
+
+    i {
+        font-size: 1rem;
+        width: 1.25rem;
+        min-width: 1.25rem;
+        text-align: center;
+    }
+
+    .sidebar-tour-label {
+        font-weight: 450;
+        opacity: 1;
+        transition: opacity var(--nx-transition-fast);
+        white-space: nowrap;
+    }
+}
+
+// Menu list
+.layout-menu {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    .layout-root-menuitem {
+        > .layout-menuitem-root-text {
+            font-size: 0.675rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--nx-sidebar-section-text);
+            margin: 1.25rem 0 0.4rem 0;
+            padding: 0 0.75rem 0 0.75rem;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.15s;
+
+            .layout-root-toggler {
+                font-size: 0.7rem;
+                color: var(--nx-sidebar-section-text);
+                opacity: 0.45;
+                transition: opacity 0.15s, transform 0.25s ease;
+                transform: rotate(-180deg);
+            }
+
+            &.layout-menuitem-root-collapsed .layout-root-toggler {
+                transform: rotate(0deg);
+            }
+
+            &:hover {
+                color: var(--nx-sidebar-text);
+
+                .layout-root-toggler {
+                    opacity: 0.85;
+                }
+            }
+        }
+
+        > a {
+            display: none;
+        }
+    }
+
+    a {
+        user-select: none;
+
+        &.active-menuitem {
+            > .layout-submenu-toggler {
+                transform: rotate(-180deg);
+            }
+        }
+    }
+
+    li.active-menuitem {
+        > a {
+            .layout-submenu-toggler {
+                transform: rotate(-180deg);
+            }
+        }
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+
+        a {
+            display: flex;
+            align-items: center;
+            position: relative;
+            outline: 0 none;
+            color: var(--nx-sidebar-text);
+            cursor: pointer;
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--nx-sidebar-item-radius);
+            width: 100%;
+            min-height: 2.5rem;
+            transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+            font-size: 0.85rem;
+            font-weight: 400;
+            gap: 0.6rem;
+            text-decoration: none;
+
+            .layout-menuitem-icon {
+                margin-right: 0;
+                font-size: 1.05rem;
+                flex: 0 0 1.25rem;
+                width: 1.25rem;
+                min-width: 1.25rem;
+                text-align: center;
+                color: var(--nx-sidebar-text-muted);
+                transition: color 0.15s ease;
+            }
+
+            .layout-menuitem-text {
+                flex: 1 1 auto;
+                min-width: 0;
+                font-weight: 450;
+                opacity: 1;
+                color: inherit;
+                line-height: 1.2;
+                white-space: nowrap;
+            }
+
+            .layout-submenu-toggler {
+                font-size: 0.75rem;
+                margin-left: auto;
+                flex: 0 0 auto;
+                transition: transform $transitionDuration;
+                color: var(--nx-sidebar-text-muted);
+            }
+
+            &.active-route {
+                font-weight: 500;
+                color: var(--nx-sidebar-item-active-text);
+                background: var(--nx-sidebar-item-active-bg);
+                box-shadow: var(--nx-sidebar-item-active-shadow);
+
+                .layout-menuitem-icon {
+                    color: var(--nx-sidebar-item-active-icon);
+                }
+            }
+
+            &:hover {
+                color: var(--nx-sidebar-item-active-text);
+                background: var(--nx-sidebar-item-hover);
+
+                .layout-menuitem-icon {
+                    color: var(--nx-sidebar-text);
+                }
+            }
+
+            &.active-route:hover {
+                background: var(--nx-sidebar-item-active-bg);
+                color: var(--nx-sidebar-item-active-text);
+
+                .layout-menuitem-icon {
+                    color: var(--nx-sidebar-item-active-icon);
+                }
+            }
+
+            &:focus-visible {
+                @include focused-inset();
+            }
+        }
+
+        ul {
+            overflow: hidden;
+
+            li {
+                a {
+                    padding-left: 2.25rem;
+                }
+
+                li {
+                    a {
+                        padding-left: 3.25rem;
+                    }
+
+                    li {
+                        a {
+                            padding-left: 4rem;
+                        }
+
+                        li {
+                            a {
+                                padding-left: 4.75rem;
+                            }
+
+                            li {
+                                a {
+                                    padding-left: 5.5rem;
+                                }
+
+                                li {
+                                    a {
+                                        padding-left: 6.25rem;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Pin/star icon on menu items — hidden by default, shown on hover
+.menu-fav-icon {
+    margin-left: auto;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    padding: 0.25rem;
+
+    &.pi-star-fill {
+        opacity: 0.7;
+        color: var(--primary-color);
+    }
+
+    &:hover {
+        opacity: 1 !important;
+        color: var(--primary-color);
+    }
+}
+
+// Show pin icon on menu item hover
+.layout-menu li > a:hover .menu-fav-icon {
+    opacity: 0.5;
+}
+
+// ── Collapsed state ──
+.layout-static-inactive {
+    .layout-sidebar {
+        width: $sidebarWidthCollapsed;
+
+        .sidebar-brand {
+            display: none;
+        }
+
+        .sidebar-account-switcher {
+            display: none;
+        }
+
+        .sidebar-header {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: unset;
+            padding: 0.75rem 0.25rem;
+            gap: 4px;
+
+            .sidebar-collapse-btn {
+                position: static;
+                transform: none;
+                width: 32px;
+                height: 20px;
+                min-width: 32px;
+                margin-left: 0;
+                border-radius: var(--nx-radius-sm);
+                opacity: 0.4;
+                pointer-events: auto;
+                transition: opacity var(--nx-transition-fast), background-color var(--nx-transition-fast);
+
+                &:hover {
+                    opacity: 1;
+                }
+
+                i {
+                    transform: rotate(180deg);
+                    font-size: 0.7rem;
+                }
+            }
+        }
+
+        .sidebar-content {
+            padding: 0.5rem;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .sidebar-tour-btn {
+            justify-content: center;
+            padding: 0.55rem 0;
+
+            .sidebar-tour-label {
+                display: none;
+            }
+        }
+
+        // Hide favourite star icons in collapsed mode
+        .menu-fav-icon {
+            display: none;
+        }
+
+        .layout-menu {
+            .layout-root-menuitem > .layout-menuitem-root-text {
+                opacity: 0;
+                height: 0;
+                margin: 0.5rem 0 0 0;
+                overflow: hidden;
+            }
+
+            // Hide all submenus in collapsed mode — only top-level icons
+            ul ul {
+                display: none !important;
+            }
+
+            ul a {
+                justify-content: center;
+                padding: 0.55rem 0;
+
+                .layout-menuitem-text,
+                .layout-submenu-toggler {
+                    display: none;
+                }
+
+                .layout-menuitem-icon {
+                    margin-right: 0;
+                    font-size: 1.1rem;
+                    flex: none;
+                }
+            }
+        }
+
+        // Footer: hide text, only show icon
+        .sidebar-footer .reactivate-nexia-btn {
+            justify-content: center;
+
+            span {
+                display: none;
+            }
+        }
+    }
+}

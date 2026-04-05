@@ -1,0 +1,1157 @@
+// ============================================================================
+// NEXIVO — Shared Page Component Styles
+// ============================================================================
+// Unified patterns for page headers, stat cards, filter bars, empty states,
+// dialogs, form labels, and table enhancements.
+// All classes use Nexivo tokens for theme-awareness.
+// ============================================================================
+
+// ── Hero Section ────────────────────────────────────────────────────────────
+// Reusable hero header wrapper with glow effects — used across all pages.
+
+.nx-hero-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: var(--nx-card-radius);
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.08), transparent 22%),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.05), transparent 18%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  box-shadow: var(--nx-shadow-card);
+  margin-bottom: 1.5rem;
+
+  &__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(6px);
+    pointer-events: none;
+
+    &--primary {
+      top: -52px;
+      left: -36px;
+      width: 170px;
+      height: 170px;
+      background: rgba(99, 102, 241, 0.09);
+    }
+
+    &--accent {
+      right: -60px;
+      bottom: -70px;
+      width: 180px;
+      height: 180px;
+      background: rgba(6, 182, 212, 0.08);
+    }
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 1.15rem 1.35rem;
+  }
+}
+
+// ── Page Kicker ─────────────────────────────────────────────────────────────
+
+.nx-page-kicker {
+  display: inline-flex;
+  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  color: var(--nx-primary);
+}
+
+// ── Hero Action Button ──────────────────────────────────────────────────────
+
+.nx-hero-action {
+  min-height: 44px;
+  padding-inline: 1.1rem;
+  box-shadow: 0 10px 18px rgba(99, 102, 241, 0.18);
+}
+
+.nx-hero-action.nx-hero-action--modern.p-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.48rem 0.8rem 0.48rem 0.62rem;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6366f1, #5b5ff0 55%, #4f46e5);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow:
+    0 10px 24px rgba(99, 102, 241, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform var(--nx-transition-fast), box-shadow var(--nx-transition-fast), filter var(--nx-transition-fast);
+
+  .p-button-label {
+    display: none;
+  }
+
+  &:enabled:hover,
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+    filter: saturate(1.05);
+    background: linear-gradient(135deg, #6366f1, #5b5ff0 55%, #4f46e5) !important;
+    color: #fff !important;
+    box-shadow:
+      0 14px 28px rgba(99, 102, 241, 0.26),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  }
+
+  &:enabled:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.92),
+      0 0 0 5px rgba(99, 102, 241, 0.34),
+      0 10px 24px rgba(99, 102, 241, 0.22);
+  }
+}
+
+// Secondary hero action (outlined variant)
+.nx-hero-action.nx-hero-action--secondary.p-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.48rem 0.8rem 0.48rem 0.62rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--nx-text-primary);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: transform var(--nx-transition-fast), box-shadow var(--nx-transition-fast);
+
+  .p-button-label {
+    display: none;
+  }
+
+  &:enabled:hover,
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(99, 102, 241, 0.3);
+    color: var(--nx-text-primary) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  &:enabled:active {
+    transform: translateY(0);
+  }
+}
+
+.nx-hero-action__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+
+  i {
+    font-size: 0.9rem;
+  }
+}
+
+.nx-hero-action--secondary .nx-hero-action__icon {
+  background: var(--nx-primary-soft);
+  color: var(--nx-primary);
+  box-shadow: none;
+}
+
+.nx-hero-action__label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// ── Info Pill ───────────────────────────────────────────────────────────────
+
+.nx-info-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--nx-slate-700);
+  font-size: 0.8rem;
+  font-weight: 600;
+  backdrop-filter: blur(1px);
+
+  i {
+    color: var(--nx-primary);
+  }
+
+  &--warning i {
+    color: var(--nx-warning);
+  }
+
+  &--success i {
+    color: var(--nx-accent-green);
+  }
+
+  &--danger i {
+    color: var(--nx-accent-red);
+  }
+}
+
+// ── Page Header ─────────────────────────────────────────────────────────────
+
+.nx-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--nx-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.3rem;
+    }
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--nx-text-primary);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: var(--nx-text-secondary);
+    margin: 0.25rem 0 0;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  // Hero variant — used inside .nx-hero-section
+  &--hero {
+    align-items: flex-start;
+    margin-bottom: 0;
+
+    .nx-page-header__left {
+      align-items: flex-start;
+    }
+
+    .nx-page-header__title {
+      font-size: clamp(1.55rem, 1.8vw, 2.1rem);
+      letter-spacing: -0.03em;
+    }
+
+    .nx-page-header__subtitle {
+      max-width: 720px;
+      margin-top: 0.55rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--nx-slate-600);
+    }
+  }
+
+  &__icon--hero {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.1));
+    color: var(--nx-primary);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+  }
+}
+
+// Hero responsive
+@media (max-width: 991px) {
+  .nx-page-header--hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+
+    .nx-page-header__actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+  }
+
+  .nx-hero-action {
+    flex: 1;
+  }
+
+  .nx-hero-action.nx-hero-action--modern.p-button,
+  .nx-hero-action.nx-hero-action--secondary.p-button {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .nx-hero-section {
+    border-radius: var(--nx-card-radius);
+  }
+
+  .nx-hero-section__content {
+    padding: 1rem;
+  }
+
+  .nx-page-header--hero {
+    .nx-page-header__left {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .nx-page-header__title {
+      font-size: 1.35rem !important;
+    }
+
+    .nx-page-header__subtitle {
+      font-size: 0.82rem;
+    }
+  }
+
+  .nx-page-kicker {
+    font-size: 0.65rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .nx-page-header__icon--hero {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+
+  .nx-hero-action.nx-hero-action--modern.p-button,
+  .nx-hero-action.nx-hero-action--secondary.p-button {
+    padding: 0.4rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+  }
+
+  .nx-hero-action__icon {
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 10px;
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+
+  .nx-hero-action__label {
+    font-size: 0.82rem;
+  }
+}
+
+// ── Stat Card ───────────────────────────────────────────────────────────────
+
+.nx-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--nx-card-bg);
+  border: 1px solid var(--nx-card-border);
+  border-radius: var(--nx-card-radius);
+  padding: 1.25rem;
+  transition: transform var(--nx-transition-fast), box-shadow var(--nx-transition-fast);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--nx-shadow-md);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--nx-radius-lg);
+    flex-shrink: 0;
+
+    i, .material-symbols-outlined {
+      font-size: 1.25rem;
+    }
+
+    // Color variants
+    &--blue {
+      background: var(--nx-accent-blue-soft);
+      color: var(--nx-accent-blue);
+    }
+
+    &--green {
+      background: var(--nx-accent-green-soft);
+      color: var(--nx-accent-green);
+    }
+
+    &--orange {
+      background: var(--nx-accent-orange-soft);
+      color: var(--nx-accent-orange);
+    }
+
+    &--red {
+      background: var(--nx-accent-red-soft);
+      color: var(--nx-accent-red);
+    }
+
+    &--purple {
+      background: var(--nx-accent-purple-soft);
+      color: var(--nx-accent-purple);
+    }
+
+    &--cyan {
+      background: var(--nx-accent-cyan-soft);
+      color: var(--nx-accent-cyan);
+    }
+
+    &--pink {
+      background: var(--nx-accent-pink-soft);
+      color: var(--nx-accent-pink);
+    }
+
+    &--primary {
+      background: var(--nx-primary-soft);
+      color: var(--nx-primary);
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--nx-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    color: var(--nx-text-secondary);
+    margin-top: 2px;
+  }
+
+  &__detail {
+    font-size: 0.75rem;
+    color: var(--nx-text-muted);
+    margin-top: 2px;
+  }
+}
+
+// Stat card mobile
+@media (max-width: 767px) {
+  .nx-stat-card {
+    padding: 0.85rem;
+    gap: 0.75rem;
+
+    &__icon {
+      width: 40px;
+      height: 40px;
+
+      i {
+        font-size: 1.05rem;
+      }
+    }
+
+    &__value {
+      font-size: 1rem;
+    }
+
+    &__label {
+      font-size: 0.72rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .nx-stat-card {
+    padding: 0.65rem;
+    gap: 0.5rem;
+
+    &__icon {
+      width: 34px;
+      height: 34px;
+
+      i {
+        font-size: 0.9rem;
+      }
+    }
+
+    &__value {
+      font-size: 0.9rem;
+    }
+
+    &__label {
+      font-size: 0.68rem;
+    }
+  }
+}
+
+// ── Filter Bar ──────────────────────────────────────────────────────────────
+
+.nx-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 767px) {
+  .nx-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .p-input-icon-left {
+      width: 100%;
+
+      input {
+        width: 100% !important;
+      }
+    }
+  }
+}
+
+// ── Section Tabs ────────────────────────────────────────────────────────────
+
+.nx-section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--nx-border);
+  padding-bottom: 0;
+  margin-bottom: 1rem;
+}
+
+.nx-section-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: none;
+  color: var(--nx-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--nx-transition-fast);
+  border-radius: var(--nx-radius-md) var(--nx-radius-md) 0 0;
+
+  &:hover {
+    color: var(--nx-text-primary);
+    background: var(--nx-hover);
+  }
+
+  &--active {
+    color: var(--nx-primary);
+    border-bottom-color: var(--nx-primary);
+    font-weight: 600;
+  }
+
+  &__count {
+    background: var(--nx-primary-soft);
+    color: var(--nx-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--nx-radius-full);
+    margin-left: 0.25rem;
+  }
+}
+
+// ── Empty State ─────────────────────────────────────────────────────────────
+
+.nx-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: var(--nx-card-bg);
+  border: 2px dashed var(--nx-border);
+  border-radius: var(--nx-card-radius);
+
+  &__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--nx-primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+
+    i {
+      font-size: 2rem;
+      color: var(--nx-primary);
+    }
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--nx-text-primary);
+  }
+
+  p {
+    margin: 0 0 1.25rem;
+    color: var(--nx-text-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+.nx-empty-state--sm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+
+  i {
+    font-size: 2.5rem;
+    color: var(--nx-text-muted);
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+  }
+
+  p {
+    color: var(--nx-text-secondary);
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+// ── Table Empty Message ─────────────────────────────────────────────────────
+
+.nx-table-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  i {
+    font-size: 2.5rem;
+    color: var(--nx-text-muted);
+    display: block;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+  }
+
+  span {
+    color: var(--nx-text-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+// ── Amount Cell ─────────────────────────────────────────────────────────────
+
+.nx-amount {
+  font-weight: 700;
+  font-size: 0.95rem;
+
+  &--income {
+    color: var(--nx-accent-green);
+  }
+
+  &--expense {
+    color: var(--nx-accent-red);
+  }
+
+  &--positive {
+    color: var(--nx-accent-green);
+  }
+
+  &--negative {
+    color: var(--nx-accent-red);
+  }
+}
+
+// ── Cells ───────────────────────────────────────────────────────────────────
+
+.nx-cell-user {
+  font-size: 0.85rem;
+  color: var(--nx-text-secondary);
+
+  i {
+    font-size: 0.8rem;
+  }
+}
+
+.nx-cell-date {
+  font-size: 0.85rem;
+  color: var(--nx-text-secondary);
+}
+
+// ── Form Label ──────────────────────────────────────────────────────────────
+
+.nx-form-label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--nx-text-primary);
+  margin-bottom: 0.5rem;
+
+  i {
+    color: var(--nx-text-secondary);
+  }
+}
+
+// ── Type Pills (toggle selectors) ──────────────────────────────────────────
+
+.nx-type-pills {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nx-type-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--nx-border);
+  border-radius: var(--nx-radius-lg);
+  background: var(--nx-card-bg);
+  color: var(--nx-text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--nx-transition-fast);
+
+  &:hover {
+    border-color: var(--nx-text-muted);
+  }
+
+  &--income.nx-type-pill--active {
+    border-color: var(--nx-accent-green);
+    background: var(--nx-accent-green-soft);
+    color: var(--nx-accent-green);
+  }
+
+  &--expense.nx-type-pill--active {
+    border-color: var(--nx-accent-red);
+    background: var(--nx-accent-red-soft);
+    color: var(--nx-accent-red);
+  }
+}
+
+// ── Dialog Hint ─────────────────────────────────────────────────────────────
+
+.nx-dialog-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--nx-info-soft);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--nx-radius-md);
+  color: var(--nx-accent-blue);
+  font-size: 0.85rem;
+
+  i {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+// ── Summary Box ─────────────────────────────────────────────────────────────
+
+.nx-summary-box {
+  background: var(--nx-hover);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-lg);
+  padding: 1rem 1.25rem;
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__label {
+    font-size: 0.9rem;
+    color: var(--nx-text-secondary);
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--nx-text-primary);
+
+    &--primary {
+      color: var(--nx-primary);
+    }
+  }
+}
+
+// ── Modern Dialog (PrimeNG override) ────────────────────────────────────────
+
+.nx-dialog {
+  .p-dialog-header {
+    background: var(--nx-bg-card);
+    border-bottom: 1px solid var(--nx-border);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .p-dialog-content {
+    padding: 1.5rem;
+    background: var(--nx-bg-card);
+  }
+
+  .p-dialog-footer {
+    border-top: 1px solid var(--nx-border);
+    padding: 1rem 1.5rem;
+    background: var(--nx-bg-card);
+  }
+}
+
+// ── Dialog Form Fields (only inside table-data CRUD dialogs) ────────────────
+.nx-dialog .p-dialog-content .p-fluid .field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .nx-form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--nx-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// ── Row Highlights ──────────────────────────────────────────────────────────
+
+.nx-row--income {
+  border-left: 3px solid var(--nx-accent-green);
+}
+
+.nx-row--expense {
+  border-left: 3px solid var(--nx-accent-red);
+}
+
+// ── Status Tag (larger) ─────────────────────────────────────────────────────
+
+.nx-status-tag--lg {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--nx-radius-full);
+}
+
+// ── PrimeNG Table Unified Overrides ─────────────────────────────────────────
+// Applied globally — all p-tables get consistent styling via Nexivo tokens.
+// Component-level ::ng-deep overrides are no longer needed.
+
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: var(--nx-table-header-bg);
+    border-color: var(--nx-table-border);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--nx-text-secondary);
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background-color var(--nx-transition-fast);
+
+    &:hover {
+      background-color: var(--nx-table-row-hover) !important;
+    }
+
+    > td {
+      border-color: var(--nx-table-border);
+    }
+  }
+
+  &.p-datatable-sm .p-datatable-tbody > tr > td {
+    padding: 0.6rem 0.75rem;
+  }
+}
+
+// Tags inside tables
+.p-datatable .p-tag {
+  font-weight: 600;
+  border-radius: var(--nx-radius-sm);
+}
+
+// ── Nexivo Chips ──────────────────────────────────────────────────────────────
+// Soft, modern chips that align with the Nexivo design system
+
+.p-chip.nx-chip {
+  background: var(--nx-bg-elevated);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-full);
+  color: var(--nx-text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  transition: var(--nx-transition-fast);
+  gap: 0.375rem;
+
+  .p-chip-icon {
+    font-size: 0.8125rem;
+    color: var(--nx-text-secondary);
+  }
+
+  .p-chip-text {
+    line-height: 1.4;
+  }
+
+  // ── Color variants ──
+  &.nx-chip--primary {
+    background: var(--nx-primary-soft);
+    border-color: transparent;
+    color: var(--nx-primary);
+
+    .p-chip-icon { color: var(--nx-primary); }
+  }
+
+  &.nx-chip--blue {
+    background: var(--nx-accent-blue-soft);
+    border-color: transparent;
+    color: var(--nx-accent-blue);
+
+    .p-chip-icon { color: var(--nx-accent-blue); }
+  }
+
+  &.nx-chip--green {
+    background: var(--nx-accent-green-soft);
+    border-color: transparent;
+    color: var(--nx-accent-green);
+
+    .p-chip-icon { color: var(--nx-accent-green); }
+  }
+
+  &.nx-chip--purple {
+    background: var(--nx-accent-purple-soft);
+    border-color: transparent;
+    color: var(--nx-accent-purple);
+
+    .p-chip-icon { color: var(--nx-accent-purple); }
+  }
+
+  &.nx-chip--cyan {
+    background: var(--nx-accent-cyan-soft);
+    border-color: transparent;
+    color: var(--nx-accent-cyan);
+
+    .p-chip-icon { color: var(--nx-accent-cyan); }
+  }
+
+  &.nx-chip--orange {
+    background: var(--nx-accent-orange-soft);
+    border-color: transparent;
+    color: var(--nx-accent-orange);
+
+    .p-chip-icon { color: var(--nx-accent-orange); }
+  }
+}
+
+// ── PrimeNG Validation Overrides ────────────────────────────────────────────
+
+.p-inputnumber.ng-invalid.ng-dirty .p-inputtext,
+.p-dropdown.ng-invalid.ng-dirty,
+.p-inputtextarea.ng-invalid.ng-dirty,
+.p-calendar.ng-invalid.ng-dirty .p-inputtext {
+  border-color: var(--nx-error);
+}
+
+// ── PrimeNG AutoComplete dropdown button fix ─────────────────────────────────
+// Makes the dropdown button look like part of the input (no rounded left border)
+.p-autocomplete .p-autocomplete-dropdown {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.p-autocomplete .p-autocomplete-input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+// ── PrimeNG InputNumber stacked buttons fix ──────────────────────────────────
+// Base styles missing from primeng.min.css
+p-inputnumber,
+.p-inputnumber {
+  display: inline-flex;
+}
+
+.p-inputnumber .p-inputnumber-input {
+  flex: 1 1 auto;
+  width: 1%;
+}
+
+.p-inputnumber .p-inputnumber-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button .p-button-label {
+  display: none;
+}
+
+.p-inputnumber-buttons-stacked .p-inputnumber-input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button-up {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button-down {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0;
+  padding: 0;
+}
+
+.p-inputnumber-buttons-stacked .p-inputnumber-button-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-inputnumber-buttons-stacked .p-inputnumber-button-group .p-button.p-inputnumber-button {
+  flex: 1 1 auto;
+}
+
+.p-inputnumber-buttons-stacked .p-inputnumber-button-group {
+  min-width: 2rem;
+}
+
+.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button .p-button-icon {
+  font-size: 0.75rem;
+}
+
+// ── Dark Mode Overrides ──────────────────────────────────────────────────────
+
+.layout-theme-dark {
+  // Hero section — swap light gradients for dark-aware ones
+  .nx-hero-section {
+    border-color: var(--nx-border);
+    background:
+      radial-gradient(circle at top left, rgba(99, 102, 241, 0.12), transparent 22%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 18%),
+      linear-gradient(135deg, var(--nx-bg-card), var(--nx-bg-elevated));
+    box-shadow: var(--nx-shadow-card);
+  }
+
+  .nx-hero-section__glow--primary {
+    background: rgba(99, 102, 241, 0.06);
+  }
+
+  .nx-hero-section__glow--accent {
+    background: rgba(6, 182, 212, 0.05);
+  }
+
+  // Hero action buttons
+  .nx-hero-action.nx-hero-action--modern.p-button {
+    border-color: rgba(129, 140, 248, 0.3);
+    background: linear-gradient(135deg, #6366f1, #5b5ff0 55%, #4f46e5);
+    box-shadow:
+      0 10px 24px rgba(99, 102, 241, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .nx-hero-action.nx-hero-action--secondary.p-button {
+    border-color: var(--nx-border);
+    background: var(--nx-bg-elevated);
+    color: var(--nx-text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+    &:enabled:hover,
+    &:not(:disabled):hover {
+      border-color: var(--nx-primary);
+      background: var(--nx-bg-elevated) !important;
+      color: var(--nx-text-primary) !important;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  .nx-hero-action--secondary .nx-hero-action__icon {
+    background: var(--nx-primary-soft);
+    color: var(--nx-primary);
+  }
+
+  // Page header icon
+  .nx-page-header__icon--hero {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(99, 102, 241, 0.12));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  // Page kicker
+  .nx-page-kicker {
+    color: var(--nx-indigo-400);
+  }
+
+  // Subtitle
+  .nx-page-header--hero .nx-page-header__subtitle {
+    color: var(--nx-text-secondary);
+  }
+}

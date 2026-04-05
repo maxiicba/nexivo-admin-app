@@ -1,0 +1,58 @@
+
+
+<p-sidebar [(visible)]="visible" position="right" [transitionOptions]="'.3s cubic-bezier(0, 0, 0.2, 1)'" styleClass="layout-config-sidebar w-20rem">
+    <h5>Ajustes de modo</h5>
+    <div class="grid">
+
+        <div class="col-3">
+            <button class="p-link w-2rem h-2rem" (click)="changeTheme('lara-light-blue', 'light')">
+                <img src="https://cdn-icons-png.flaticon.com/512/10275/10275221.png" class="w-2rem h-2rem" alt="Lara Light Blue">
+            </button>
+        </div>
+
+        <div class="col-3">
+            <button class="p-link w-2rem h-2rem" (click)="changeTheme('lara-dark-blue', 'dark')">
+                <img src="https://cdn-icons-png.flaticon.com/512/10275/10275211.png" class="w-2rem h-2rem" alt="Lara Dark Blue">
+            </button>
+        </div>
+    </div>
+
+    <h5>Escala</h5>
+    <div class="flex align-items-center">
+        <button icon="pi pi-minus" type="button" pButton (click)="decrementScale()" class="p-button-text p-button-rounded w-2rem h-2rem mr-2" [disabled]="scale === scales[0]"></button>
+        <div class="flex gap-2 align-items-center">
+            <i class="pi pi-circle-fill text-300" *ngFor="let s of scales" [ngClass]="{'text-primary-500': s === scale}"></i>
+        </div>
+        <button icon="pi pi-plus"  type="button" pButton (click)="incrementScale()" class="p-button-text p-button-rounded w-2rem h-2rem ml-2" [disabled]="scale === scales[scales.length - 1]"></button>
+    </div>
+
+    <ng-container *ngIf="!minimal">
+        <h5>Tipo de menu</h5>
+        <div class="field-radiobutton">
+            <p-radioButton name="menuMode" value="static" [(ngModel)]="menuMode" inputId="mode1"></p-radioButton>
+            <label for="mode1">Estatico</label>
+        </div>
+        <div class="field-radiobutton">
+            <p-radioButton name="menuMode" value="overlay" [(ngModel)]="menuMode" inputId="mode2"></p-radioButton>
+            <label for="mode2">Flotante</label>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="!minimal">
+        <h5>Estilo de campos</h5>
+        <div class="flex">
+            <div class="field-radiobutton flex-1">
+                <p-radioButton name="inputStyle" value="outlined" [(ngModel)]="inputStyle" inputId="outlined_input"></p-radioButton>
+                <label for="outlined_input">Sin fondo</label>
+            </div>
+            <div class="field-radiobutton flex-1">
+                <p-radioButton name="inputStyle" value="filled" [(ngModel)]="inputStyle" inputId="filled_input"></p-radioButton>
+                <label for="filled_input">Con fondo</label>
+            </div>
+        </div>
+
+        <h5>Ripple Effect</h5>
+        <p-inputSwitch [(ngModel)]="ripple"></p-inputSwitch>
+    </ng-container>
+
+</p-sidebar>

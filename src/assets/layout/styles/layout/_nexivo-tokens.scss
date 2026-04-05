@@ -1,0 +1,258 @@
+// ============================================================================
+// NEXIVO DESIGN SYSTEM — Design Tokens
+// ============================================================================
+// 3-layer token architecture: Core → Semantic → Component
+// This is the single source of truth for all visual decisions.
+// ============================================================================
+
+// ── Layer 1: Core ──────────────────────────────────────────────────────────
+
+:root {
+  // Slate palette
+  --nx-slate-50: #F8FAFC;
+  --nx-slate-100: #F1F5F9;
+  --nx-slate-200: #E2E8F0;
+  --nx-slate-300: #CBD5E1;
+  --nx-slate-400: #94A3B8;
+  --nx-slate-500: #64748B;
+  --nx-slate-600: #475569;
+  --nx-slate-700: #334155;
+  --nx-slate-800: #1E293B;
+  --nx-slate-900: #0F172A;
+  --nx-slate-950: #020617;
+
+  // Indigo palette
+  --nx-indigo-50: #EEF2FF;
+  --nx-indigo-100: #E0E7FF;
+  --nx-indigo-200: #C7D2FE;
+  --nx-indigo-300: #A5B4FC;
+  --nx-indigo-400: #818CF8;
+  --nx-indigo-500: #6366F1;
+  --nx-indigo-600: #4F46E5;
+  --nx-indigo-700: #4338CA;
+
+  // Radius
+  --nx-radius-sm: 6px;
+  --nx-radius-md: 8px;
+  --nx-radius-lg: 12px;
+  --nx-radius-xl: 16px;
+  --nx-radius-full: 9999px;
+
+  // Shadows
+  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --nx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --nx-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --nx-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  // Transitions
+  --nx-transition: 200ms ease;
+  --nx-transition-fast: 150ms ease;
+  --nx-transition-slow: 300ms ease;
+
+  // Typography
+  --nx-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nx-font-feature: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+// ── Layer 2: Semantic (Light mode — default) ───────────────────────────────
+
+:root,
+.layout-theme-light {
+  // Backgrounds
+  --nx-bg-ground: var(--nx-slate-50);
+  --nx-bg-card: #FFFFFF;
+  --nx-bg-card-rgb: 255, 255, 255;
+  --nx-bg-elevated: #FFFFFF;
+
+  // Text
+  --nx-text-primary: var(--nx-slate-900);
+  --nx-text-secondary: var(--nx-slate-500);
+  --nx-text-muted: var(--nx-slate-400);
+
+  // Borders
+  --nx-border: var(--nx-slate-200);
+  --nx-border-rgb: 226, 232, 240;
+  --nx-border-subtle: var(--nx-slate-100);
+
+  // Primary
+  --nx-primary: var(--nx-indigo-500);
+  --nx-primary-hover: var(--nx-indigo-600);
+  --nx-primary-soft: rgba(99, 102, 241, 0.12);
+  --nx-primary-text: #FFFFFF;
+
+  // Status
+  --nx-success: #10B981;
+  --nx-success-soft: rgba(16, 185, 129, 0.12);
+  --nx-warning: #F59E0B;
+  --nx-warning-soft: rgba(245, 158, 11, 0.12);
+  --nx-error: #EF4444;
+  --nx-error-soft: rgba(239, 68, 68, 0.12);
+  --nx-info: #3B82F6;
+  --nx-info-soft: rgba(59, 130, 246, 0.12);
+
+  // UI States
+  --nx-hover: rgba(15, 23, 42, 0.04);
+  --nx-active: rgba(15, 23, 42, 0.06);
+  --nx-focus: var(--nx-indigo-500);
+  --nx-focus-ring: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--nx-indigo-500);
+
+  // Icons
+  --nx-icon: var(--nx-slate-500);
+  --nx-icon-hover: var(--nx-slate-600);
+  --nx-icon-active: var(--nx-indigo-500);
+
+  // Sidebar — light in day mode
+  --nx-sidebar-bg: #FFFFFF;
+  --nx-sidebar-text: var(--nx-slate-600);
+  --nx-sidebar-text-muted: var(--nx-slate-400);
+  --nx-sidebar-brand-text: var(--nx-slate-900);
+  --nx-sidebar-item-hover: var(--nx-slate-100);
+  --nx-sidebar-item-active-bg: rgba(99, 102, 241, 0.08);
+  --nx-sidebar-item-active-shadow: inset 3px 0 0 var(--nx-indigo-500);
+  --nx-sidebar-item-active-text: var(--nx-indigo-600);
+  --nx-sidebar-item-active-icon: var(--nx-indigo-500);
+  --nx-sidebar-section-text: var(--nx-slate-400);
+  --nx-sidebar-divider: var(--nx-slate-200);
+  --nx-sidebar-scrollbar-thumb: var(--nx-slate-300);
+  --nx-sidebar-scrollbar-hover: var(--nx-slate-400);
+  --nx-sidebar-brand-mode-bg: rgba(99, 102, 241, 0.08);
+  --nx-sidebar-brand-mode-text: var(--nx-indigo-500);
+  --nx-sidebar-brand-mode-border: rgba(99, 102, 241, 0.15);
+  --nx-sidebar-brand-role-text: var(--nx-indigo-500);
+  --nx-sidebar-switch-hover: rgba(15, 23, 42, 0.06);
+}
+
+// ── Layer 2: Semantic (Dark mode) ──────────────────────────────────────────
+
+.layout-theme-dark {
+  --nx-bg-ground: var(--nx-slate-950);
+  --nx-bg-card: var(--nx-slate-900);
+  --nx-bg-card-rgb: 15, 23, 42;
+  --nx-bg-elevated: var(--nx-slate-800);
+
+  --nx-text-primary: var(--nx-slate-50);
+  --nx-text-secondary: var(--nx-slate-400);
+  --nx-text-muted: var(--nx-slate-600);
+
+  --nx-border: var(--nx-slate-800);
+  --nx-border-rgb: 30, 41, 59;
+  --nx-border-subtle: rgba(255, 255, 255, 0.06);
+
+  --nx-primary: var(--nx-indigo-400);
+  --nx-primary-hover: var(--nx-indigo-300);
+  --nx-primary-soft: rgba(129, 140, 248, 0.15);
+  --nx-primary-text: var(--nx-slate-900);
+
+  --nx-hover: rgba(255, 255, 255, 0.04);
+  --nx-active: rgba(255, 255, 255, 0.06);
+  --nx-focus-ring: 0 0 0 2px var(--nx-slate-900), 0 0 0 4px var(--nx-indigo-400);
+
+  --nx-icon: var(--nx-slate-400);
+  --nx-icon-hover: var(--nx-slate-300);
+  --nx-icon-active: var(--nx-indigo-400);
+
+  // Status (adjusted for dark backgrounds)
+  --nx-success-soft: rgba(16, 185, 129, 0.18);
+  --nx-warning-soft: rgba(245, 158, 11, 0.18);
+  --nx-error-soft: rgba(239, 68, 68, 0.18);
+  --nx-info-soft: rgba(59, 130, 246, 0.18);
+
+  // Dark mode component token overrides
+  --nx-card-bg: var(--nx-bg-card);
+  --nx-card-border: var(--nx-border);
+  --nx-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --nx-topbar-bg: var(--nx-bg-card);
+  --nx-topbar-border: var(--nx-border);
+  --nx-input-bg: var(--nx-bg-elevated);
+  --nx-input-border: var(--nx-slate-700);
+  --nx-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --nx-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --nx-shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+
+  // Table overrides
+  --nx-table-header-bg: var(--nx-slate-900);
+  --nx-table-row-hover: rgba(255, 255, 255, 0.04);
+  --nx-table-border: var(--nx-slate-800);
+
+  // Accent soft colors — higher opacity for dark backgrounds
+  --nx-accent-blue-soft: rgba(59, 130, 246, 0.18);
+  --nx-accent-green-soft: rgba(16, 185, 129, 0.18);
+  --nx-accent-orange-soft: rgba(245, 158, 11, 0.18);
+  --nx-accent-red-soft: rgba(239, 68, 68, 0.18);
+  --nx-accent-purple-soft: rgba(139, 92, 246, 0.18);
+  --nx-accent-cyan-soft: rgba(6, 182, 212, 0.18);
+  --nx-accent-pink-soft: rgba(236, 72, 153, 0.18);
+}
+
+// ── Layer 3: Component Tokens ──────────────────────────────────────────────
+
+:root {
+  // Sidebar (dark defaults)
+  --nx-sidebar-bg: var(--nx-slate-900);
+  --nx-sidebar-width: 260px;
+  --nx-sidebar-width-collapsed: 72px;
+  --nx-sidebar-text: var(--nx-slate-300);
+  --nx-sidebar-text-muted: var(--nx-slate-500);
+  --nx-sidebar-brand-text: #FFFFFF;
+  --nx-sidebar-item-hover: rgba(255, 255, 255, 0.06);
+  --nx-sidebar-item-active-bg: rgba(99, 102, 241, 0.12);
+  --nx-sidebar-item-active-shadow: inset 3px 0 0 var(--nx-indigo-500);
+  --nx-sidebar-item-active-text: #FFFFFF;
+  --nx-sidebar-item-active-icon: var(--nx-indigo-300);
+  --nx-sidebar-item-radius: var(--nx-radius-md);
+  --nx-sidebar-section-text: var(--nx-slate-500);
+  --nx-sidebar-divider: rgba(255, 255, 255, 0.06);
+  --nx-sidebar-scrollbar-thumb: var(--nx-slate-700);
+  --nx-sidebar-scrollbar-hover: var(--nx-slate-600);
+  --nx-sidebar-brand-mode-bg: rgba(99, 102, 241, 0.12);
+  --nx-sidebar-brand-mode-text: var(--nx-primary-light, #818cf8);
+  --nx-sidebar-brand-mode-border: rgba(99, 102, 241, 0.2);
+  --nx-sidebar-brand-role-text: var(--nx-primary-light, #818cf8);
+  --nx-sidebar-switch-hover: rgba(255, 255, 255, 0.08);
+
+  // Topbar
+  --nx-topbar-bg: var(--nx-bg-card);
+  --nx-topbar-height: 56px;
+  --nx-topbar-border: var(--nx-border);
+
+  // Cards
+  --nx-card-bg: var(--nx-bg-card);
+  --nx-card-border: var(--nx-border);
+  --nx-card-radius: var(--nx-radius-lg);
+  --nx-card-shadow: var(--nx-shadow-card);
+  --nx-card-padding: 1.5rem;
+
+  // Tables
+  --nx-table-header-bg: var(--nx-slate-50);
+  --nx-table-row-hover: var(--nx-slate-100);
+  --nx-table-border: var(--nx-slate-200);
+  --nx-table-radius: var(--nx-radius-lg);
+
+  // Buttons
+  --nx-btn-radius: var(--nx-radius-sm);
+  --nx-btn-font-weight: 500;
+  --nx-btn-transition: var(--nx-transition-fast);
+
+  // Inputs
+  --nx-input-bg: var(--nx-bg-card);
+  --nx-input-border: var(--nx-slate-300);
+  --nx-input-border-focus: var(--nx-primary);
+  --nx-input-radius: var(--nx-radius-sm);
+  --nx-input-placeholder: var(--nx-text-muted);
+
+  // Accent colors (for stat cards, badges, indicators)
+  --nx-accent-blue: #3B82F6;
+  --nx-accent-blue-soft: rgba(59, 130, 246, 0.10);
+  --nx-accent-green: #10B981;
+  --nx-accent-green-soft: rgba(16, 185, 129, 0.10);
+  --nx-accent-orange: #F59E0B;
+  --nx-accent-orange-soft: rgba(245, 158, 11, 0.10);
+  --nx-accent-red: #EF4444;
+  --nx-accent-red-soft: rgba(239, 68, 68, 0.10);
+  --nx-accent-purple: #8B5CF6;
+  --nx-accent-purple-soft: rgba(139, 92, 246, 0.10);
+  --nx-accent-cyan: #06B6D4;
+  --nx-accent-cyan-soft: rgba(6, 182, 212, 0.10);
+  --nx-accent-pink: #EC4899;
+  --nx-accent-pink-soft: rgba(236, 72, 153, 0.10);
+}

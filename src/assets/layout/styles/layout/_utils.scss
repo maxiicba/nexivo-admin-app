@@ -1,0 +1,20 @@
+.card {
+    background: var(--nx-card-bg);
+    border: 1px solid var(--nx-card-border);
+    padding: var(--nx-card-padding);
+    margin-bottom: 1.5rem;
+    border-radius: var(--nx-card-radius);
+    box-shadow: var(--nx-card-shadow);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.p-toast {
+    &.p-toast-top-right,
+    &.p-toast-top-left,
+    &.p-toast-top-center {
+        top: calc(#{$topbarHeight} + 0.75rem);
+    }
+}
