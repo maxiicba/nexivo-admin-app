@@ -32,6 +32,7 @@ import { RouterModule } from '@angular/router';
       { path: 'referrals', loadComponent: () => import('./referrals/referrals.component').then(m => m.ReferralsComponent) },
       { path: 'notifications', loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent) },
       { path: 'demos', loadComponent: () => import('./demos/demos.component').then(m => m.DemosComponent) },
+      { path: 'chat', loadComponent: () => import('./chat-dashboard/chat-dashboard.component').then(m => m.ChatDashboardComponent) },
     ]),
   ],
 })

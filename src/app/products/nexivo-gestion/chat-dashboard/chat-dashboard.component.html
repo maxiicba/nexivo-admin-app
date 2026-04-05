@@ -1,0 +1,331 @@
+<div class="chat-dashboard">
+  <!-- Hero Header -->
+  <section class="nx-hero-section">
+    <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+    <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+    <div class="nx-hero-section__content">
+      <div class="nx-page-header nx-page-header--hero">
+        <div class="nx-page-header__left">
+          <div class="nx-page-header__icon nx-page-header__icon--hero">
+            <i class="pi pi-comments"></i>
+          </div>
+
+          <div>
+            <span class="nx-page-kicker">Nexivo Soporte</span>
+
+            <h2 class="nx-page-header__title m-0">Chat de Soporte</h2>
+
+            <p class="nx-page-header__subtitle m-0">
+              Gestiona conversaciones y tickets de soporte con tus clientes
+            </p>
+
+            <div class="nx-page-header__meta" *ngIf="isSuperAdmin && stats">
+              <span class="nx-info-pill">
+                <i class="pi pi-comments"></i>
+                {{ stats.activeConversations }} activas
+              </span>
+              <span class="nx-info-pill nx-info-pill--warning">
+                <i class="pi pi-inbox"></i>
+                {{ stats.unassignedCount }} sin asignar
+              </span>
+              <span class="nx-info-pill nx-info-pill--danger">
+                <i class="pi pi-ticket"></i>
+                {{ stats.openTickets }} tickets
+              </span>
+              <span class="nx-info-pill nx-info-pill--success">
+                <i class="pi pi-users"></i>
+                {{ stats.onlineAgents }} agentes online
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="nx-page-header__actions">
+          <button pButton class="p-button-rounded nx-hero-action nx-hero-action--modern"
+            (click)="openNewConversationDialog()">
+            <span class="nx-hero-action__icon">
+              <i class="pi pi-plus"></i>
+            </span>
+            <span class="nx-hero-action__label">Nueva conversacion</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="chat-layout">
+    <!-- Sidebar: conversation list -->
+    <div class="conversation-sidebar">
+      <div class="sidebar-header">
+        <h3>Conversaciones</h3>
+      </div>
+
+      <p-tabView>
+        <!-- Assigned / my conversations -->
+        <p-tabPanel [header]="isSupportAgent ? 'Mis chats' : 'Activas'">
+          <div class="conv-list">
+            <div *ngIf="loading" class="text-center p-3">
+              <p-progressSpinner [style]="{width: '30px', height: '30px'}" strokeWidth="4"></p-progressSpinner>
+            </div>
+            <div
+              *ngFor="let conv of conversations"
+              class="conv-item"
+              [class.active]="activeConversation?.id === conv.id"
+              (click)="selectConversation(conv)">
+              <p-avatar
+                [label]="getAccountInitials(conv.account?.name || '')"
+                shape="circle"
+                size="normal"
+                [style]="{'background-color': 'var(--primary-100)', 'color': 'var(--primary-color)'}">
+              </p-avatar>
+              <div class="conv-info">
+                <div class="conv-name">{{ conv.account?.name || 'Cuenta' }}</div>
+                <div class="conv-preview">{{ conv.lastMessage?.content | slice:0:40 }}</div>
+              </div>
+              <div class="conv-meta">
+                <small>{{ conv.lastMessageAt | date:'HH:mm':'UTC-3' }}</small>
+                <p-badge *ngIf="conv.unreadCount" [value]="conv.unreadCount?.toString()" severity="danger"></p-badge>
+              </div>
+            </div>
+            <div *ngIf="!loading && conversations.length === 0" class="empty-state">
+              <small>No hay conversaciones asignadas</small>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <!-- Unassigned (lobby) -->
+        <p-tabPanel header="Cola">
+          <div class="conv-list">
+            <div
+              *ngFor="let conv of unassignedConversations"
+              class="conv-item unassigned">
+              <p-avatar
+                [label]="getAccountInitials(conv.account?.name || '')"
+                shape="circle"
+                size="normal"
+                [style]="{'background-color': 'var(--orange-100)', 'color': 'var(--orange-600)'}">
+              </p-avatar>
+              <div class="conv-info">
+                <div class="conv-name">{{ conv.account?.name || 'Cuenta' }}</div>
+                <small class="text-orange-500">Esperando agente</small>
+              </div>
+              <button pButton icon="pi pi-user-plus" class="p-button-sm p-button-outlined"
+                (click)="takeConversation(conv)" pTooltip="Tomar conversacion"></button>
+            </div>
+            <div *ngIf="unassignedConversations.length === 0" class="empty-state">
+              <small>No hay conversaciones en cola</small>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <!-- Tickets tab (superadmin only) -->
+        <p-tabPanel header="Tickets" *ngIf="isSuperAdmin">
+          <div class="ticket-filters flex gap-2 mb-3 mt-2">
+            <p-dropdown
+              [options]="statusFilterOptions"
+              [(ngModel)]="ticketStatusFilter"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Estado"
+              (onChange)="onTicketFilterChange()"
+              [style]="{'min-width': '140px'}">
+            </p-dropdown>
+            <p-dropdown
+              [options]="priorityOptions"
+              [(ngModel)]="ticketPriorityFilter"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Prioridad"
+              [showClear]="true"
+              (onChange)="onTicketFilterChange()"
+              [style]="{'min-width': '140px'}">
+            </p-dropdown>
+          </div>
+
+          <p-table
+            [value]="allTickets"
+            [lazy]="true"
+            [paginator]="true"
+            [rows]="ticketLimit"
+            [totalRecords]="totalTickets"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            (onLazyLoad)="onTicketPageChange($event)"
+            [tableStyle]="{'min-width': '100%'}"
+            styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Asunto</th>
+                <th>Cuenta</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Creado</th>
+                <th>Resuelto</th>
+                <th>Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ticket>
+              <tr>
+                <td>{{ ticket.subject }}</td>
+                <td>{{ ticket.conversation?.account?.name || '-' }}</td>
+                <td><p-tag [value]="ticket.status" [severity]="getTicketSeverity(ticket.status)"></p-tag></td>
+                <td><p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)"></p-tag></td>
+                <td>{{ ticket.createdAt | date:'dd/MM/yyyy HH:mm':'UTC-3' }}</td>
+                <td>{{ ticket.resolvedAt ? (ticket.resolvedAt | date:'dd/MM/yyyy HH:mm':'UTC-3') : '-' }}</td>
+                <td>
+                  <button pButton icon="pi pi-eye" class="p-button-sm p-button-text p-button-rounded"
+                    (click)="viewTicketConversation(ticket)" pTooltip="Ver conversacion"
+                    [disabled]="!ticket.conversationId">
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="7" class="text-center p-3">No se encontraron tickets</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+
+    <!-- Main chat area -->
+    <div class="chat-main" *ngIf="activeConversation; else noConversation">
+      <!-- Chat header -->
+      <div class="chat-header">
+        <div class="header-left">
+          <h4>{{ activeConversation.account?.name || 'Conversacion' }}</h4>
+          <p-tag *ngIf="activeConversation.botActive" value="Bot activo" icon="pi pi-android" severity="info"></p-tag>
+          <p-tag *ngIf="activeConversation.assignedAgent" [value]="activeConversation.assignedAgent.displayName" icon="pi pi-user" severity="success"></p-tag>
+        </div>
+        <div class="header-actions">
+          <button pButton icon="pi pi-ticket" label="Crear ticket" class="p-button-sm p-button-outlined" (click)="openTicketDialog()"></button>
+          <button pButton icon="pi pi-times-circle" label="Cerrar chat" class="p-button-sm p-button-outlined p-button-danger" (click)="closeConversation()" pTooltip="Cerrar esta conversacion"></button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" #messagesContainer>
+        <div
+          *ngFor="let msg of messages"
+          class="message-row"
+          [class.own]="msg.senderType === 'support' || msg.senderType === 'superadmin'">
+          <div class="message-bubble"
+            [class.client]="msg.senderType === 'client'"
+            [class.bot]="msg.senderType === 'bot'"
+            [class.support]="msg.senderType === 'support' || msg.senderType === 'superadmin'">
+            <div class="msg-sender">{{ getSenderLabel(msg) }}</div>
+            <div class="msg-content">{{ msg.content }}</div>
+            <div class="msg-time">{{ msg.createdAt | date:'HH:mm':'UTC-3' }}</div>
+          </div>
+        </div>
+
+        <div class="typing-indicator" *ngIf="isTyping || isBotTyping">
+          <span>{{ isBotTyping ? botName + ' pensando' : 'Cliente escribiendo' }}...</span>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="message-input-area">
+        <textarea
+          pInputTextarea
+          [(ngModel)]="newMessage"
+          placeholder="Escribe tu respuesta..."
+          [maxlength]="2000"
+          [autoResize]="true"
+          [rows]="1"
+          (keydown)="onKeyDown($event)">
+        </textarea>
+        <button pButton icon="pi pi-send" class="p-button-rounded" [disabled]="!newMessage.trim()" (click)="sendMessage()"></button>
+        <span class="char-counter" *ngIf="newMessage.trim().length > 1500"
+          [style.color]="newMessage.trim().length > 1800 ? '#ef4444' : '#94a3b8'"
+          [style.font-size]="'0.75rem'">
+          {{ newMessage.trim().length }}/2000
+        </span>
+      </div>
+
+      <!-- Tickets sidebar -->
+      <div class="tickets-panel" *ngIf="tickets.length > 0">
+        <h5>Tickets</h5>
+        <div *ngFor="let ticket of tickets" class="ticket-item">
+          <div class="ticket-header">
+            <span class="ticket-subject">{{ ticket.subject }}</span>
+            <p-tag [value]="ticket.status" [severity]="getTicketSeverity(ticket.status)"></p-tag>
+          </div>
+          <div class="ticket-meta">
+            <p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)" [style]="{'font-size': '0.7rem'}"></p-tag>
+            <button *ngIf="ticket.status !== 'resolved' && ticket.status !== 'closed'"
+              pButton label="Resolver" icon="pi pi-check" class="p-button-sm p-button-text p-button-success"
+              (click)="resolveTicket(ticket)">
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No conversation selected -->
+    <ng-template #noConversation>
+      <div class="chat-main empty">
+        <div class="empty-chat">
+          <i class="pi pi-comments" style="font-size: 3rem; color: var(--surface-400)"></i>
+          <h4>Selecciona una conversacion</h4>
+          <p>Elige una conversacion de la lista o toma una de la cola</p>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Ticket Dialog -->
+<p-dialog header="Crear ticket" [(visible)]="showTicketDialog" [modal]="true" [style]="{width: '400px', maxWidth: '95vw'}">
+  <div class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label>Asunto</label>
+      <input pInputText [(ngModel)]="ticketSubject" placeholder="Describe el problema" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Prioridad</label>
+      <p-dropdown [options]="priorityOptions" [(ngModel)]="ticketPriority" optionLabel="label" optionValue="value"></p-dropdown>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showTicketDialog = false"></button>
+    <button pButton label="Crear" icon="pi pi-check" [disabled]="!ticketSubject.trim()" (click)="createTicket()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- New Conversation Dialog (superadmin) -->
+<p-dialog header="Nueva conversacion" [(visible)]="showNewConversationDialog" [modal]="true" [style]="{width: '450px', maxWidth: '95vw'}">
+  <div class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label>Cuenta</label>
+      <p-autoComplete
+        [(ngModel)]="selectedAccount"
+        [suggestions]="filteredAccounts"
+        (completeMethod)="filterAccounts($event)"
+        field="name"
+        placeholder="Buscar cuenta..."
+        [minLength]="0"
+        [forceSelection]="true"
+        [dropdown]="true">
+      </p-autoComplete>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Mensaje</label>
+      <textarea
+        pInputTextarea
+        [(ngModel)]="newConversationMessage"
+        placeholder="Escribe el mensaje inicial..."
+        [rows]="4">
+      </textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showNewConversationDialog = false"></button>
+    <button pButton label="Enviar" icon="pi pi-send"
+      [disabled]="!selectedAccount || !newConversationMessage.trim()"
+      (click)="startConversation()">
+    </button>
+  </ng-template>
+</p-dialog>
