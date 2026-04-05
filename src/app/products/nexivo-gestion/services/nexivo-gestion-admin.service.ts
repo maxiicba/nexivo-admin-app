@@ -9,8 +9,13 @@ export class NexivoGestionAdminService {
 
   constructor(private http: HttpClient) {}
 
+  // ── Subscriptions ──────────────────────────────────────────────────────────
+  // GET /api/subscriptions          → findAllSubscriptions() (superAdmin)
+  // PUT /api/subscriptions/:id      → updateSubscription()
+  // POST /api/subscriptions/:id/cancel → cancelSubscription()
+
   getAllSubscriptions(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/admin`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.base}`, { withCredentials: true });
   }
 
   getStats(): Observable<any> {
@@ -18,26 +23,30 @@ export class NexivoGestionAdminService {
   }
 
   updateSubscription(id: string, data: any): Observable<any> {
-    return this.http.patch<any>(`${this.base}/admin/${id}`, data, { withCredentials: true });
+    return this.http.put<any>(`${this.base}/${id}`, data, { withCredentials: true });
   }
 
   cancelSubscription(id: string, reason: string): Observable<void> {
-    return this.http.patch<void>(`${this.base}/admin/${id}/cancel`, { reason }, { withCredentials: true });
+    return this.http.post<void>(`${this.base}/${id}/cancel`, { reason }, { withCredentials: true });
   }
 
+  // ── Plans ──────────────────────────────────────────────────────────────────
+  // Routes under @Controller('subscriptions'): /api/subscriptions/plans/...
+  // NOTE: management-api uses PUT for plan updates (not PATCH)
+
   getAllPlans(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.managementApiUrl}/plans`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.base}/plans`, { withCredentials: true });
   }
 
   createPlan(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.managementApiUrl}/plans`, data, { withCredentials: true });
+    return this.http.post<any>(`${this.base}/plans`, data, { withCredentials: true });
   }
 
   updatePlan(id: string, data: any): Observable<any> {
-    return this.http.patch<any>(`${environment.managementApiUrl}/plans/${id}`, data, { withCredentials: true });
+    return this.http.put<any>(`${this.base}/plans/${id}`, data, { withCredentials: true });
   }
 
   deletePlan(id: string): Observable<void> {
-    return this.http.delete<void>(`${environment.managementApiUrl}/plans/${id}`, { withCredentials: true });
+    return this.http.delete<void>(`${this.base}/plans/${id}`, { withCredentials: true });
   }
 }

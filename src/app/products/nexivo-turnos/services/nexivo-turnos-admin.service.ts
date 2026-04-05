@@ -9,6 +9,8 @@ export class NexivoTurnosAdminService {
 
   constructor(private http: HttpClient) {}
 
+  // ── Subscriptions ──────────────────────────────────────────────────────────
+
   getAllSubscriptions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/admin/all`, { withCredentials: true });
   }
@@ -17,7 +19,7 @@ export class NexivoTurnosAdminService {
     return this.http.get<any>(`${this.base}/admin/stats`, { withCredentials: true });
   }
 
-  updateSubscription(id: string, data: Partial<{planId: string; billingCycle: string; currentPrice: number}>): Observable<any> {
+  updateSubscription(id: string, data: Partial<{ planId: string; billingCycle: string; currentPrice: number }>): Observable<any> {
     return this.http.patch<any>(`${this.base}/admin/${id}/plan`, data, { withCredentials: true });
   }
 
@@ -25,19 +27,22 @@ export class NexivoTurnosAdminService {
     return this.http.patch<void>(`${this.base}/admin/${id}/cancel`, { reason }, { withCredentials: true });
   }
 
+  // ── Plans ──────────────────────────────────────────────────────────────────
+  // Routes under @Controller('subscriptions'): /api/subscriptions/plans/...
+
   getAllPlans(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.turnosApiUrl}/plans`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.base}/plans`, { withCredentials: true });
   }
 
   createPlan(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.turnosApiUrl}/plans`, data, { withCredentials: true });
+    return this.http.post<any>(`${this.base}/plans`, data, { withCredentials: true });
   }
 
   updatePlan(id: string, data: any): Observable<any> {
-    return this.http.patch<any>(`${environment.turnosApiUrl}/plans/${id}`, data, { withCredentials: true });
+    return this.http.patch<any>(`${this.base}/plans/${id}`, data, { withCredentials: true });
   }
 
   deletePlan(id: string): Observable<void> {
-    return this.http.delete<void>(`${environment.turnosApiUrl}/plans/${id}`, { withCredentials: true });
+    return this.http.delete<void>(`${this.base}/plans/${id}`, { withCredentials: true });
   }
 }
