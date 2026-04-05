@@ -33,6 +33,7 @@ import { RouterModule } from '@angular/router';
       { path: 'notifications', loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent) },
       { path: 'demos', loadComponent: () => import('./demos/demos.component').then(m => m.DemosComponent) },
       { path: 'chat', loadComponent: () => import('./chat-dashboard/chat-dashboard.component').then(m => m.ChatDashboardComponent) },
+      { path: 'chat-config', loadComponent: () => import('./chat-config/chat-config.component').then(m => m.ChatConfigComponent) },
     ]),
   ],
 })

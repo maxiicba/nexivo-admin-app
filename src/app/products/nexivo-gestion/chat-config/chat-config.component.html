@@ -1,0 +1,266 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '400px'}" appendTo="body"></p-confirmDialog>
+
+<div class="chat-config-page">
+  <!-- Header -->
+  <section class="nx-hero-section">
+    <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+    <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+    <div class="nx-hero-section__content">
+      <div class="nx-page-header nx-page-header--hero">
+        <div class="nx-page-header__left">
+          <div class="nx-page-header__icon nx-page-header__icon--hero">
+            <i class="pi pi-comments"></i>
+          </div>
+
+          <div>
+            <span class="nx-page-kicker">Nexivo SuperAdmin</span>
+
+            <div class="flex align-items-center flex-wrap gap-2">
+              <h2 class="nx-page-header__title m-0">Configuracion de Chat y Soporte</h2>
+            </div>
+
+            <p class="nx-page-header__subtitle m-0">Agentes de soporte, FAQ y preguntas sin responder</p>
+          </div>
+        </div>
+
+        <div class="nx-page-header__actions">
+          <button pButton label="Limpiar cache del bot" icon="pi pi-refresh"
+            class="p-button-outlined" [loading]="clearingCache"
+            (click)="clearBotCache()" pTooltip="Elimina respuestas cacheadas para que el bot use el prompt actualizado"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p-tabView>
+    <!-- Agents Tab -->
+    <p-tabPanel header="Agentes de soporte" leftIcon="pi pi-users">
+      <div class="section-header">
+        <h4>Agentes</h4>
+        <button pButton label="Nuevo agente" icon="pi pi-plus" (click)="openAgentDialog()"></button>
+      </div>
+
+      <p-table [value]="agents" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Max. conversaciones</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-agent>
+          <tr>
+            <td>{{ agent.displayName }}</td>
+            <td>{{ agent.user?.email }}</td>
+            <td>
+              <p-tag [value]="agent.status" [severity]="getStatusSeverity(agent.status)"></p-tag>
+            </td>
+            <td>{{ agent.maxConversations }}</td>
+            <td>
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm"
+                (click)="deleteAgent(agent)" pTooltip="Desactivar"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="5" class="text-center p-4">No hay agentes registrados</td></tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+    <!-- FAQ Tab -->
+    <p-tabPanel header="FAQ / Base de conocimiento" leftIcon="pi pi-book">
+      <div class="section-header">
+        <h4>Preguntas frecuentes</h4>
+        <button pButton label="Nueva FAQ" icon="pi pi-plus" (click)="openFaqDialog()"></button>
+      </div>
+
+      <p-table [value]="faqEntries" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Pregunta</th>
+            <th>Respuesta</th>
+            <th>Keywords</th>
+            <th>Global</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-entry>
+          <tr>
+            <td>{{ entry.question | slice:0:60 }}</td>
+            <td>{{ entry.answer | slice:0:80 }}</td>
+            <td>
+              <p-chip *ngFor="let kw of entry.keywords" [label]="kw" styleClass="mr-1"></p-chip>
+            </td>
+            <td>
+              <i [class]="entry.isGlobal ? 'pi pi-check-circle text-green-500' : 'pi pi-minus-circle text-gray-400'"></i>
+            </td>
+            <td>
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" (click)="deleteFaq(entry)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="5" class="text-center p-4">No hay entradas de FAQ</td></tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+    <!-- Unanswered Questions Tab -->
+    <p-tabPanel header="Preguntas sin responder" leftIcon="pi pi-question-circle">
+      <div class="section-header">
+        <h4>Preguntas que el bot no supo responder</h4>
+        <div class="flex align-items-center gap-2">
+          <p-dropdown [options]="filterOptions" [(ngModel)]="unansweredFilter"
+            (onChange)="onFilterChange()" [style]="{minWidth: '150px'}"></p-dropdown>
+          <button pButton icon="pi pi-refresh" class="p-button-text" (click)="loadUnanswered()"
+            pTooltip="Actualizar" [loading]="loadingUnanswered"></button>
+        </div>
+      </div>
+
+      <p-table [value]="unansweredQuestions" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [loading]="loadingUnanswered" [rowHover]="true">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 25%">Pregunta</th>
+            <th style="width: 30%">Respuesta del bot</th>
+            <th style="width: 10%">Motivo</th>
+            <th style="width: 12%">Cuenta</th>
+            <th style="width: 13%">Fecha</th>
+            <th style="width: 10%">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-q>
+          <tr>
+            <td>{{ q.question }}</td>
+            <td class="text-sm">{{ q.botResponse | slice:0:100 }}{{ q.botResponse?.length > 100 ? '...' : '' }}</td>
+            <td>
+              <p-tag [value]="getReasonLabel(q.reason)" [severity]="getReasonSeverity(q.reason)"></p-tag>
+            </td>
+            <td>{{ q.account?.businessName || '-' }}</td>
+            <td>{{ q.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+            <td>
+              <button *ngIf="!q.isReviewed" pButton icon="pi pi-check" class="p-button-success p-button-text p-button-sm"
+                (click)="openReviewDialog(q)" pTooltip="Marcar como revisada"></button>
+              <i *ngIf="q.isReviewed" class="pi pi-check-circle text-green-500" [pTooltip]="'Revisada' + (q.reviewNotes ? ': ' + q.reviewNotes : '')"></i>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="6" class="text-center p-4">No hay preguntas sin responder</td></tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+  </p-tabView>
+</div>
+
+<!-- Agent Dialog -->
+<p-dialog header="Nuevo agente de soporte" [(visible)]="showAgentDialog" [modal]="true" [style]="{width: '450px', maxWidth: '95vw'}">
+  <div class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label>Nombre</label>
+      <input pInputText [(ngModel)]="agentForm.firstName" placeholder="Nombre" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Apellido</label>
+      <input pInputText [(ngModel)]="agentForm.lastName" placeholder="Apellido" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Email</label>
+      <input pInputText [(ngModel)]="agentForm.email" placeholder="email@ejemplo.com" appLowercase />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Nombre visible en chat</label>
+      <input pInputText [(ngModel)]="agentForm.displayName" placeholder="Nombre para los clientes" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Max. conversaciones simultaneas</label>
+      <p-inputNumber [(ngModel)]="agentForm.maxConversations" [min]="1" [max]="50"></p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showAgentDialog = false"></button>
+    <button pButton label="Crear agente" icon="pi pi-check" [loading]="savingAgent"
+      [disabled]="!agentForm.firstName || !agentForm.email || !agentForm.displayName" (click)="saveAgent()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- FAQ Dialog -->
+<p-dialog header="Nueva entrada de FAQ" [(visible)]="showFaqDialog" [modal]="true" [style]="{width: '500px', maxWidth: '95vw'}">
+  <div class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label>Pregunta</label>
+      <input pInputText [(ngModel)]="faqForm.question" placeholder="Como hago para...?" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Respuesta</label>
+      <textarea pInputTextarea [(ngModel)]="faqForm.answer" [rows]="4" placeholder="La respuesta es..."></textarea>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Keywords (separadas por coma)</label>
+      <input pInputText [(ngModel)]="faqForm.keywords" placeholder="precio, plan, factura" />
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-inputSwitch [(ngModel)]="faqForm.isGlobal"></p-inputSwitch>
+      <label>Disponible para todas las cuentas</label>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showFaqDialog = false"></button>
+    <button pButton label="Crear FAQ" icon="pi pi-check" [loading]="savingFaq"
+      [disabled]="!faqForm.question || !faqForm.answer" (click)="saveFaq()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Review Dialog -->
+<p-dialog header="Revisar pregunta" [(visible)]="showReviewDialog" [modal]="true" [style]="{width: '550px', maxWidth: '95vw'}">
+  <div *ngIf="reviewingQuestion" class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label class="font-semibold">Pregunta del usuario</label>
+      <div class="p-3 surface-100 border-round">{{ reviewingQuestion.question }}</div>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-semibold">Respuesta del bot</label>
+      <div class="p-3 surface-100 border-round text-sm">{{ reviewingQuestion.botResponse }}</div>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-semibold">Motivo</label>
+      <p-tag [value]="getReasonLabel(reviewingQuestion.reason)" [severity]="getReasonSeverity(reviewingQuestion.reason)"></p-tag>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label>Notas de revision (opcional)</label>
+      <textarea pInputTextarea [(ngModel)]="reviewNotes" [rows]="3" placeholder="Ej: Agregar esta info a la base de conocimiento..."></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showReviewDialog = false"></button>
+    <button pButton label="Marcar como revisada" icon="pi pi-check" [loading]="savingReview" (click)="saveReview()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Credentials Dialog -->
+<p-dialog header="Agente creado exitosamente" [(visible)]="showCredentialsDialog" [modal]="true" [closable]="false" [style]="{width: '450px', maxWidth: '95vw'}">
+  <div class="flex flex-column gap-3 pt-2">
+    <p class="m-0"><strong>Guarda estas credenciales.</strong> La contrasena temporal no se podra recuperar.</p>
+    <div class="flex flex-column gap-1">
+      <label class="font-semibold">Email</label>
+      <div class="p-inputgroup">
+        <input pInputText [value]="createdAgentEmail" readonly />
+      </div>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label class="font-semibold">Contrasena temporal</label>
+      <div class="p-inputgroup">
+        <input pInputText [value]="createdAgentPassword" readonly />
+      </div>
+    </div>
+    <p class="text-sm text-500 m-0">El agente debera cambiar su contrasena al iniciar sesion por primera vez.</p>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Entendido" icon="pi pi-check" (click)="showCredentialsDialog = false"></button>
+  </ng-template>
+</p-dialog>
