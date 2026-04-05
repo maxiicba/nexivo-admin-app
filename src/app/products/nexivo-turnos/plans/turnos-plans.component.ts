@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -15,6 +15,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { forkJoin, Subscription } from 'rxjs';
 import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.service';
 
 const DEFAULT_PLAN = () => ({
@@ -38,7 +39,7 @@ const DEFAULT_PLAN = () => ({
   providers: [MessageService, ConfirmationService],
   templateUrl: './turnos-plans.component.html',
 })
-export class TurnosPlansComponent implements OnInit {
+export class TurnosPlansComponent implements OnInit, OnDestroy {
   plans: any[] = [];
   loading = false;
   planDialog = false;
@@ -46,6 +47,7 @@ export class TurnosPlansComponent implements OnInit {
   editingPlan: any = DEFAULT_PLAN();
   featureInput = '';
   saving = false;
+  private dragDropSub?: Subscription;
 
   constructor(
     private svc: NexivoTurnosAdminService,
@@ -129,11 +131,21 @@ export class TurnosPlansComponent implements OnInit {
 
   onDrop(event: CdkDragDrop<any[]>): void {
     moveItemInArray(this.plans, event.previousIndex, event.currentIndex);
-    this.plans.forEach((p, i) => {
-      if (p.sortOrder !== i) {
-        p.sortOrder = i;
-        this.svc.updatePlan(p.id, { sortOrder: i }).subscribe();
-      }
+    const updates = this.plans
+      .map((p, i) => ({ plan: p, newIndex: i }))
+      .filter(({ plan, newIndex }) => plan.sortOrder !== newIndex)
+      .map(({ plan, newIndex }) => {
+        plan.sortOrder = newIndex;
+        return this.svc.updatePlan(plan.id, { sortOrder: newIndex });
+      });
+    if (updates.length === 0) return;
+    this.dragDropSub?.unsubscribe();
+    this.dragDropSub = forkJoin(updates).subscribe({
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el orden' }),
     });
+  }
+
+  ngOnDestroy(): void {
+    this.dragDropSub?.unsubscribe();
   }
 }

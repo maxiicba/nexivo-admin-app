@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -13,6 +13,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { forkJoin, Subscription } from 'rxjs';
 import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.service';
 
 @Component({
@@ -26,7 +27,7 @@ import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.servic
   providers: [MessageService, ConfirmationService],
   templateUrl: './turnos-subscriptions.component.html',
 })
-export class TurnosSubscriptionsComponent implements OnInit {
+export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   subscriptions: any[] = [];
   plans: any[] = [];
   stats: any = { total: 0, mrr: 0, byStatus: { active: 0, trialing: 0, past_due: 0, suspended: 0 } };
@@ -46,6 +47,7 @@ export class TurnosSubscriptionsComponent implements OnInit {
   ];
 
   saving = false;
+  private loadSub?: Subscription;
 
   constructor(
     private svc: NexivoTurnosAdminService,
@@ -58,16 +60,25 @@ export class TurnosSubscriptionsComponent implements OnInit {
   }
 
   load(): void {
+    this.loadSub?.unsubscribe();
     this.loading = true;
-    this.svc.getAllSubscriptions().subscribe({
-      next: (data) => { this.subscriptions = data; this.loading = false; },
+    this.loadSub = forkJoin({
+      subs: this.svc.getAllSubscriptions(),
+      stats: this.svc.getStats(),
+      plans: this.svc.getAllPlans(),
+    }).subscribe({
+      next: ({ subs, stats, plans }) => {
+        this.subscriptions = subs;
+        this.stats = stats;
+        this.plans = plans.map((pl: any) => ({ label: pl.displayName, value: pl.id }));
+        this.loading = false;
+      },
       error: () => { this.loading = false; },
     });
-    this.svc.getStats().subscribe({ next: (s) => { this.stats = s; }, error: () => {} });
-    this.svc.getAllPlans().subscribe({
-      next: (p) => { this.plans = p.map((pl: any) => ({ label: pl.displayName, value: pl.id })); },
-      error: () => {}
-    });
+  }
+
+  ngOnDestroy(): void {
+    this.loadSub?.unsubscribe();
   }
 
   getStatusSeverity(status: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {

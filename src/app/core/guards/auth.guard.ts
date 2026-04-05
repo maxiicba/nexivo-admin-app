@@ -9,7 +9,11 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isLoggedIn() && authService.getCurrentUser()) return true;
+  const cachedUser = authService.getCurrentUser();
+  if (authService.isLoggedIn() && cachedUser) {
+    if (!cachedUser.isSuperAdmin) return router.parseUrl('/unauthorized');
+    return true;
+  }
 
   return authService.checkAuthStatus().pipe(
     map(user => {

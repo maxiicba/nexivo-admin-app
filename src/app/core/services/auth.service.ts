@@ -32,7 +32,7 @@ export class AuthService {
           return of(null);
         }),
         finalize(() => { this.checkStatus$ = null; }),
-        shareReplay(1),
+        shareReplay({ bufferSize: 1, refCount: true }),
       );
     }
     return this.checkStatus$;

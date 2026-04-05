@@ -24,11 +24,11 @@ import { authGuard } from './core/guards/auth.guard';
             path: 'products/nexivo-turnos',
             loadChildren: () => import('./products/nexivo-turnos/nexivo-turnos.module').then(m => m.NexivoTurnosModule),
           },
-          {
-            path: 'unauthorized',
-            loadComponent: () => import('./pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent),
-          },
         ],
+      },
+      {
+        path: 'unauthorized',
+        loadComponent: () => import('./pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent),
       },
       { path: '**', redirectTo: '' },
     ])
