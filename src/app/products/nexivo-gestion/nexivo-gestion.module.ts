@@ -25,6 +25,10 @@ import { RouterModule } from '@angular/router';
         path: 'subscription-management',
         loadComponent: () => import('./subscription-management/subscription-management.component').then(m => m.SubscriptionManagementComponent),
       },
+      {
+        path: 'api-keys',
+        loadComponent: () => import('./api-keys/api-keys.component').then(m => m.ApiKeysComponent),
+      },
     ]),
   ],
 })
