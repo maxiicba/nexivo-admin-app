@@ -27,50 +27,50 @@ export class DemosService {
   // ── Admin ──
 
   getRequests(params: any = {}): Observable<any> {
-    return this.http.get(`${this.adminUrl}/requests`, { params });
+    return this.http.get(`${this.adminUrl}/requests`, { params, withCredentials: true });
   }
 
   getRequestById(id: string): Observable<any> {
-    return this.http.get(`${this.adminUrl}/requests/${id}`);
+    return this.http.get(`${this.adminUrl}/requests/${id}`, { withCredentials: true });
   }
 
   updateRequest(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.adminUrl}/requests/${id}`, data);
+    return this.http.patch(`${this.adminUrl}/requests/${id}`, data, { withCredentials: true });
   }
 
   getStats(): Observable<any> {
-    return this.http.get(`${this.adminUrl}/stats`);
+    return this.http.get(`${this.adminUrl}/stats`, { withCredentials: true });
   }
 
   // ── Availability ──
 
   getAvailability(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.adminUrl}/availability`);
+    return this.http.get<any[]>(`${this.adminUrl}/availability`, { withCredentials: true });
   }
 
   createAvailability(data: any): Observable<any> {
-    return this.http.post(`${this.adminUrl}/availability`, data);
+    return this.http.post(`${this.adminUrl}/availability`, data, { withCredentials: true });
   }
 
   updateAvailability(id: string, data: any): Observable<any> {
-    return this.http.put(`${this.adminUrl}/availability/${id}`, data);
+    return this.http.put(`${this.adminUrl}/availability/${id}`, data, { withCredentials: true });
   }
 
   deleteAvailability(id: string): Observable<any> {
-    return this.http.delete(`${this.adminUrl}/availability/${id}`);
+    return this.http.delete(`${this.adminUrl}/availability/${id}`, { withCredentials: true });
   }
 
   // ── Blocked slots ──
 
   getBlockedSlots(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.adminUrl}/blocked-slots`);
+    return this.http.get<any[]>(`${this.adminUrl}/blocked-slots`, { withCredentials: true });
   }
 
   createBlockedSlot(data: any): Observable<any> {
-    return this.http.post(`${this.adminUrl}/blocked-slots`, data);
+    return this.http.post(`${this.adminUrl}/blocked-slots`, data, { withCredentials: true });
   }
 
   deleteBlockedSlot(id: string): Observable<any> {
-    return this.http.delete(`${this.adminUrl}/blocked-slots/${id}`);
+    return this.http.delete(`${this.adminUrl}/blocked-slots/${id}`, { withCredentials: true });
   }
 }

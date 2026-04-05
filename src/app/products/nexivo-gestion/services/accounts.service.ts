@@ -21,11 +21,11 @@ export class AccountsService {
       }
 
 
-    createAccountAndOwnerUserAndPoint(accountAndUser) {
+    createAccountAndOwnerUserAndPoint(accountAndUser: any): Observable<any> {
         return this.httpClient.post(`${this.urlApi}/accounts`, accountAndUser,  { withCredentials: true });
     }
 
-    updateAccount(id, updateAccount) {
+    updateAccount(id: string, updateAccount: any): Observable<any> {
         return this.httpClient.put(`${this.urlApi}/accounts/${id}`, updateAccount,  { withCredentials: true });
     }
 
