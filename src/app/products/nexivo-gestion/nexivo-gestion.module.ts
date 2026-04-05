@@ -21,6 +21,10 @@ import { RouterModule } from '@angular/router';
         path: 'accounts',
         loadComponent: () => import('./accounts/accounts.component').then(m => m.AccountsComponent),
       },
+      {
+        path: 'subscription-management',
+        loadComponent: () => import('./subscription-management/subscription-management.component').then(m => m.SubscriptionManagementComponent),
+      },
     ]),
   ],
 })

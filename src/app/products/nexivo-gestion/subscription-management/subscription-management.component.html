@@ -1,0 +1,822 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page Header -->
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero">
+          <i class="pi pi-credit-card"></i>
+        </div>
+
+        <div>
+          <span class="nx-page-kicker">Nexivo Administracion</span>
+
+          <div class="flex align-items-center flex-wrap gap-2">
+            <h2 class="nx-page-header__title m-0">Suscripciones</h2>
+          </div>
+
+          <p class="nx-page-header__subtitle m-0">Gestion de planes y suscripciones de cuentas</p>
+        </div>
+      </div>
+
+      <div class="nx-page-header__actions">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KPI Cards -->
+<div class="grid mb-3">
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--blue">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.total }}</span>
+        <span class="nx-stat-card__label">Total</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--green">
+        <i class="pi pi-dollar"></i>
+      </div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ formatCurrency(stats.mrr) }}</span>
+        <span class="nx-stat-card__label">MRR</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.byStatus.active }}</span>
+        <span class="nx-stat-card__label">Activas</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--orange">
+        <i class="pi pi-exclamation-circle"></i>
+      </div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.accountsWithoutSubscription }}</span>
+        <span class="nx-stat-card__label">Sin plan</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status chips -->
+<div class="card mb-3 p-3">
+  <div class="flex flex-wrap gap-2 align-items-center">
+    <span class="text-sm font-medium mr-2" style="color: var(--nx-text-secondary)">Estado:</span>
+    <p-tag value="Prueba: {{ stats.byStatus.trialing }}" severity="info" [rounded]="true"></p-tag>
+    <p-tag value="Activas: {{ stats.byStatus.active }}" severity="success" [rounded]="true"></p-tag>
+    <p-tag value="Vencidas: {{ stats.byStatus.past_due }}" severity="warning" [rounded]="true"></p-tag>
+    <p-tag value="Suspendidas: {{ stats.byStatus.suspended }}" severity="danger" [rounded]="true"></p-tag>
+    <p-tag value="Canceladas: {{ stats.byStatus.cancelled }}" [rounded]="true"
+      styleClass="bg-gray-200 text-gray-600"></p-tag>
+  </div>
+</div>
+
+<p-tabView>
+  <!-- Tab: Suscripciones -->
+  <p-tabPanel header="Suscripciones">
+    <div class="card">
+      <p-table #dtSubs [value]="subscriptions" [paginator]="true" [rows]="10" [rowHover]="true"
+        [globalFilterFields]="['account.name','account.email','plan.displayName','status']"
+        [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} de {totalRecords}"
+        styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="caption">
+          <div class="nx-filter-bar" style="margin-bottom: 0">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="dtSubs.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Buscar cuenta, plan..." class="w-full" style="max-width:280px" />
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="account.name">Cuenta <p-sortIcon field="account.name"></p-sortIcon></th>
+            <th pSortableColumn="plan.displayName">Plan <p-sortIcon field="plan.displayName"></p-sortIcon></th>
+            <th>Ciclo</th>
+            <th pSortableColumn="currentPrice">Precio <p-sortIcon field="currentPrice"></p-sortIcon></th>
+            <th pSortableColumn="status">Estado <p-sortIcon field="status"></p-sortIcon></th>
+            <th>Periodo actual</th>
+            <th>Bonificados</th>
+            <th style="width:100px"></th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-sub>
+          <tr>
+            <td>
+              <div class="font-medium">{{ sub.account?.name }}</div>
+              <div class="text-xs" style="color: var(--nx-text-secondary)">{{ sub.account?.email }}</div>
+            </td>
+            <td>
+              <span *ngIf="sub.plan?.displayName; else noPlan" class="font-medium">{{ sub.plan.displayName }}</span>
+              <ng-template #noPlan><span class="text-sm" style="color: var(--nx-text-muted)">Sin plan</span></ng-template>
+            </td>
+            <td>
+              <span class="text-sm">{{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</span>
+            </td>
+            <td>
+              <span class="nx-amount">{{ formatCurrency(sub.currentPrice) }}</span>
+            </td>
+            <td>
+              <p-tag [value]="getStatusLabel(sub.status)" [severity]="getStatusSeverity(sub.status)"></p-tag>
+            </td>
+            <td>
+              <span class="nx-cell-date">
+                {{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="sub.freeMonths > 0" class="text-sm font-medium" style="color: var(--nx-accent-blue)">
+                {{ sub.freeMonths }} {{ sub.freeMonths === 1 ? 'mes' : 'meses' }}
+              </span>
+              <span *ngIf="!sub.freeMonths || sub.freeMonths === 0" style="color: var(--nx-text-muted)">-</span>
+            </td>
+            <td>
+              <div class="flex gap-1 justify-content-end">
+                <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-sm" pTooltip="Editar"
+                  tooltipPosition="top" (click)="openEditSub(sub)"></button>
+                <button *ngIf="sub.status !== 'cancelled'" pButton icon="pi pi-ban"
+                  class="p-button-text p-button-rounded p-button-danger p-button-sm" pTooltip="Cancelar"
+                  tooltipPosition="top" (click)="openCancelDialog(sub)"></button>
+                <button *ngIf="sub.status === 'cancelled' || sub.status === 'suspended'" pButton icon="pi pi-refresh"
+                  class="p-button-text p-button-rounded p-button-success p-button-sm" pTooltip="Reactivar"
+                  tooltipPosition="top" (click)="reactivate(sub)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="nx-table-empty">
+              <i class="pi pi-inbox"></i>
+              <span>No hay suscripciones aun</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Cuentas sin suscripcion -->
+    <div class="card mt-3" *ngIf="accountsWithoutSub.length > 0">
+      <div class="flex align-items-center justify-content-between mb-3">
+        <h5 class="m-0">Cuentas sin suscripcion</h5>
+        <p-tag [value]="accountsWithoutSub.length + ' pendientes'" severity="warning"></p-tag>
+      </div>
+      <p-table [value]="accountsWithoutSub" [rows]="5" [paginator]="accountsWithoutSub.length > 5"
+        styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th style="width: 140px"></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-account>
+          <tr>
+            <td class="font-medium">{{ account.name }}</td>
+            <td class="nx-cell-date">{{ account.email }}</td>
+            <td><p-tag [value]="account.status" severity="secondary"></p-tag></td>
+            <td>
+              <button pButton label="Asignar plan" icon="pi pi-plus" class="p-button-outlined p-button-sm"
+                (click)="openAssignDialog(account)"></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-tabPanel>
+
+  <!-- Tab: Planes -->
+  <p-tabPanel header="Planes">
+    <div class="card">
+      <div class="flex justify-content-end mb-3">
+        <button pButton label="Nuevo Plan" icon="pi pi-plus" (click)="openNewPlan()"></button>
+      </div>
+
+      <p-tabView [(activeIndex)]="activePlanTab">
+        <p-tabPanel *ngFor="let mode of accountModes">
+          <ng-template pTemplate="header">
+            <div class="flex align-items-center gap-2">
+              <i [class]="accountModeConfig[mode]?.icon || 'pi pi-question'"></i>
+              <span>{{ accountModeConfig[mode]?.label || mode }}</span>
+              <p-tag [value]="getPlansByMode(mode).length.toString()" [rounded]="true" severity="info" styleClass="ml-1"></p-tag>
+            </div>
+          </ng-template>
+
+          <div cdkDropList (cdkDropListDropped)="onPlanDrop($event, mode)" class="plan-drop-list grid mt-3">
+            <div class="col-12 md:col-4" cdkDrag *ngFor="let plan of getPlansByMode(mode)">
+              <div class="card border-1 h-full plan-card" style="border-color: var(--nx-border); position: relative"
+                [style.opacity]="plan.isActive ? 1 : 0.7">
+                <div class="drag-handle" cdkDragHandle>
+                  <i class="pi pi-bars text-400 cursor-move"></i>
+                </div>
+                <div class="flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h4 class="mb-1 mt-0">{{ plan.displayName }}</h4>
+                    <p class="text-sm mt-0 mb-0" style="color: var(--nx-text-secondary)">{{ plan.description }}</p>
+                  </div>
+                  <p-tag *ngIf="!plan.isActive" value="Inactivo" severity="danger"></p-tag>
+                </div>
+            <p-divider></p-divider>
+            <div class="flex justify-content-between mb-2">
+              <span class="text-sm" style="color: var(--nx-text-secondary)">Mensual</span>
+              <span class="font-bold">{{ formatCurrency(plan.monthlyPrice) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3">
+              <span class="text-sm" style="color: var(--nx-text-secondary)">Anual</span>
+              <span class="font-bold">{{ formatCurrency(plan.annualPrice) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Puntos de venta</span>
+              <span class="font-medium">{{ formatLimit(plan.maxSalePoints) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Usuarios</span>
+              <span class="font-medium">{{ formatLimit(plan.maxUsers) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Productos</span>
+              <span class="font-medium">{{ formatLimit(plan.maxProducts) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Clientes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxClients) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Proveedores</span>
+              <span class="font-medium">{{ formatLimit(plan.maxSuppliers) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Ventas/mes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxMonthlySales) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm" *ngIf="plan.hasAiDescriptions">
+              <span style="color: var(--nx-text-secondary)">IA desc./dia</span>
+              <span class="font-medium">{{ formatLimit(plan.maxAiDescriptionsDaily) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3 text-sm" *ngIf="plan.hasAiDescriptions">
+              <span style="color: var(--nx-text-secondary)">IA desc./mes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxAiDescriptionsMonthly) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3 text-sm" *ngIf="plan.hasAiImageAnalysis">
+              <span style="color: var(--nx-text-secondary)">IA analisis/dia</span>
+              <span class="font-medium">{{ formatLimit(plan.maxDailyAiAnalysis) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3 text-sm" *ngIf="plan.hasAiImageAnalysis">
+              <span style="color: var(--nx-text-secondary)">IA analisis/mes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxMonthlyAiAnalysis) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm" *ngIf="(plan.maxDailyDocumentScan ?? 0) > 0">
+              <span style="color: var(--nx-text-secondary)">IA doc scan/dia</span>
+              <span class="font-medium">{{ formatLimit(plan.maxDailyDocumentScan) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3 text-sm" *ngIf="(plan.maxMonthlyDocumentScan ?? 0) > 0">
+              <span style="color: var(--nx-text-secondary)">IA doc scan/mes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxMonthlyDocumentScan) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm" *ngIf="plan.hasChatBot">
+              <span style="color: var(--nx-text-secondary)">Bot chat/dia</span>
+              <span class="font-medium">{{ formatLimit(plan.maxChatBotQueriesDaily) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-3 text-sm" *ngIf="plan.hasChatBot">
+              <span style="color: var(--nx-text-secondary)">Bot chat/mes</span>
+              <span class="font-medium">{{ formatLimit(plan.maxChatBotQueriesMonthly) }}</span>
+            </div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span style="color: var(--nx-text-secondary)">Periodo de prueba</span>
+              <span class="font-medium" *ngIf="plan.hasTrialPeriod" style="color: var(--nx-accent-green)">{{ plan.trialDays }} dias gratis</span>
+              <span class="font-medium" *ngIf="!plan.hasTrialPeriod" style="color: var(--nx-warning)">Requiere pago</span>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <p-tag *ngIf="plan.hasOnlineStore" value="Tienda Online" severity="success" [rounded]="true" icon="pi pi-shopping-bag"></p-tag>
+              <p-tag *ngIf="plan.hasWhatsapp" value="WhatsApp" severity="success" [rounded]="true" icon="pi pi-whatsapp"></p-tag>
+              <p-tag *ngIf="plan.hasAdvancedReports" value="Reportes Avanzados" severity="success" [rounded]="true" icon="pi pi-chart-bar"></p-tag>
+              <p-tag *ngIf="plan.hasCompras" value="Compras" severity="success" [rounded]="true" icon="pi pi-shopping-cart"></p-tag>
+              <p-tag *ngIf="plan.hasGastos" value="Gastos" severity="success" [rounded]="true" icon="pi pi-money-bill"></p-tag>
+              <p-tag *ngIf="plan.hasAiDescriptions" value="IA Descripciones" severity="success" [rounded]="true" icon="pi pi-sparkles"></p-tag>
+              <p-tag *ngIf="plan.hasAiImageAnalysis" value="IA Analisis" severity="success" [rounded]="true" icon="pi pi-image"></p-tag>
+              <p-tag *ngIf="plan.hasPayroll" value="RRHH" severity="success" [rounded]="true" icon="pi pi-briefcase"></p-tag>
+              <p-tag *ngIf="plan.hasTreasury" value="Tesorería" severity="success" [rounded]="true" icon="pi pi-building-columns"></p-tag>
+              <p-tag *ngIf="plan.hasAiSearch" value="Buscador IA" severity="success" [rounded]="true" icon="pi pi-sparkles"></p-tag>
+              <p-tag *ngIf="plan.hasVisualEditor" value="Editor Visual" severity="success" [rounded]="true" icon="pi pi-palette"></p-tag>
+              <p-tag *ngIf="plan.hasChatBot" value="Chat Bot" severity="success" [rounded]="true" icon="pi pi-comment"></p-tag>
+              <p-tag *ngIf="plan.hasMarketing" value="Marketing" severity="success" [rounded]="true" icon="pi pi-megaphone"></p-tag>
+              <p-tag *ngIf="plan.hasSupportAgent" value="Soporte Agente" severity="success" [rounded]="true" icon="pi pi-headphones"></p-tag>
+              <p-tag *ngIf="plan.hasMercadoPago" value="Mercado Pago" severity="success" [rounded]="true" icon="pi pi-credit-card"></p-tag>
+              <p-tag *ngIf="plan.hasInvoiceFlexibility" value="Fact. Flexible" severity="success" [rounded]="true" icon="pi pi-receipt"></p-tag>
+              <p-tag *ngIf="plan.hasStockTransfers" value="Transferencias" severity="success" [rounded]="true" icon="pi pi-arrows-h"></p-tag>
+              <p-tag *ngIf="plan.hasModuleManagement" value="Módulos" severity="success" [rounded]="true" icon="pi pi-th-large"></p-tag>
+              <p-tag *ngIf="plan.hasWarehouse" value="Depósito" severity="success" [rounded]="true" icon="pi pi-building"></p-tag>
+              <p-tag *ngIf="!plan.hasOnlineStore" value="Sin Tienda" [rounded]="true" styleClass="bg-gray-200 text-gray-500"></p-tag>
+              <p-tag *ngIf="!plan.hasWhatsapp" value="Sin WhatsApp" [rounded]="true" styleClass="bg-gray-200 text-gray-500"></p-tag>
+              <p-tag *ngIf="!plan.hasAiDescriptions" value="Sin IA" [rounded]="true" styleClass="bg-gray-200 text-gray-500"></p-tag>
+            </div>
+            <ul class="list-none p-0 m-0 mb-3" *ngIf="plan.features?.length">
+              <li *ngFor="let f of plan.features" class="py-1 flex align-items-center gap-2 text-sm">
+                <i class="pi pi-check-circle" style="color: var(--nx-accent-green)"></i>
+                <span>{{ f }}</span>
+              </li>
+            </ul>
+            <p-divider></p-divider>
+            <div class="flex gap-2">
+              <button pButton icon="pi pi-pencil" label="Editar" class="p-button-outlined p-button-sm flex-1"
+                (click)="editPlan(plan)"></button>
+              <button pButton icon="pi pi-trash" class="p-button-outlined p-button-danger p-button-sm"
+                (click)="confirmDeletePlan(plan)"></button>
+            </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="getPlansByMode(mode).length === 0" class="nx-empty-state--sm mt-3">
+            <i class="pi pi-box"></i>
+            <p>No hay planes de este tipo</p>
+          </div>
+
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </p-tabPanel>
+</p-tabView>
+
+<!-- Dialog: Editar suscripcion -->
+<p-dialog [(visible)]="editSubDialog" [style]="{width: '480px', maxWidth: '95vw'}" [modal]="true" [draggable]="false" [resizable]="false"
+  header="Editar suscripcion" styleClass="nx-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-pencil" style="color: var(--nx-primary)"></i>
+      <span class="font-semibold text-lg">Editar suscripcion</span>
+    </div>
+    <div class="text-sm mt-1" style="color: var(--nx-text-secondary)" *ngIf="editingSub">{{ editingSub.account?.name }}</div>
+  </ng-template>
+
+  <div class="p-fluid" *ngIf="editingSub">
+    <div class="nx-summary-box mb-4">
+      <div class="flex align-items-center gap-3">
+        <div class="nx-stat-card__icon nx-stat-card__icon--primary" style="width:2.5rem;height:2.5rem">
+          <i class="pi pi-building" style="font-size: 1rem"></i>
+        </div>
+        <div class="flex-1" style="min-width: 0">
+          <div class="font-semibold">{{ editingSub.account?.name }}</div>
+          <div class="text-xs" style="color: var(--nx-text-secondary)">{{ editingSub.account?.email }}</div>
+        </div>
+        <p-tag [value]="getStatusLabel(editingSub.status)" [severity]="getStatusSeverity(editingSub.status)"></p-tag>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="nx-form-label">Plan</label>
+      <p-dropdown [(ngModel)]="editSubData.planId" [options]="plans" optionLabel="displayName" optionValue="id"
+        placeholder="Sin plan" [showClear]="true" class="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Ciclo de facturacion</label>
+      <p-dropdown [(ngModel)]="editSubData.billingCycle" [options]="billingCycleOptions" optionLabel="label"
+        optionValue="value" class="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Precio actual (ARS)</label>
+        <p-inputNumber [(ngModel)]="editSubData.currentPrice" mode="currency" currency="ARS" locale="es-AR" [min]="0"
+          class="w-full"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Meses bonificados</label>
+        <p-inputNumber [(ngModel)]="editSubData.freeMonths" [min]="0" [max]="36" suffix=" meses"
+          class="w-full"></p-inputNumber>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-outlined p-button-sm"
+      (click)="editSubDialog = false"></button>
+    <button pButton label="Guardar cambios" icon="pi pi-check" class="p-button-sm" (click)="saveSubEdit()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Nuevo Plan / Editar Plan -->
+<p-dialog [(visible)]="planDialog" [style]="{width: '520px', maxWidth: '95vw'}" [header]="isNewPlan ? 'Nuevo Plan' : 'Editar Plan'"
+  [modal]="true" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="p-fluid">
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Nombre interno *</label>
+        <input pInputText [(ngModel)]="editingPlan.name" [disabled]="!isNewPlan" placeholder="ej: profesional"
+          class="w-full" />
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Nombre visible *</label>
+        <input pInputText [(ngModel)]="editingPlan.displayName" placeholder="ej: Plan Profesional" class="w-full" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Descripcion</label>
+      <textarea pInputTextarea [(ngModel)]="editingPlan.description" rows="2" class="w-full"></textarea>
+    </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Precio mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.monthlyPrice" mode="currency" currency="ARS" locale="es-AR"
+          class="w-full"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Precio anual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.annualPrice" mode="currency" currency="ARS" locale="es-AR"
+          class="w-full"></p-inputNumber>
+      </div>
+    </div>
+    <!-- Limites de recursos -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Limites de recursos</span></p-divider>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. puntos de venta</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxSalePoints" [min]="1" class="w-full"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. usuarios</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxUsers" [min]="1" class="w-full"></p-inputNumber>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. productos</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxProducts" [min]="0" class="w-full"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. clientes</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxClients" [min]="0" class="w-full"></p-inputNumber>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. proveedores</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxSuppliers" [min]="0" class="w-full"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. ventas por mes</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxMonthlySales" [min]="0" class="w-full"></p-inputNumber>
+      </div>
+    </div>
+    <div class="nx-dialog-hint mb-3">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 99999 para ilimitado en cualquier campo numerico.</span>
+    </div>
+
+    <!-- Features -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Funcionalidades</span></p-divider>
+    <div class="grid mb-2">
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasOnlineStore"></p-inputSwitch>
+          <label class="text-sm">Tienda Online</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsapp"></p-inputSwitch>
+          <label class="text-sm">WhatsApp</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasAdvancedReports"></p-inputSwitch>
+          <label class="text-sm">Reportes</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasCompras"></p-inputSwitch>
+          <label class="text-sm">Compras</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasGastos"></p-inputSwitch>
+          <label class="text-sm">Gastos</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsappAlerts"></p-inputSwitch>
+          <label class="text-sm">Alertas WhatsApp</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasGranularPermissions"></p-inputSwitch>
+          <label class="text-sm">Gestión de Roles</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasPayroll"></p-inputSwitch>
+          <label class="text-sm">RRHH / Liquidaciones</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasTreasury"></p-inputSwitch>
+          <label class="text-sm">Tesorería</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasAiSearch"></p-inputSwitch>
+          <label class="text-sm">Buscador IA</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasVisualEditor"></p-inputSwitch>
+          <label class="text-sm">Editor Visual</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasSupportAgent"></p-inputSwitch>
+          <label class="text-sm">Soporte con Agente</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasMercadoPago"></p-inputSwitch>
+          <label class="text-sm">Mercado Pago</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasInvoiceFlexibility"></p-inputSwitch>
+          <label class="text-sm">Facturación Flexible</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasStockTransfers"></p-inputSwitch>
+          <label class="text-sm">Transferencias de Stock</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasModuleManagement"></p-inputSwitch>
+          <label class="text-sm">Gestión de Módulos</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasWarehouse"></p-inputSwitch>
+          <label class="text-sm">Depósito</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasPaymentMethodFees"></p-inputSwitch>
+          <label class="text-sm">Comisiones de Pago</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Descriptions -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Descripcion con IA</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasAiDescriptions"></p-inputSwitch>
+      <label class="text-sm">Habilitado</label>
+    </div>
+    <div class="grid" *ngIf="editingPlan.hasAiDescriptions">
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite diario</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxAiDescriptionsDaily" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxAiDescriptionsMonthly" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.hasAiDescriptions">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 0 o 99999 para ilimitado.</span>
+    </div>
+
+    <!-- AI Image Analysis -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Analisis de Producto con IA</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasAiImageAnalysis"></p-inputSwitch>
+      <label class="text-sm">Habilitado</label>
+    </div>
+    <div class="grid" *ngIf="editingPlan.hasAiImageAnalysis">
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite diario</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxDailyAiAnalysis" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxMonthlyAiAnalysis" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.hasAiImageAnalysis">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 0 o 99999 para ilimitado. Analiza fotos de productos con IA para autocompletar datos.</span>
+    </div>
+
+    <!-- Document Scan -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Escaneo de Documentos con IA</span></p-divider>
+    <div class="nx-dialog-hint mb-3">
+      <i class="pi pi-info-circle"></i>
+      <span>Cupo compartido entre escaneo de facturas (compras) y comprobantes (gastos). Usa 0 o 99999 para ilimitado.</span>
+    </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite diario</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxDailyDocumentScan" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxMonthlyDocumentScan" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+    </div>
+
+    <!-- Chat Bot -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Chat Bot</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasChatBot"></p-inputSwitch>
+      <label class="text-sm">Habilitado</label>
+    </div>
+    <div class="grid" *ngIf="editingPlan.hasChatBot">
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite diario</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxChatBotQueriesDaily" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxChatBotQueriesMonthly" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.hasChatBot">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 0 o 99999 para ilimitado. Consultas del chatbot de soporte con IA.</span>
+    </div>
+
+    <!-- Marketing -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Marketing</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasMarketing"></p-inputSwitch>
+      <label class="text-sm">Habilitado</label>
+    </div>
+    <div class="grid" *ngIf="editingPlan.hasMarketing">
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite diario IA</label>
+        <p-inputNumber [(ngModel)]="editingPlan.marketingAiDailyLimit" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+      <div class="col-6 field">
+        <label class="nx-form-label">Limite mensual IA</label>
+        <p-inputNumber [(ngModel)]="editingPlan.marketingAiMonthlyLimit" [min]="0" class="w-full"
+          placeholder="0 = sin limite"></p-inputNumber>
+      </div>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.hasMarketing">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 0 o 99999 para ilimitado. Generaciones de diseños con IA para campanas de marketing.</span>
+    </div>
+
+    <!-- Trial Period -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Periodo de prueba</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasTrialPeriod"></p-inputSwitch>
+      <label class="text-sm">Tiene periodo de prueba gratuito</label>
+    </div>
+    <div *ngIf="editingPlan.hasTrialPeriod" class="field mb-3">
+      <label class="nx-form-label">Dias de prueba</label>
+      <p-dropdown [(ngModel)]="editingPlan.trialDays"
+        [options]="[{label: '7 dias', value: 7}, {label: '14 dias', value: 14}, {label: '21 dias', value: 21}, {label: '30 dias', value: 30}]"
+        optionLabel="label" optionValue="value" class="w-full" appendTo="body"
+        placeholder="Seleccionar dias"></p-dropdown>
+    </div>
+    <div class="nx-dialog-hint mb-3">
+      <i class="pi pi-info-circle"></i>
+      <span *ngIf="editingPlan.hasTrialPeriod">El usuario podra usar la app gratis durante {{ editingPlan.trialDays }} dias. Al vencer se le cobrara el proporcional del mes.</span>
+      <span *ngIf="!editingPlan.hasTrialPeriod">Sin periodo de prueba: la cuenta se crea suspendida hasta que el usuario realice el primer pago.</span>
+    </div>
+
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Otros</span></p-divider>
+    <div class="field">
+      <div class="flex align-items-center justify-content-between mb-2">
+        <label class="nx-form-label mb-0">Caracteristicas (una por linea)</label>
+        <button pButton type="button" label="Generar automaticamente" icon="pi pi-sync"
+          class="p-button-outlined p-button-sm p-button-secondary" (click)="generateFeatures()"></button>
+      </div>
+      <textarea pInputTextarea [(ngModel)]="featuresText" rows="4" class="w-full"
+        placeholder="Una caracteristica por linea"></textarea>
+    </div>
+    <div class="flex align-items-center justify-content-between">
+      <div class="field mb-0">
+        <label class="nx-form-label">Tipo de cuenta</label>
+        <p-dropdown [(ngModel)]="editingPlan.accountMode"
+          [options]="accountModeOptions"
+          [disabled]="!isNewPlan"
+          optionLabel="label" optionValue="value"
+          placeholder="Seleccionar tipo"
+          [style]="{width: '200px'}" appendTo="body">
+        </p-dropdown>
+      </div>
+      <div class="flex align-items-center gap-2 mt-2">
+        <label class="nx-form-label" style="margin-bottom: 0">Activo</label>
+        <p-inputSwitch [(ngModel)]="editingPlan.isActive"></p-inputSwitch>
+      </div>
+      <div class="flex align-items-center gap-2 mt-2">
+        <label class="nx-form-label" style="margin-bottom: 0">Recomendado</label>
+        <p-inputSwitch [(ngModel)]="editingPlan.isRecommended"></p-inputSwitch>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-outlined p-button-sm"
+      (click)="planDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" class="p-button-sm" (click)="savePlan()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Asignar suscripcion -->
+<p-dialog [(visible)]="assignDialog" [style]="{width: '440px', maxWidth: '95vw'}" header="Asignar suscripcion" [modal]="true"
+  [draggable]="false" styleClass="nx-dialog">
+  <div class="p-fluid">
+    <div class="field" *ngIf="!assignData.accountId">
+      <label class="nx-form-label">Cuenta</label>
+      <p-dropdown [(ngModel)]="assignData.accountId" [options]="accountsWithoutSub" optionLabel="name" optionValue="id"
+        placeholder="Seleccionar cuenta" class="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Plan</label>
+      <p-dropdown [(ngModel)]="assignData.planId" [options]="plans" optionLabel="displayName" optionValue="id"
+        placeholder="Seleccionar plan" class="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Ciclo de facturacion</label>
+      <p-dropdown [(ngModel)]="assignData.billingCycle" [options]="billingCycleOptions" optionLabel="label"
+        optionValue="value" class="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Meses bonificados</label>
+      <p-inputNumber [(ngModel)]="assignData.freeMonths" [min]="0" [max]="24" suffix=" meses"
+        class="w-full"></p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-outlined p-button-sm"
+      (click)="assignDialog = false"></button>
+    <button pButton label="Crear suscripcion" icon="pi pi-check" class="p-button-sm"
+      (click)="assignSubscription()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Cancelar suscripcion -->
+<p-dialog [(visible)]="cancelDialog" [style]="{width: '380px', maxWidth: '95vw'}" header="Cancelar suscripcion" [modal]="true"
+  [draggable]="false" styleClass="nx-dialog">
+  <div class="flex align-items-start gap-3 mb-3">
+    <i class="pi pi-exclamation-triangle text-2xl mt-1" style="color: var(--nx-warning)"></i>
+    <p class="m-0" style="color: var(--nx-text-primary)">Esta accion cancelara la suscripcion. El cliente perdera acceso al finalizar el periodo
+      actual.</p>
+  </div>
+  <div class="field p-fluid">
+    <label class="nx-form-label">Motivo (opcional)</label>
+    <textarea pInputTextarea [(ngModel)]="cancelReason" rows="3" class="w-full"
+      placeholder="Ej: Solicitud del cliente, falta de pago..."></textarea>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="No cancelar" icon="pi pi-times" class="p-button-outlined p-button-sm"
+      (click)="cancelDialog = false"></button>
+    <button pButton label="Confirmar cancelacion" icon="pi pi-ban" class="p-button-danger p-button-sm"
+      (click)="confirmCancel()"></button>
+  </ng-template>
+</p-dialog>
