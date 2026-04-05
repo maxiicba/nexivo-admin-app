@@ -71,10 +71,10 @@
 <!-- Table -->
 <div class="card">
   <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="15"
-    [globalFilterFields]="['business.name','plan.displayName','status']" [rowHover]="true">
+    [globalFilterFields]="['account.name','plan.displayName','status']" [rowHover]="true">
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="business.name">Negocio <p-sortIcon field="business.name"/></th>
+        <th pSortableColumn="account.name">Negocio <p-sortIcon field="account.name"/></th>
         <th pSortableColumn="plan.displayName">Plan <p-sortIcon field="plan.displayName"/></th>
         <th>Ciclo</th>
         <th pSortableColumn="currentPrice">Precio <p-sortIcon field="currentPrice"/></th>
@@ -85,7 +85,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-sub>
       <tr>
-        <td>{{ sub.business?.name || sub.businessId }}</td>
+        <td>{{ sub.account?.name || sub.accountId }}</td>
         <td>{{ sub.plan?.displayName || '—' }}</td>
         <td>{{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</td>
         <td>{{ formatCurrency(sub.currentPrice) }}</td>
