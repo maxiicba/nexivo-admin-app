@@ -1,0 +1,629 @@
+
+<p-dialog
+  header="Crear una nueva cuenta"
+  [modal]="true"
+  [(visible)]="visible"
+  (onHide)="hideDialog('account')"
+  [style]="{ width: '40rem', maxWidth: '95vw' }"
+  styleClass="nx-dialog"
+>
+  <p-stepper [(activeStep)]="active" [linear]="true">
+    <p-stepperPanel>
+
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button
+          class="bg-transparent border-none inline-flex flex-column gap-2"
+          (click)="onClick.emit()"
+        >
+          <span
+            class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center"
+            [ngClass]="{
+                        'bg-primary border-primary': index <= active,
+                        'surface-border': index > active
+                    }"
+          >
+            <span class="material-symbols-outlined">
+                account_circle
+            </span>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-nextCallback="nextCallback">
+        <div
+          class="flex flex-column gap-2 mx-auto"
+          style="min-height: 16rem; max-width: 20rem"
+        >
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Detalles de la cuenta
+          </div>
+          <form [formGroup]="accountForm">
+            <div class="field p-fluid mt-4">
+              <p-floatLabel>
+                <input formControlName="name" pInputText id="name" type="text" placeholder="Nombre" maxlength="60"/>
+                <label for="name">Nombre de la cuenta</label>
+              </p-floatLabel>
+              <small *ngIf="(accountControls['name'].touched || accountControls['name'].dirty) && accountControls['name'].errors" class="p-error">
+                <span *ngIf="accountControls['name']?.errors?.['required']">Campo es requerido.</span>
+                <span *ngIf="accountControls['name']?.errors?.['pattern']">Solo se permiten letras y espacios.</span>
+              </small>
+
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input formControlName="email" type="text" pInputText id="email" placeholder="Email" maxlength="60" appLowercase/>
+                <label for="email">Email</label>
+              </p-floatLabel>
+              <small *ngIf="(accountControls['email'].touched || accountControls['email'].dirty) && accountControls['email'].errors" class="p-error">
+                <span *ngIf="accountControls['email']?.errors?.['required']">Campo es requerido.</span>
+                <span *ngIf="accountControls['email']?.errors?.['pattern']">Formato de correo inválido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input pKeyFilter="num" formControlName="phone" type="text" pInputText id="phone" placeholder="Teléfono" minlength="10" maxlength="10"/>
+                <label for="phone">Teléfono</label>
+              </p-floatLabel>
+              <small *ngIf="(accountControls['phone'].touched || accountControls['phone'].dirty) && accountControls['phone'].errors" class="p-error">
+                <span *ngIf="accountControls['phone']?.errors?.['required']">Teléfono es requerido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input formControlName="icon" type="text" pInputText id="icon" placeholder="URL icono (opcional)" maxlength="300"/>
+                <label for="icon">URL icono (opcional)</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <textarea formControlName="description" id="description" maxlength="500" pInputTextarea rows="3" cols="20" placeholder="Descripción"></textarea>
+                <label for="description">Descripción</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <p-dropdown formControlName="status" inputId="accountStatus" optionValue="value" [options]="statuses" placeholder="Seleccionar" appendTo="body">
+                  <ng-template pTemplate="selectedItem">
+                    <span *ngIf="accountControls['status'].value">{{ accountControls['status'].value | statusLabel }}</span>
+                  </ng-template>
+                  <ng-template let-option pTemplate="item">
+                    <p-badge [value]="option.value | statusLabel" [severity]="option.value | statusSeverity"></p-badge>
+                  </ng-template>
+                </p-dropdown>
+                <label for="status">Estado de la cuenta</label>
+              </p-floatLabel>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-4 justify-content-end">
+          <p-button [disabled]="!this.accountForm.valid" (onClick)="nextCallback.emit()" label="Siguiente" icon="pi pi-arrow-right" iconPos="right"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+
+    <p-stepperPanel>
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button class="bg-transparent border-none inline-flex flex-column gap-2" (click)="onClick.emit()">
+          <span class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center" [ngClass]="{'bg-primary border-primary': index <= active, 'surface-border': index > active}">
+            <span class="material-symbols-outlined">person</span>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback">
+        <div class="flex flex-column gap-2 mx-auto" style="min-height: 16rem; max-width: 20rem">
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Detalles de usuario propietario
+          </div>
+          <form [formGroup]="ownerUserForm">
+            <div  class="field p-fluid mt-2">
+              <p-iconField iconPosition="left">
+                <p-inputIcon styleClass="pi pi-at"></p-inputIcon>
+                <input maxlength="20" pKeyFilter="alphanum" formControlName="username" type="text" pInputText id="usernameOwner" placeholder="Nombre de usuario" appLowercase/>
+              </p-iconField>
+              <small *ngIf="(ownerUserControls['username'].touched || ownerUserControls['username'].dirty) && ownerUserControls['username'].errors" class="p-error">
+                <span *ngIf="ownerUserControls['username']?.errors?.['required']">Nombre de usuario es requerido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input maxlength="50" formControlName="email" type="text" pInputText id="emailOwner" placeholder="Email" appLowercase/>
+                <label for="emailOwner">Email</label>
+              </p-floatLabel>
+              <small *ngIf="(ownerUserControls['email'].touched || ownerUserControls['email'].dirty) && ownerUserControls['email'].errors" class="p-error">
+                <span *ngIf="ownerUserControls['email']?.errors?.['required']">Correo es requerido.</span>
+                <span *ngIf="ownerUserControls['email']?.errors?.['pattern']">Formato de correo inválido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input maxlength="50" formControlName="first_name" type="text" pInputText id="firstNameOwner" placeholder="Nombre"/>
+                <label for="firstNameOwner">Nombre</label>
+              </p-floatLabel>
+              <small *ngIf="(ownerUserControls['first_name'].touched || ownerUserControls['first_name'].dirty) && ownerUserControls['first_name'].errors" class="p-error">
+                <span *ngIf="ownerUserControls['first_name']?.errors?.['required']">Nombre es requerido.</span>
+                <span *ngIf="ownerUserControls['first_name']?.errors?.['pattern']">Formato de nombre inválido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input maxlength="50" formControlName="last_name" type="text" pInputText id="lastNameOwner" placeholder="Apellido"/>
+                <label for="lastNameOwner">Apellido</label>
+              </p-floatLabel>
+              <small *ngIf="(ownerUserControls['last_name'].touched || ownerUserControls['last_name'].dirty) && ownerUserControls['last_name'].errors" class="p-error">
+                <span *ngIf="ownerUserControls['last_name']?.errors?.['required']">Apellido es requerido.</span>
+                <span *ngIf="ownerUserControls['last_name']?.errors?.['pattern']">Formato de apellido inválido.</span>
+              </small>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-4 justify-content-between">
+          <p-button (onClick)="prevCallback.emit()" label="Atras" severity="secondary" icon="pi pi-arrow-left"></p-button>
+          <p-button [disabled]="!this.ownerUserForm.valid" (onClick)="nextCallback.emit()" label="Siguiente" icon="pi pi-arrow-right" iconPos="right"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+
+    <p-stepperPanel>
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button class="bg-transparent border-none inline-flex flex-column gap-2" (click)="onClick.emit()">
+          <span class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center" [ngClass]="{'bg-primary border-primary': index <= active, 'surface-border': index > active}">
+            <span class="material-symbols-outlined">pin_drop</span>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback">
+        <div class="flex flex-column gap-2 mx-auto" style="min-height: 16rem; max-width: 20rem">
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Detalles de punto de venta
+          </div>
+          <form [formGroup]="salePointForm">
+            <div class="field p-fluid mt-4">
+              <p-floatLabel>
+                <input maxlength="50" formControlName="name" type="text" pInputText id="salePointName" placeholder="Nombre del punto"/>
+                <label for="salePointName">Nombre del punto</label>
+              </p-floatLabel>
+              <small *ngIf="submitted && salePointControls['name'].errors" class="p-error">
+                <span *ngIf="salePointControls['name']?.errors?.['required']">Nombre del punto es requerido.</span>
+              </small>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input maxlength="50" formControlName="address" type="text" pInputText id="salePointAddress" placeholder="Dirección"/>
+                <label for="salePointAddress">Dirección</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <input pKeyFilter="num" minlength="10" maxlength="10" formControlName="phone" type="text" pInputText id="salePointPhone" placeholder="Teléfono"/>
+                <label for="salePointPhone">Teléfono</label>
+              </p-floatLabel>
+              <small *ngIf="submitted && salePointControls['phone'].errors" class="p-error">
+                <span *ngIf="salePointControls['phone']?.errors?.['required']">Teléfono es requerido.</span>
+              </small>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-4 justify-content-between">
+          <p-button (onClick)="prevCallback.emit()" label="Atras" severity="secondary" icon="pi pi-arrow-left"></p-button>
+          <p-button [disabled]="!this.salePointForm.valid" (onClick)="nextCallback.emit()" label="Siguiente" icon="pi pi-arrow-right" iconPos="right"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+
+    <!-- Step: Plan selection -->
+    <p-stepperPanel>
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button class="bg-transparent border-none inline-flex flex-column gap-2" (click)="onClick.emit()">
+          <span class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center" [ngClass]="{'bg-primary border-primary': index <= active, 'surface-border': index > active}">
+            <span class="material-symbols-outlined">credit_card</span>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback">
+        <div class="flex flex-column gap-2 mx-auto" style="min-height: 16rem; max-width: 20rem">
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Plan de suscripcion
+          </div>
+          <form [formGroup]="subscriptionForm">
+            <div class="field p-fluid mt-4">
+              <p-floatLabel>
+                <p-dropdown formControlName="planId" inputId="planSelect" [options]="plans" optionLabel="displayName" optionValue="id" placeholder="Seleccionar plan" appendTo="body"></p-dropdown>
+                <label for="planSelect">Plan</label>
+              </p-floatLabel>
+              <small *ngIf="subscriptionControls['planId'].touched && subscriptionControls['planId'].errors?.['required']" class="p-error">Plan es requerido.</small>
+            </div>
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <p-dropdown formControlName="billingCycle" inputId="billingCycleSelect" [options]="billingCycleOptions" optionLabel="label" optionValue="value" appendTo="body"></p-dropdown>
+                <label for="billingCycleSelect">Ciclo de facturacion</label>
+              </p-floatLabel>
+            </div>
+            <div class="field p-fluid mt-5">
+              <p-floatLabel>
+                <p-inputNumber formControlName="freeMonths" inputId="freeMonths" [min]="0" [max]="24"></p-inputNumber>
+                <label for="freeMonths">Meses bonificados</label>
+              </p-floatLabel>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-4 justify-content-between">
+          <p-button (onClick)="prevCallback.emit()" label="Atras" severity="secondary" icon="pi pi-arrow-left"></p-button>
+          <p-button [disabled]="!this.subscriptionForm.valid" (onClick)="nextCallback.emit()" label="Siguiente" icon="pi pi-arrow-right" iconPos="right"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+
+    <p-stepperPanel>
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button class="bg-transparent border-none inline-flex flex-column gap-2" (click)="onClick.emit()">
+          <span class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center" [ngClass]="{'bg-primary border-primary': index <= active, 'surface-border': index > active}">
+            <span class="material-symbols-outlined">checklist</span>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback">
+        <div class="flex flex-column gap-2 mx-auto" style="min-height: 16rem; max-width: 24rem">
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Resumen de la cuenta
+          </div>
+          <div class="flex flex-wrap justify-content-center gap-3">
+            <div class="card flex justify-content-center">
+              <p-accordion [activeIndex]="[0]" class="w-full" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
+                <p-accordionTab>
+                  <ng-template pTemplate="header">
+                    <span class="flex align-items-center gap-2 w-full">
+                      <span class="material-symbols-outlined">account_circle</span>
+                      <span class="font-bold white-space-nowrap">Cuenta</span>
+                    </span>
+                  </ng-template>
+                  <p class="m-0">
+                    <strong>Nombre:</strong> {{ accountControls['name'].value }}<br>
+                    <strong>Email:</strong> {{ accountControls['email'].value }}<br>
+                    <strong>Teléfono</strong> {{ accountControls['phone'].value }}<br>
+                    <strong>Icono</strong> {{ accountControls['icon'].value }}<br>
+                    <strong>Descripción</strong> {{ accountControls['description'].value }}<br>
+                    <strong>Estado</strong> {{ accountControls['status'].value }}
+                  </p>
+                </p-accordionTab>
+                <p-accordionTab>
+                  <ng-template pTemplate="header">
+                    <span class="flex align-items-center gap-2 w-full">
+                      <span class="material-symbols-outlined">person</span>
+                      <span class="font-bold white-space-nowrap">Usuario propietario</span>
+                    </span>
+                  </ng-template>
+                  <p class="m-0">
+                    <strong>Nombre de usuario:</strong> {{ ownerUserControls['username'].value }}<br>
+                    <strong>Email:</strong> {{ ownerUserControls['email'].value }}<br>
+                    <strong>Nombre:</strong> {{ ownerUserControls['first_name'].value }}<br>
+                    <strong>Apellido:</strong> {{ ownerUserControls['last_name'].value }}
+                  </p>
+                </p-accordionTab>
+                <p-accordionTab>
+                  <ng-template pTemplate="header">
+                    <span class="flex align-items-center gap-2 w-full">
+                      <span class="material-symbols-outlined">pin_drop</span>
+                      <span class="font-bold white-space-nowrap">Punto de venta</span>
+                    </span>
+                  </ng-template>
+                  <p class="m-0">
+                    <strong>Nombre del punto:</strong> {{ salePointControls['name'].value }}<br>
+                    <strong>Dirección:</strong> {{ salePointControls['address'].value }}<br>
+                    <strong>Teléfono:</strong> {{ salePointControls['phone'].value }}
+                  </p>
+                </p-accordionTab>
+                <p-accordionTab>
+                  <ng-template pTemplate="header">
+                    <span class="flex align-items-center gap-2 w-full">
+                      <span class="material-symbols-outlined">credit_card</span>
+                      <span class="font-bold white-space-nowrap">Suscripcion</span>
+                    </span>
+                  </ng-template>
+                  <p class="m-0">
+                    <strong>Plan:</strong> {{ subscriptionControls['planId'].value }}<br>
+                    <strong>Ciclo:</strong> {{ subscriptionControls['billingCycle'].value === 'annual' ? 'Anual' : 'Mensual' }}<br>
+                    <strong>Meses bonificados:</strong> {{ subscriptionControls['freeMonths'].value || 0 }}
+                  </p>
+                </p-accordionTab>
+              </p-accordion>
+            </div>
+          </div>
+        </div>
+        <div class="flex pt-4 justify-content-between">
+          <p-button [loading]="isSaving" (onClick)="prevCallback.emit()" label="Atras" severity="secondary" icon="pi pi-arrow-left"></p-button>
+          <p-button [loading]="isSaving" (onClick)="onSubmit(nextCallback)" label="Crear cuenta" icon="pi pi-check-circle" iconPos="right"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+
+    <p-stepperPanel>
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button class="bg-transparent border-none inline-flex flex-column gap-2" (click)="onClick.emit()">
+          <span class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center" [ngClass]="{'bg-primary border-primary': index <= active, 'surface-border': index > active}">
+            <i class="pi pi-id-card"></i>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-prevCallback="prevCallback">
+        <div class="flex flex-column gap-2 mx-auto" style="min-height: 16rem; max-width: 24rem">
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Cuenta creada con éxito
+          </div>
+          <div class="text-center">
+            <img alt="logo" src="https://primefaces.org/cdn/primeng/images/stepper/content.svg"/>
+          </div>
+        </div>
+        <div class="flex pt-4 justify-content-start">
+          <p-button (onClick)="closeModal()" label="Cerrar" severity="secondary" icon="pi pi-times-circle"></p-button>
+        </div>
+      </ng-template>
+    </p-stepperPanel>
+  </p-stepper>
+</p-dialog>
+
+<!-- Page Header -->
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero">
+          <i class="pi pi-building"></i>
+        </div>
+
+        <div>
+          <span class="nx-page-kicker">Nexivo SuperAdmin</span>
+
+          <h2 class="nx-page-header__title m-0">Administrar Cuentas</h2>
+
+          <p class="nx-page-header__subtitle m-0">
+            Gestiona las cuentas de tus clientes
+          </p>
+        </div>
+      </div>
+
+      <div class="nx-page-header__actions">
+        <button pButton class="p-button-rounded nx-hero-action nx-hero-action--modern"
+          (click)="showDialog1()">
+          <span class="nx-hero-action__icon">
+            <i class="pi pi-plus"></i>
+          </span>
+          <span class="nx-hero-action__label">Nueva Cuenta</span>
+        </button>
+        <button pButton class="p-button-rounded nx-hero-action nx-hero-action--secondary"
+          (click)="dt.exportCSV()">
+          <span class="nx-hero-action__icon">
+            <i class="pi pi-upload"></i>
+          </span>
+          <span class="nx-hero-action__label">Exportar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="card">
+  <p-toast></p-toast>
+  <div class="nx-filter-bar">
+    <span class="p-input-icon-left flex-1">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." class="w-full"/>
+    </span>
+    <div class="flex gap-2 sm:hidden">
+      <button pButton icon="pi pi-plus" class="p-button-rounded p-button-sm" (click)="showDialog1()" pTooltip="Nueva cuenta"></button>
+      <button pButton icon="pi pi-upload" class="p-button-outlined p-button-rounded p-button-sm" (click)="dt.exportCSV()" pTooltip="Exportar"></button>
+    </div>
+  </div>
+
+  <p-table #dt [value]="accounts" [columns]="cols" responsiveLayout="scroll" [rows]="10"
+    [globalFilterFields]="['name','country.name','representative.name','status']" [paginator]="true"
+    [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} registros"
+    [(selection)]="selectedAccounts" selectionMode="multiple" [rowHover]="true" dataKey="id"
+    styleClass="p-datatable-sm">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 50px"></th>
+        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="description">Descripción <p-sortIcon field="description"></p-sortIcon></th>
+        <th pSortableColumn="email">Correo <p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="phone">Teléfono <p-sortIcon field="phone"></p-sortIcon></th>
+        <th pSortableColumn="ownerUsername">Propietario <p-sortIcon field="ownerUsername"></p-sortIcon></th>
+        <th pSortableColumn="status">Estado <p-sortIcon field="status"></p-sortIcon></th>
+        <th style="width: 80px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-account>
+      <tr>
+        <td>
+          <img *ngIf="account.icon && !account._iconError" [src]="account.icon" style="height: 40px; width: 40px; border-radius: 8px; object-fit: cover;" alt="logo" (error)="account._iconError = true">
+          <p-avatar *ngIf="!account.icon || account._iconError" [label]="account.name?.charAt(0)?.toUpperCase()" shape="square" size="large" [style]="{'background-color': getAvatarColor(account.name), 'color': '#ffffff', 'border-radius': '8px'}"></p-avatar>
+        </td>
+        <td>
+          <span class="font-medium">{{ account.name }}</span>
+        </td>
+        <td>
+          <span class="nx-cell-date">{{ account.description }}</span>
+        </td>
+        <td>
+          <span class="nx-cell-date">{{ account.email }}</span>
+        </td>
+        <td>
+          <span class="nx-cell-date">{{ account.phone }}</span>
+        </td>
+        <td>
+          <p-chip styleClass="pl-0 pr-3">
+            <span class="bg-primary border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+              {{ getOwnerUsername(account) | slice:0:1 | uppercase }}
+            </span>
+            <span class="ml-2 font-medium">{{ getOwnerUsername(account) | titlecase }}</span>
+          </p-chip>
+        </td>
+        <td>
+          <p-badge [value]="account.status | statusLabel" [severity]="account.status | statusSeverity"></p-badge>
+        </td>
+        <td>
+          <button pButton [outlined]="true" severity="contrast" pRipple icon="pi pi-pencil"
+            class="p-button-rounded p-button-sm mr-2" (click)="editAccount(account)"></button>
+          <button pButton
+            [outlined]="true"
+            severity="warning"
+            pRipple
+            icon="pi pi-undo"
+            pTooltip="Cancelar eliminación"
+            tooltipPosition="top"
+            class="p-button-rounded p-button-sm mr-2"
+            *ngIf="account.status === 'pending_deletion'"
+            (click)="cancelDeletion(account)">
+          </button>
+          <button pButton [outlined]="true" severity="danger" pRipple icon="pi pi-trash"
+            class="p-button-rounded p-button-sm" (click)="deleteAccount(account)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="nx-table-empty">
+          <i class="pi pi-inbox"></i>
+          <span>No hay cuentas registradas</span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Edit Account Dialog -->
+<p-dialog [(visible)]="accountDialog" [style]="{width: '450px', maxWidth: '95vw'}" header="Detalle de cuenta" [modal]="true"
+  class="p-fluid" styleClass="nx-dialog">
+  <ng-template pTemplate="content">
+    <div class="field">
+      <label for="name" class="nx-form-label">Nombre</label>
+      <input type="text" pInputText id="name" [(ngModel)]="account.name" #nameModel="ngModel" maxlength="255"
+        required pattern="^[a-zA-ZÀ-ÿ\s]+$">
+      <small *ngIf="submitted && !account.name" class="p-error">Campo es requerido.</small>
+      <small *ngIf="nameModel?.invalid && nameModel?.errors?.['pattern']" class="p-error">Solo se permiten letras y espacios.</small>
+    </div>
+    <div class="field">
+      <label for="email" class="nx-form-label">Correo</label>
+      <input type="text" pInputText id="email" [(ngModel)]="account.email" #emailModel="ngModel"
+        required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" appLowercase>
+      <small *ngIf="submitted && !account.email" class="p-error">Correo es requerido.</small>
+      <small *ngIf="emailModel?.invalid && emailModel?.errors?.['pattern']" class="p-error">Formato de correo inválido.</small>
+    </div>
+    <div class="field">
+      <label for="phone" class="nx-form-label">Teléfono</label>
+      <input type="text" maxlength="10" pInputText id="phone" [(ngModel)]="account.phone" required>
+      <small class="p-error" *ngIf="submitted && !account.phone">Teléfono es requerido.</small>
+    </div>
+    <div class="field">
+      <label for="icon" class="nx-form-label">URL icono (opcional)</label>
+      <input type="text" maxlength="900" pInputText id="icon" [(ngModel)]="account.icon">
+    </div>
+    <div class="field">
+      <label for="description" class="nx-form-label">Descripción</label>
+      <textarea id="description" pInputTextarea [(ngModel)]="account.description" maxlength="600" required rows="3" cols="20"></textarea>
+    </div>
+    <div class="field">
+      <label for="status" class="nx-form-label">Estado de la cuenta</label>
+      <p-dropdown [(ngModel)]="account.status" inputId="accountStatus" optionValue="value" [options]="statuses" placeholder="Seleccionar" appendTo="body">
+        <ng-template pTemplate="selectedItem">
+          <span *ngIf="account.status">{{ account.status | statusLabel }}</span>
+        </ng-template>
+        <ng-template let-option pTemplate="item">
+          <p-badge [value]="option.value | statusLabel" [severity]="option.value | statusSeverity"></p-badge>
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog('account')"></button>
+    <p-button label="Guardar" icon="pi pi-plus-circle" [loading]="isSaving" (onClick)="saveAccount()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation -->
+<p-dialog [(visible)]="deleteaccountDialog" header="Confirmar" [modal]="true" [style]="{width:'450px', maxWidth: '95vw'}" styleClass="nx-dialog">
+  <div class="flex align-items-center justify-content-center gap-3 py-3">
+    <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--nx-warning)"></i>
+    <span *ngIf="account">¿Estás seguro de que quieres eliminar <b>{{account.name}}</b>?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteaccountDialog = false"></button>
+    <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Si" (click)="confirmDelete()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="deleteAccountsDialog" header="Confirmar" [modal]="true" [style]="{width:'450px', maxWidth: '95vw'}" styleClass="nx-dialog">
+  <div class="flex align-items-center justify-content-center gap-3 py-3">
+    <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--nx-warning)"></i>
+    <span>¿Está seguro de que quiere eliminar las cuentas seleccionadas?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteAccountsDialog = false"></button>
+    <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Si" (click)="confirmDeleteSelected()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Owner User Dialog -->
+<p-dialog [(visible)]="accountOwnerDialog" [style]="{width: '450px', maxWidth: '95vw'}" header="Crear usuario" [modal]="true"
+  class="p-fluid" styleClass="nx-dialog">
+  <ng-template pTemplate="content">
+    <label class="nx-form-label mb-3">Datos de usuario</label>
+    <div class="flex flex-column gap-2">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-at"></i></span>
+        <input type="text" pInputText id="usernameOwner" [(ngModel)]="ownerUser.username"
+          placeholder="Nombre de usuario" required appLowercase
+          [ngClass]="{'ng-invalid ng-dirty': submitted && !ownerUser.username}">
+      </div>
+      <small *ngIf="submitted && !ownerUser.username" class="p-error">Nombre de usuario es requerido</small>
+    </div>
+
+    <div class="flex flex-column gap-2 mt-3">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-envelope"></i></span>
+        <input type="text" pInputText id="emailOwner" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+          [(ngModel)]="ownerUser.email" placeholder="Correo electrónico" required appLowercase
+          [ngClass]="{'ng-invalid ng-dirty': submitted && !ownerUser.email}">
+      </div>
+      <small *ngIf="submitted && !ownerUser.email" class="p-error">Correo Electrónico es requerido</small>
+    </div>
+
+    <label class="nx-form-label mt-4 mb-3">Datos personales</label>
+    <div class="flex flex-column gap-2">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+        <input type="text" pInputText id="firstNameOwner" maxlength="40" pattern="^[a-zA-ZÀ-ÿ\s]+$"
+          [(ngModel)]="ownerUser.first_name" placeholder="Nombre" required
+          [ngClass]="{'ng-invalid ng-dirty': submitted && !ownerUser.first_name}">
+      </div>
+      <small *ngIf="submitted && !ownerUser.first_name" class="p-error">Nombre es requerido</small>
+    </div>
+
+    <div class="flex flex-column gap-2 mt-3">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+        <input type="text" pInputText id="lastNameOwner" maxlength="40" pattern="^[a-zA-ZÀ-ÿ\s]+$"
+          [(ngModel)]="ownerUser.last_name" placeholder="Apellido" required
+          [ngClass]="{'ng-invalid ng-dirty': submitted && !ownerUser.last_name}">
+      </div>
+      <small *ngIf="submitted && !ownerUser.last_name" class="p-error">Apellido es requerido</small>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog('userOwner')"></button>
+    <button pButton pRipple label="Guardar" icon="pi pi-check" (click)="saveOwneruser()"></button>
+  </ng-template>
+</p-dialog>

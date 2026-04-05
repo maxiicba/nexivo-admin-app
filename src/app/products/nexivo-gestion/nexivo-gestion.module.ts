@@ -17,6 +17,10 @@ import { RouterModule } from '@angular/router';
         path: 'panel-admin',
         loadComponent: () => import('./panel-admin/panel-admin.component').then(m => m.PanelAdminComponent),
       },
+      {
+        path: 'accounts',
+        loadComponent: () => import('./accounts/accounts.component').then(m => m.AccountsComponent),
+      },
     ]),
   ],
 })
