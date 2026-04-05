@@ -1,0 +1,133 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero"><i class="pi pi-calendar"></i></div>
+        <div>
+          <span class="nx-page-kicker">Nexivo Turnos</span>
+          <h2 class="nx-page-header__title m-0">Suscripciones</h2>
+          <p class="nx-page-header__subtitle m-0">Gestión de planes y suscripciones de negocios</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KPIs -->
+<div class="grid mb-3">
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--blue"><i class="pi pi-users"></i></div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.total }}</span>
+        <span class="nx-stat-card__label">Total</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--green"><i class="pi pi-dollar"></i></div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ formatCurrency(stats.mrr) }}</span>
+        <span class="nx-stat-card__label">MRR</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--cyan"><i class="pi pi-check-circle"></i></div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.byStatus?.active }}</span>
+        <span class="nx-stat-card__label">Activas</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--orange"><i class="pi pi-clock"></i></div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ stats.byStatus?.trialing }}</span>
+        <span class="nx-stat-card__label">Trial</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status chips -->
+<div class="card mb-3 p-3">
+  <div class="flex flex-wrap gap-2 align-items-center">
+    <span class="text-sm font-medium mr-2">Estado:</span>
+    <p-tag value="Prueba: {{ stats.byStatus?.trialing }}" severity="info" [rounded]="true"></p-tag>
+    <p-tag value="Activas: {{ stats.byStatus?.active }}" severity="success" [rounded]="true"></p-tag>
+    <p-tag value="Vencidas: {{ stats.byStatus?.past_due }}" severity="warning" [rounded]="true"></p-tag>
+    <p-tag value="Suspendidas: {{ stats.byStatus?.suspended }}" severity="danger" [rounded]="true"></p-tag>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="15"
+    [globalFilterFields]="['business.name','plan.displayName','status']" [rowHover]="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="business.name">Negocio <p-sortIcon field="business.name"/></th>
+        <th pSortableColumn="plan.displayName">Plan <p-sortIcon field="plan.displayName"/></th>
+        <th>Ciclo</th>
+        <th pSortableColumn="currentPrice">Precio <p-sortIcon field="currentPrice"/></th>
+        <th pSortableColumn="status">Estado <p-sortIcon field="status"/></th>
+        <th>Período actual</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-sub>
+      <tr>
+        <td>{{ sub.business?.name || sub.businessId }}</td>
+        <td>{{ sub.plan?.displayName || '—' }}</td>
+        <td>{{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</td>
+        <td>{{ formatCurrency(sub.currentPrice) }}</td>
+        <td><p-tag [value]="sub.status" [severity]="getStatusSeverity(sub.status)" /></td>
+        <td class="text-sm">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
+        <td>
+          <div class="flex gap-1">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="openEdit(sub)" pTooltip="Editar"></button>
+            <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="openCancel(sub)" pTooltip="Cancelar"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Edit dialog -->
+<p-dialog [(visible)]="editDialog" header="Editar suscripción" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2" *ngIf="editingSub">
+    <div>
+      <label class="block mb-1 font-medium">Plan</label>
+      <p-dropdown [options]="plans" [(ngModel)]="editData.planId" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Ciclo</label>
+      <p-dropdown [options]="billingCycleOptions" [(ngModel)]="editData.billingCycle" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="editDialog = false"></button>
+    <button pButton label="Guardar" [loading]="saving" (click)="saveEdit()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Cancel dialog -->
+<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true" [style]="{width: '400px'}">
+  <div class="py-2">
+    <label class="block mb-1 font-medium">Motivo de cancelación</label>
+    <input pInputText [(ngModel)]="cancelReason" placeholder="Motivo..." class="w-full">
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="cancelDialog = false"></button>
+    <button pButton label="Confirmar cancelación" class="p-button-danger" [loading]="saving" (click)="confirmCancel()"></button>
+  </ng-template>
+</p-dialog>
