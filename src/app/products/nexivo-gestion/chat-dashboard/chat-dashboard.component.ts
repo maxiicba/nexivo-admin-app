@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
@@ -19,8 +18,8 @@ import { TableModule } from 'primeng/table';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ChatService } from '../services/chat.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { AccountsService } from '../services/accounts.service';
 import { Conversation, ChatMessage, SupportAgent, Ticket, ChatStats } from '../interfaces/chat.interface';
-import { environment } from '../../../../environments/environment';
 
 const BOT_NAME = 'Nexivo Bot';
 
@@ -95,7 +94,7 @@ export class ChatDashboardComponent implements OnInit {
   constructor(
     private chatService: ChatService,
     private authService: AuthService,
-    private http: HttpClient,
+    private accountsService: AccountsService,
   ) {}
 
   ngOnInit(): void {
@@ -173,83 +172,105 @@ export class ChatDashboardComponent implements OnInit {
     this.loading = true;
 
     if (this.isSuperAdmin) {
-      this.chatService.getStats().subscribe({
-        next: (stats) => this.stats = stats,
-        error: (err) => console.error('[ChatDashboard] getStats error', err),
-      });
-      this.chatService.getSupportAgents().subscribe({
-        next: (agents) => this.agents = agents,
-        error: (err) => console.error('[ChatDashboard] getSupportAgents error', err),
-      });
-      this.chatService.getAgentConversations().subscribe({
-        next: (convs) => {
-          this.conversations = convs;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('[ChatDashboard] getAgentConversations error', err);
-          this.loading = false;
-        },
-      });
-      this.chatService.getUnassignedConversations().subscribe({
-        next: (convs) => this.unassignedConversations = convs,
-        error: (err) => console.error('[ChatDashboard] getUnassignedConversations error', err),
-      });
+      this.chatService.getStats()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (stats) => this.stats = stats,
+          error: (err) => console.error('[ChatDashboard] getStats error', err),
+        });
+      this.chatService.getSupportAgents()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (agents) => this.agents = agents,
+          error: (err) => console.error('[ChatDashboard] getSupportAgents error', err),
+        });
+      this.chatService.getAgentConversations()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (convs) => {
+            this.conversations = convs;
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('[ChatDashboard] getAgentConversations error', err);
+            this.loading = false;
+          },
+        });
+      this.chatService.getUnassignedConversations()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (convs) => this.unassignedConversations = convs,
+          error: (err) => console.error('[ChatDashboard] getUnassignedConversations error', err),
+        });
     } else if (this.isSupportAgent) {
-      this.chatService.getAgentConversations().subscribe({
-        next: (convs) => {
-          this.conversations = convs;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('[ChatDashboard] getAgentConversations error', err);
-          this.loading = false;
-        },
-      });
-      this.chatService.getUnassignedConversations().subscribe({
-        next: (convs) => this.unassignedConversations = convs,
-        error: (err) => console.error('[ChatDashboard] getUnassignedConversations error', err),
-      });
+      this.chatService.getAgentConversations()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (convs) => {
+            this.conversations = convs;
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('[ChatDashboard] getAgentConversations error', err);
+            this.loading = false;
+          },
+        });
+      this.chatService.getUnassignedConversations()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (convs) => this.unassignedConversations = convs,
+          error: (err) => console.error('[ChatDashboard] getUnassignedConversations error', err),
+        });
     }
   }
 
   refreshConversations(): void {
     if (this.isSuperAdmin || this.isSupportAgent) {
-      this.chatService.getAgentConversations().subscribe({
-        next: (convs) => this.conversations = convs,
-        error: (err) => console.error('[ChatDashboard] refreshConversations error', err),
-      });
+      this.chatService.getAgentConversations()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (convs) => this.conversations = convs,
+          error: (err) => console.error('[ChatDashboard] refreshConversations error', err),
+        });
     }
-    this.chatService.getUnassignedConversations().subscribe({
-      next: (convs) => this.unassignedConversations = convs,
-      error: (err) => console.error('[ChatDashboard] getUnassigned error', err),
-    });
-    if (this.isSuperAdmin) {
-      this.chatService.getStats().subscribe({
-        next: (stats) => this.stats = stats,
-        error: (err) => console.error('[ChatDashboard] getStats error', err),
+    this.chatService.getUnassignedConversations()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (convs) => this.unassignedConversations = convs,
+        error: (err) => console.error('[ChatDashboard] getUnassigned error', err),
       });
+    if (this.isSuperAdmin) {
+      this.chatService.getStats()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (stats) => this.stats = stats,
+          error: (err) => console.error('[ChatDashboard] getStats error', err),
+        });
     }
   }
 
   selectConversation(conv: Conversation): void {
     this.activeConversation = conv;
     this.chatService.setActiveConversation(conv);
-    this.chatService.getTicketsByConversation(conv.id).subscribe({
-      next: (tickets) => this.tickets = tickets,
-      error: (err) => console.error('[ChatDashboard] getTickets error', err),
-    });
+    this.chatService.getTicketsByConversation(conv.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tickets) => this.tickets = tickets,
+        error: (err) => console.error('[ChatDashboard] getTickets error', err),
+      });
   }
 
   takeConversation(conv: Conversation): void {
-    this.chatService.takeConversation(conv.id).subscribe({
-      next: (updated) => {
-        this.unassignedConversations = this.unassignedConversations.filter(c => c.id !== conv.id);
-        this.conversations = [updated, ...this.conversations];
-        this.selectConversation(updated);
-      },
-      error: (err) => console.error('[ChatDashboard] takeConversation error', err),
-    });
+    this.chatService.takeConversation(conv.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.unassignedConversations = this.unassignedConversations.filter(c => c.id !== conv.id);
+          this.conversations = [updated, ...this.conversations];
+          this.selectConversation(updated);
+        },
+        error: (err) => console.error('[ChatDashboard] takeConversation error', err),
+      });
   }
 
   closeConversation(): void {
@@ -282,22 +303,26 @@ export class ChatDashboardComponent implements OnInit {
 
   createTicket(): void {
     if (!this.activeConversation || !this.ticketSubject.trim()) return;
-    this.chatService.createTicket(this.activeConversation.id, this.ticketSubject, this.ticketPriority).subscribe({
-      next: (ticket) => {
-        this.tickets = [ticket, ...this.tickets];
-        this.showTicketDialog = false;
-      },
-      error: (err) => console.error('[ChatDashboard] createTicket error', err),
-    });
+    this.chatService.createTicket(this.activeConversation.id, this.ticketSubject, this.ticketPriority)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (ticket) => {
+          this.tickets = [ticket, ...this.tickets];
+          this.showTicketDialog = false;
+        },
+        error: (err) => console.error('[ChatDashboard] createTicket error', err),
+      });
   }
 
   resolveTicket(ticket: Ticket): void {
-    this.chatService.updateTicket(ticket.id, { status: 'resolved' }).subscribe({
-      next: (updated) => {
-        this.tickets = this.tickets.map(t => t.id === updated.id ? updated : t);
-      },
-      error: (err) => console.error('[ChatDashboard] resolveTicket error', err),
-    });
+    this.chatService.updateTicket(ticket.id, { status: 'resolved' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.tickets = this.tickets.map(t => t.id === updated.id ? updated : t);
+        },
+        error: (err) => console.error('[ChatDashboard] resolveTicket error', err),
+      });
   }
 
   getSenderLabel(msg: ChatMessage): string {
@@ -343,13 +368,15 @@ export class ChatDashboardComponent implements OnInit {
     if (this.ticketStatusFilter) params.status = this.ticketStatusFilter;
     if (this.ticketPriorityFilter) params.priority = this.ticketPriorityFilter;
 
-    this.chatService.getAllTickets(params).subscribe({
-      next: (res) => {
-        this.allTickets = res.data;
-        this.totalTickets = res.total;
-      },
-      error: (err) => console.error('[ChatDashboard] getAllTickets error', err),
-    });
+    this.chatService.getAllTickets(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.allTickets = res.data;
+          this.totalTickets = res.total;
+        },
+        error: (err) => console.error('[ChatDashboard] getAllTickets error', err),
+      });
   }
 
   onTicketPageChange(event: any): void {
@@ -365,22 +392,26 @@ export class ChatDashboardComponent implements OnInit {
 
   viewTicketConversation(ticket: any): void {
     if (ticket.conversationId) {
-      this.chatService.getConversation(ticket.conversationId).subscribe({
-        next: (conv) => this.selectConversation(conv),
-        error: (err) => console.error('[ChatDashboard] getConversation error', err),
-      });
+      this.chatService.getConversation(ticket.conversationId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (conv) => this.selectConversation(conv),
+          error: (err) => console.error('[ChatDashboard] getConversation error', err),
+        });
     }
   }
 
   // New conversation (superadmin)
   loadAllAccounts(): void {
-    this.http.get<any[]>(`${environment.managementApiUrl}/accounts`, { withCredentials: true }).subscribe({
-      next: (accounts) => {
-        this.allAccounts = accounts;
-        this.filteredAccounts = accounts;
-      },
-      error: (err) => console.error('[ChatDashboard] loadAllAccounts error', err),
-    });
+    this.accountsService.getAccounts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (accounts) => {
+          this.allAccounts = accounts;
+          this.filteredAccounts = accounts;
+        },
+        error: (err) => console.error('[Chat] Failed to load accounts:', err),
+      });
   }
 
   filterAccounts(event: any): void {
@@ -403,14 +434,16 @@ export class ChatDashboardComponent implements OnInit {
     if (!this.selectedAccount || !this.newConversationMessage.trim()) return;
     const accountId = this.selectedAccount.id || this.selectedAccount;
 
-    this.chatService.initiateConversation(accountId, this.newConversationMessage).subscribe({
-      next: (res) => {
-        this.showNewConversationDialog = false;
-        this.selectConversation(res.conversation);
-        this.refreshConversations();
-      },
-      error: (err) => console.error('[ChatDashboard] initiateConversation error', err),
-    });
+    this.chatService.initiateConversation(accountId, this.newConversationMessage)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.showNewConversationDialog = false;
+          this.selectConversation(res.conversation);
+          this.refreshConversations();
+        },
+        error: (err) => console.error('[ChatDashboard] initiateConversation error', err),
+      });
   }
 
   private scrollToBottom(): void {

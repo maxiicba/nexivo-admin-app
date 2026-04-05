@@ -110,24 +110,26 @@ export class ChatConfigComponent implements OnInit {
 
   saveAgent(): void {
     this.savingAgent = true;
-    this.chatService.createSupportAgent(this.agentForm).subscribe({
-      next: (agent: any) => {
-        this.agents = [...this.agents, agent];
-        this.showAgentDialog = false;
-        this.savingAgent = false;
-        if (agent.tempPassword) {
-          this.createdAgentEmail = this.agentForm.email;
-          this.createdAgentPassword = agent.tempPassword;
-          this.showCredentialsDialog = true;
-        } else {
-          this.messageService.add({ severity: 'success', summary: 'Agente creado', detail: `${agent.displayName} fue creado exitosamente` });
-        }
-      },
-      error: (err) => {
-        this.savingAgent = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear agente' });
-      },
-    });
+    this.chatService.createSupportAgent(this.agentForm)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (agent: any) => {
+          this.agents = [...this.agents, agent];
+          this.showAgentDialog = false;
+          this.savingAgent = false;
+          if (agent.tempPassword) {
+            this.createdAgentEmail = this.agentForm.email;
+            this.createdAgentPassword = agent.tempPassword;
+            this.showCredentialsDialog = true;
+          } else {
+            this.messageService.add({ severity: 'success', summary: 'Agente creado', detail: `${agent.displayName} fue creado exitosamente` });
+          }
+        },
+        error: (err) => {
+          this.savingAgent = false;
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear agente' });
+        },
+      });
   }
 
   deleteAgent(agent: SupportAgent): void {
@@ -138,16 +140,18 @@ export class ChatConfigComponent implements OnInit {
       acceptLabel: 'Si',
       rejectLabel: 'No',
       accept: () => {
-        this.chatService.deleteSupportAgent(agent.id).subscribe({
-          next: () => {
-            this.agents = this.agents.filter(a => a.id !== agent.id);
-            this.messageService.add({ severity: 'success', summary: 'Agente desactivado' });
-          },
-          error: (err) => {
-            console.error('[ChatConfig] deleteAgent error', err);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al desactivar agente' });
-          },
-        });
+        this.chatService.deleteSupportAgent(agent.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.agents = this.agents.filter(a => a.id !== agent.id);
+              this.messageService.add({ severity: 'success', summary: 'Agente desactivado' });
+            },
+            error: (err) => {
+              console.error('[ChatConfig] deleteAgent error', err);
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al desactivar agente' });
+            },
+          });
       },
     });
   }
@@ -164,16 +168,18 @@ export class ChatConfigComponent implements OnInit {
   // --- Cache ---
   clearBotCache(): void {
     this.clearingCache = true;
-    this.chatService.clearBotCache().subscribe({
-      next: (res) => {
-        this.clearingCache = false;
-        this.messageService.add({ severity: 'success', summary: 'Cache limpiado', detail: res.message });
-      },
-      error: () => {
-        this.clearingCache = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo limpiar el cache' });
-      },
-    });
+    this.chatService.clearBotCache()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.clearingCache = false;
+          this.messageService.add({ severity: 'success', summary: 'Cache limpiado', detail: res.message });
+        },
+        error: () => {
+          this.clearingCache = false;
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo limpiar el cache' });
+        },
+      });
   }
 
   // --- FAQ ---
@@ -202,34 +208,38 @@ export class ChatConfigComponent implements OnInit {
       keywords: this.faqForm.keywords.split(',').map(k => k.trim()).filter(k => k),
       isGlobal: this.faqForm.isGlobal,
     };
-    this.chatService.createFaqEntry(data).subscribe({
-      next: (entry) => {
-        this.faqEntries = [...this.faqEntries, entry];
-        this.showFaqDialog = false;
-        this.savingFaq = false;
-        this.messageService.add({ severity: 'success', summary: 'FAQ creada' });
-      },
-      error: () => {
-        this.savingFaq = false;
-        this.messageService.add({ severity: 'error', summary: 'Error al crear FAQ' });
-      },
-    });
+    this.chatService.createFaqEntry(data)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (entry) => {
+          this.faqEntries = [...this.faqEntries, entry];
+          this.showFaqDialog = false;
+          this.savingFaq = false;
+          this.messageService.add({ severity: 'success', summary: 'FAQ creada' });
+        },
+        error: () => {
+          this.savingFaq = false;
+          this.messageService.add({ severity: 'error', summary: 'Error al crear FAQ' });
+        },
+      });
   }
 
   deleteFaq(entry: ChatFaqEntry): void {
     this.confirmationService.confirm({
       message: 'Eliminar esta entrada de FAQ?',
       accept: () => {
-        this.chatService.deleteFaqEntry(entry.id).subscribe({
-          next: () => {
-            this.faqEntries = this.faqEntries.filter(e => e.id !== entry.id);
-            this.messageService.add({ severity: 'success', summary: 'FAQ eliminada' });
-          },
-          error: (err) => {
-            console.error('[ChatConfig] deleteFaq error', err);
-            this.messageService.add({ severity: 'error', summary: 'Error al eliminar FAQ' });
-          },
-        });
+        this.chatService.deleteFaqEntry(entry.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.faqEntries = this.faqEntries.filter(e => e.id !== entry.id);
+              this.messageService.add({ severity: 'success', summary: 'FAQ eliminada' });
+            },
+            error: (err) => {
+              console.error('[ChatConfig] deleteFaq error', err);
+              this.messageService.add({ severity: 'error', summary: 'Error al eliminar FAQ' });
+            },
+          });
       },
     });
   }
@@ -284,21 +294,23 @@ export class ChatConfigComponent implements OnInit {
   saveReview(): void {
     if (!this.reviewingQuestion) return;
     this.savingReview = true;
-    this.chatService.markAsReviewed(this.reviewingQuestion.id, this.reviewNotes).subscribe({
-      next: () => {
-        this.reviewingQuestion.isReviewed = true;
-        this.reviewingQuestion.reviewNotes = this.reviewNotes;
-        this.showReviewDialog = false;
-        this.savingReview = false;
-        this.messageService.add({ severity: 'success', summary: 'Marcada como revisada' });
-        if (this.unansweredFilter === 'pending') {
-          this.unansweredQuestions = this.unansweredQuestions.filter(q => q.id !== this.reviewingQuestion.id);
-        }
-      },
-      error: () => {
-        this.savingReview = false;
-        this.messageService.add({ severity: 'error', summary: 'Error al marcar como revisada' });
-      },
-    });
+    this.chatService.markAsReviewed(this.reviewingQuestion.id, this.reviewNotes)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.reviewingQuestion.isReviewed = true;
+          this.reviewingQuestion.reviewNotes = this.reviewNotes;
+          this.showReviewDialog = false;
+          this.savingReview = false;
+          this.messageService.add({ severity: 'success', summary: 'Marcada como revisada' });
+          if (this.unansweredFilter === 'pending') {
+            this.unansweredQuestions = this.unansweredQuestions.filter(q => q.id !== this.reviewingQuestion.id);
+          }
+        },
+        error: () => {
+          this.savingReview = false;
+          this.messageService.add({ severity: 'error', summary: 'Error al marcar como revisada' });
+        },
+      });
   }
 }
