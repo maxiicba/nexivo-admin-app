@@ -22,11 +22,17 @@ export class AppMenuComponent implements OnInit {
         items: PRODUCTS.map(p => ({
           label: p.label,
           icon: p.icon,
-          items: [
-            { label: 'Suscripciones', icon: 'pi pi-list', routerLink: [`${p.routePath}/subscriptions`] },
-            { label: 'Planes', icon: 'pi pi-tag', routerLink: [`${p.routePath}/plans`] },
-          ]
-        }))
+          items: p.menuItems
+            ? p.menuItems.map(item => ({
+                label: item.label,
+                icon: item.icon,
+                routerLink: [`${p.routePath}/${item.routeSuffix}`],
+              }))
+            : [
+                { label: 'Suscripciones', icon: 'pi pi-list', routerLink: [`${p.routePath}/subscriptions`] },
+                { label: 'Planes',        icon: 'pi pi-tag',  routerLink: [`${p.routePath}/plans`] },
+              ],
+        })),
       }
     ];
   }
