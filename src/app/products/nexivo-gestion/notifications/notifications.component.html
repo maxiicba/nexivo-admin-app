@@ -1,0 +1,292 @@
+<p-toast></p-toast>
+
+<div class="send-notif-container">
+
+  <!-- Header -->
+  <section class="nx-hero-section">
+    <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+    <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+    <div class="nx-hero-section__content">
+      <div class="nx-page-header nx-page-header--hero">
+        <div class="nx-page-header__left">
+          <div class="nx-page-header__icon nx-page-header__icon--hero">
+            <i class="pi pi-send"></i>
+          </div>
+
+          <div>
+            <span class="nx-page-kicker">Nexivo SuperAdmin</span>
+
+            <div class="flex align-items-center flex-wrap gap-2">
+              <h2 class="nx-page-header__title m-0">Enviar Notificaciones</h2>
+            </div>
+
+            <p class="nx-page-header__subtitle m-0">Envia notificaciones a cuentas, roles o usuarios especificos</p>
+          </div>
+        </div>
+
+        <div class="nx-page-header__actions">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid mt-3">
+
+    <!-- Form -->
+    <div class="col-12 lg:col-7">
+      <div class="form-card">
+
+        <!-- Send mode -->
+        <div class="field">
+          <label for="sendMode">Alcance del envio *</label>
+          <p-dropdown id="sendMode"
+                      [options]="sendModes"
+                      [(ngModel)]="sendMode"
+                      (onChange)="onSendModeChange()"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="w-full">
+            <ng-template let-item pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                <i [class]="item.icon"></i>
+                <span>{{ item.label }}</span>
+              </div>
+            </ng-template>
+          </p-dropdown>
+        </div>
+
+        <!-- All active badge -->
+        <div class="broadcast-badge" *ngIf="sendMode === 'all'">
+          <i class="pi pi-globe"></i>
+          <span>Se enviara a <strong>{{ activeAccountCount }}</strong> cuentas activas</span>
+        </div>
+
+        <!-- Multi-select accounts -->
+        <div class="field" *ngIf="sendMode === 'multiple'">
+          <label for="accounts">Cuentas destino *</label>
+          <p-multiSelect id="accounts"
+                         [options]="accounts"
+                         [(ngModel)]="selectedAccounts"
+                         optionLabel="name"
+                         placeholder="Seleccionar cuentas"
+                         [filter]="true"
+                         filterBy="name,email"
+                         [maxSelectedLabels]="3"
+                         selectedItemsLabel="{0} cuentas seleccionadas"
+                         styleClass="w-full">
+            <ng-template let-item pTemplate="item">
+              <div class="account-option">
+                <span class="account-option__name">{{ item.name }}</span>
+                <span class="account-option__email">{{ item.email }}</span>
+              </div>
+            </ng-template>
+          </p-multiSelect>
+        </div>
+
+        <!-- Single account -->
+        <div class="field" *ngIf="sendMode === 'single'">
+          <label for="account">Cuenta destino *</label>
+          <p-dropdown id="account"
+                      [options]="accounts"
+                      [(ngModel)]="selectedAccount"
+                      (onChange)="onAccountChange()"
+                      optionLabel="name"
+                      placeholder="Seleccionar cuenta"
+                      [filter]="true"
+                      filterBy="name,email"
+                      [showClear]="true"
+                      styleClass="w-full">
+            <ng-template let-item pTemplate="item">
+              <div class="account-option">
+                <span class="account-option__name">{{ item.name }}</span>
+                <span class="account-option__email">{{ item.email }}</span>
+              </div>
+            </ng-template>
+          </p-dropdown>
+        </div>
+
+        <!-- Target type -->
+        <div class="field">
+          <label for="target">Destino</label>
+          <p-dropdown id="target"
+                      [options]="sendMode === 'single' ? targetTypes : targetTypes.slice(0, 2)"
+                      [(ngModel)]="targetType"
+                      (onChange)="onTargetTypeChange()"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="w-full">
+          </p-dropdown>
+        </div>
+
+        <!-- Role selector -->
+        <div class="field" *ngIf="targetType === 'role'">
+          <label for="role">Rol *</label>
+          <p-dropdown id="role"
+                      [options]="roles"
+                      [(ngModel)]="selectedRole"
+                      optionLabel="label"
+                      placeholder="Seleccionar rol"
+                      [loading]="loadingRoles"
+                      [disabled]="!selectedAccount"
+                      styleClass="w-full">
+          </p-dropdown>
+        </div>
+
+        <!-- User selector -->
+        <div class="field" *ngIf="targetType === 'user' && sendMode === 'single'">
+          <label for="user">Usuario *</label>
+          <p-dropdown id="user"
+                      [options]="users"
+                      [(ngModel)]="selectedUser"
+                      optionLabel="label"
+                      placeholder="Seleccionar usuario"
+                      [filter]="true"
+                      filterBy="label,email"
+                      [loading]="loadingUsers"
+                      [disabled]="!selectedAccount"
+                      [showClear]="true"
+                      styleClass="w-full">
+            <ng-template let-item pTemplate="item">
+              <div class="user-option">
+                <span class="user-option__name">{{ item.label }}</span>
+                <span class="user-option__detail">{{ item.email }} · {{ item.role }}</span>
+              </div>
+            </ng-template>
+          </p-dropdown>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Type & Severity row -->
+        <div class="grid">
+          <div class="col-6">
+            <div class="field">
+              <label for="type">Tipo</label>
+              <p-dropdown id="type"
+                          [options]="notifTypes"
+                          [(ngModel)]="notifType"
+                          optionLabel="label"
+                          optionValue="value"
+                          styleClass="w-full">
+              </p-dropdown>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="field">
+              <label for="severity">Severidad</label>
+              <p-dropdown id="severity"
+                          [options]="severities"
+                          [(ngModel)]="severity"
+                          optionLabel="label"
+                          optionValue="value"
+                          styleClass="w-full">
+              </p-dropdown>
+            </div>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="field">
+          <label for="title">Titulo *</label>
+          <input id="title" pInputText [(ngModel)]="title"
+                 placeholder="Titulo de la notificacion"
+                 maxlength="200" class="w-full" />
+          <small class="char-count">{{ title.length }}/200</small>
+        </div>
+
+        <!-- Message -->
+        <div class="field">
+          <label for="message">Mensaje *</label>
+          <textarea id="message" pInputTextarea [(ngModel)]="message"
+                    placeholder="Cuerpo de la notificacion"
+                    maxlength="500" rows="3" class="w-full"></textarea>
+          <small class="char-count">{{ message.length }}/500</small>
+        </div>
+
+        <!-- Action URL -->
+        <div class="field">
+          <label for="actionUrl">URL de accion (opcional)</label>
+          <input id="actionUrl" pInputText [(ngModel)]="actionUrl"
+                 placeholder="/ruta/interna" maxlength="500" class="w-full" />
+          <small class="field-hint">Ruta interna a la que se navega al hacer click. Ej: /ventas, /productos/uuid</small>
+        </div>
+
+        <!-- Send button -->
+        <div class="send-actions">
+          <button pButton label="Enviar notificacion"
+                  icon="pi pi-send"
+                  [disabled]="!isValid || sending"
+                  [loading]="sending"
+                  (click)="send()"
+                  class="p-button-primary">
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview + History -->
+    <div class="col-12 lg:col-5">
+
+      <!-- Preview -->
+      <div class="preview-card">
+        <h4 class="preview-title">
+          <i class="pi pi-eye"></i> Vista previa
+        </h4>
+        <div class="preview-notif" *ngIf="title || message; else emptyPreview">
+          <div class="preview-icon" [ngClass]="'preview-icon--' + severity">
+            <i class="pi" [ngClass]="{
+              'pi-cog': notifType === 'system',
+              'pi-shopping-cart': notifType === 'sales',
+              'pi-box': notifType === 'stock',
+              'pi-credit-card': notifType === 'subscription',
+              'pi-shield': notifType === 'admin',
+              'pi-megaphone': notifType === 'custom'
+            }"></i>
+          </div>
+          <div class="preview-content">
+            <p class="preview-text">
+              <strong>{{ title || 'Titulo' }}</strong>
+              {{ message || 'Mensaje de la notificacion' }}
+            </p>
+            <div class="preview-meta">
+              <p-tag [value]="getTypeLabel(notifType)" [severity]="getSeverityTag(severity)" [rounded]="true" styleClass="text-xs"></p-tag>
+              <span class="preview-time">Ahora</span>
+            </div>
+            <div class="preview-recipients" *ngIf="sendMode !== 'single'">
+              <i class="pi pi-users"></i>
+              <span *ngIf="sendMode === 'all'">{{ activeAccountCount }} cuentas activas</span>
+              <span *ngIf="sendMode === 'multiple'">{{ selectedAccounts.length }} cuentas seleccionadas</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyPreview>
+          <div class="preview-empty">
+            <i class="pi pi-pencil"></i>
+            <span>Completa el formulario para ver la vista previa</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- History -->
+      <div class="history-card" *ngIf="sentHistory.length > 0">
+        <h4 class="preview-title">
+          <i class="pi pi-history"></i> Enviadas en esta sesion
+        </h4>
+        <div class="history-list">
+          <div class="history-item" *ngFor="let h of sentHistory">
+            <div class="history-item__left">
+              <p-tag [value]="getTypeLabel(h.type)" [severity]="getSeverityTag(h.severity)" [rounded]="true" styleClass="text-xs"></p-tag>
+              <span class="history-item__title">{{ h.title }}</span>
+            </div>
+            <div class="history-item__right">
+              <span class="history-item__account">{{ h.accountName }}</span>
+              <span class="history-item__target">{{ getTargetTypeLabel(h.targetType) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

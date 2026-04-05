@@ -30,6 +30,7 @@ import { RouterModule } from '@angular/router';
         loadComponent: () => import('./api-keys/api-keys.component').then(m => m.ApiKeysComponent),
       },
       { path: 'referrals', loadComponent: () => import('./referrals/referrals.component').then(m => m.ReferralsComponent) },
+      { path: 'notifications', loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent) },
     ]),
   ],
 })
