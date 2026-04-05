@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -24,7 +25,7 @@ import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputSwitchModule } from 'primeng/inputswitch';
 
-export const ACCOUNT_MODE_CONFIG: Record<string, { label: string; icon: string }> = {
+const ACCOUNT_MODE_CONFIG: Record<string, { label: string; icon: string }> = {
   simple: { label: 'Tienda Simple', icon: 'pi pi-shop' },
   full: { label: 'Gestión Completa', icon: 'pi pi-building' },
 };
@@ -78,6 +79,8 @@ export class SubscriptionManagementComponent implements OnInit {
   saving = false;
   loadingSubs = false;
 
+  private destroyRef = inject(DestroyRef);
+
   billingCycleOptions = [
     { label: 'Mensual', value: 'monthly' },
     { label: 'Anual', value: 'annual' }
@@ -94,16 +97,34 @@ export class SubscriptionManagementComponent implements OnInit {
   }
 
   loadAll() {
-    this.subscriptionService.getDashboardStats().subscribe(s => this.stats = s);
-    this.subscriptionService.getSubscriptions().subscribe(s => this.subscriptions = s);
-    this.subscriptionService.getPlans().subscribe(p => {
-      this.plans = p;
-      const modes = [...new Set(p.map(plan => plan.accountMode || 'full'))] as string[];
-      this.accountModes = Object.keys(ACCOUNT_MODE_CONFIG).filter(m => modes.includes(m));
-      if (this.accountModes.length === 0) this.accountModes = Object.keys(ACCOUNT_MODE_CONFIG);
-      this.rebuildPlansByModeCache();
-    });
-    this.subscriptionService.getAccountsWithoutSubscription().subscribe(a => this.accountsWithoutSub = a);
+    this.subscriptionService.getDashboardStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(s => this.stats = s);
+
+    this.loadingSubs = true;
+    this.subscriptionService.getSubscriptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: s => {
+          this.subscriptions = s;
+          this.loadingSubs = false;
+        },
+        error: () => { this.loadingSubs = false; }
+      });
+
+    this.subscriptionService.getPlans()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(p => {
+        this.plans = p;
+        const modes = [...new Set(p.map(plan => plan.accountMode || 'full'))] as string[];
+        this.accountModes = Object.keys(ACCOUNT_MODE_CONFIG).filter(m => modes.includes(m));
+        if (this.accountModes.length === 0) this.accountModes = Object.keys(ACCOUNT_MODE_CONFIG);
+        this.rebuildPlansByModeCache();
+      });
+
+    this.subscriptionService.getAccountsWithoutSubscription()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(a => this.accountsWithoutSub = a);
   }
 
   // ─── Status helpers ───
@@ -256,7 +277,7 @@ export class SubscriptionManagementComponent implements OnInit {
         this.cancelDialog = false;
         this.loadAll();
       },
-      error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message })
+      error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo completar la operación' })
     });
   }
 
@@ -269,7 +290,7 @@ export class SubscriptionManagementComponent implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Suscripcion reactivada' });
             this.loadAll();
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message })
+          error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo completar la operación' })
         });
       }
     });
@@ -289,10 +310,9 @@ export class SubscriptionManagementComponent implements OnInit {
     const lines: string[] = [];
 
     const fmt = (val: number | undefined) => !val || val >= 99999 ? 'Ilimitados' : `${val}`;
-    const fmtSingle = (val: number | undefined) => !val || val >= 99999 ? 'Ilimitados' : `${val}`;
 
-    lines.push(`${fmtSingle(p.maxSalePoints)} punto${(p.maxSalePoints ?? 0) !== 1 ? 's' : ''} de venta`);
-    lines.push(`${fmtSingle(p.maxUsers)} usuario${(p.maxUsers ?? 0) !== 1 ? 's' : ''}`);
+    lines.push(`${fmt(p.maxSalePoints)} punto${(p.maxSalePoints ?? 0) !== 1 ? 's' : ''} de venta`);
+    lines.push(`${fmt(p.maxUsers)} usuario${(p.maxUsers ?? 0) !== 1 ? 's' : ''}`);
     lines.push(`${fmt(p.maxProducts)} productos`);
     lines.push(`${fmt(p.maxClients)} clientes`);
     lines.push(`${fmt(p.maxSuppliers)} proveedores`);
@@ -301,7 +321,7 @@ export class SubscriptionManagementComponent implements OnInit {
     if (p.hasCompras) lines.push('Modulo de Compras');
     if (p.hasGastos) lines.push('Modulo de Gastos');
     if (p.hasOnlineStore) lines.push('Tienda online');
-    if (p.hasWhatsapp) lines.push('Alertas por WhatsApp');
+    if (p.hasWhatsapp) lines.push('Integración con WhatsApp');
     if (p.hasAdvancedReports) lines.push('Reportes avanzados');
     if (p.hasWhatsappAlerts) lines.push('Alertas por WhatsApp');
     if (p.hasGranularPermissions) lines.push('Gestión de Roles');

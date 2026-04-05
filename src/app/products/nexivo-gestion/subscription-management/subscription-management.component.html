@@ -98,6 +98,7 @@
       <p-table #dtSubs [value]="subscriptions" [paginator]="true" [rows]="10" [rowHover]="true"
         [globalFilterFields]="['account.name','account.email','plan.displayName','status']"
         [showCurrentPageReport]="true" currentPageReportTemplate="{first}-{last} de {totalRecords}"
+        [loading]="loadingSubs"
         styleClass="p-datatable-sm" responsiveLayout="scroll">
         <ng-template pTemplate="caption">
           <div class="nx-filter-bar" style="margin-bottom: 0">
