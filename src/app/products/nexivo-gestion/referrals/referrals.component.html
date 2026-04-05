@@ -1,0 +1,298 @@
+<p-toast></p-toast>
+
+<div class="referral-container">
+  <!-- Header -->
+  <section class="nx-hero-section">
+    <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+    <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+    <div class="nx-hero-section__content">
+      <div class="nx-page-header nx-page-header--hero">
+        <div class="nx-page-header__left">
+          <div class="nx-page-header__icon nx-page-header__icon--hero">
+            <i class="pi pi-users"></i>
+          </div>
+
+          <div>
+            <span class="nx-page-kicker">Nexivo SuperAdmin</span>
+
+            <div class="flex align-items-center flex-wrap gap-2">
+              <h2 class="nx-page-header__title m-0">Referidos</h2>
+            </div>
+
+            <p class="nx-page-header__subtitle m-0">Gestión de referentes, referidos y comisiones</p>
+          </div>
+        </div>
+
+        <div class="nx-page-header__actions">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stat Cards -->
+  <div class="grid mb-3">
+    <div class="col-6 md:col-3">
+      <div class="nx-stat-card">
+        <div class="nx-stat-card__icon nx-stat-card__icon--blue">
+          <i class="pi pi-user"></i>
+        </div>
+        <div class="nx-stat-card__info">
+          <span class="nx-stat-card__value">{{ stats.totalReferrers }}</span>
+          <span class="nx-stat-card__label">Referentes</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="nx-stat-card">
+        <div class="nx-stat-card__icon nx-stat-card__icon--green">
+          <i class="pi pi-link"></i>
+        </div>
+        <div class="nx-stat-card__info">
+          <span class="nx-stat-card__value">{{ stats.activeReferrals }}</span>
+          <span class="nx-stat-card__label">Referidos Activos</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="nx-stat-card">
+        <div class="nx-stat-card__icon nx-stat-card__icon--orange">
+          <i class="pi pi-clock"></i>
+        </div>
+        <div class="nx-stat-card__info">
+          <span class="nx-stat-card__value">{{ formatCurrency(stats.pendingCommissions) }}</span>
+          <span class="nx-stat-card__label">Comisiones Pendientes</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="nx-stat-card">
+        <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="nx-stat-card__info">
+          <span class="nx-stat-card__value">{{ formatCurrency(stats.paidCommissions) }}</span>
+          <span class="nx-stat-card__label">Comisiones Pagadas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <p-tabView (onChange)="onTabChange($event)">
+
+    <!-- TAB 1: Referentes -->
+    <p-tabPanel header="Referentes" leftIcon="pi pi-user">
+      <p-table [value]="referrers" [loading]="loadingReferrers" [paginator]="true" [rows]="10"
+               styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll"
+               [scrollable]="true" scrollDirection="horizontal">
+        <ng-template pTemplate="caption">
+          <div class="flex justify-content-end">
+            <button pButton label="Nuevo referente" icon="pi pi-plus" class="p-button-sm"
+                    (click)="openNewReferrer()"></button>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th>Email</th>
+            <th>Código</th>
+            <th>Descuento</th>
+            <th>Tipo Comisión</th>
+            <th>Valor Comisión</th>
+            <th pSortableColumn="referralCount">Referidos <p-sortIcon field="referralCount"></p-sortIcon></th>
+            <th pSortableColumn="totalEarnings">Ganancias <p-sortIcon field="totalEarnings"></p-sortIcon></th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-r>
+          <tr>
+            <td>{{ r.name }}</td>
+            <td>{{ r.email || '-' }}</td>
+            <td>
+              <div class="flex align-items-center gap-1">
+                <span class="code-badge">{{ r.code }}</span>
+                <button pButton icon="pi pi-copy" class="p-button-text p-button-sm p-button-rounded"
+                        (click)="copyCode(r.code)" pTooltip="Copiar código"></button>
+              </div>
+            </td>
+            <td>{{ formatPercent(r.discountPercentage) }}%</td>
+            <td>{{ getCommissionTypeLabel(r.commissionType) }}</td>
+            <td>
+              <ng-container *ngIf="r.commissionType === 'fixed_amount'">{{ formatCurrency(r.commissionValue) }}</ng-container>
+              <ng-container *ngIf="r.commissionType !== 'fixed_amount'">{{ formatPercent(r.commissionValue) }}%</ng-container>
+            </td>
+            <td>{{ r.referralCount || 0 }}</td>
+            <td>{{ formatCurrency(r.totalEarnings) }}</td>
+            <td>
+              <p-tag [value]="getStatusLabel(r.status)" [severity]="getStatusSeverity(r.status)"></p-tag>
+            </td>
+            <td>
+              <div class="flex gap-1">
+                <button pButton icon="pi pi-eye" class="p-button-text p-button-sm p-button-rounded"
+                        (click)="openDetail(r)" pTooltip="Ver referidos"></button>
+                <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm p-button-rounded"
+                        (click)="openEditReferrer(r)" pTooltip="Editar"></button>
+                <button pButton [icon]="r.status === 'active' ? 'pi pi-ban' : 'pi pi-check'"
+                        class="p-button-text p-button-sm p-button-rounded"
+                        (click)="toggleReferrerStatus(r)"
+                        [pTooltip]="r.status === 'active' ? 'Desactivar' : 'Activar'"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="10" class="text-center p-4">No hay referentes registrados</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+    <!-- TAB 2: Comisiones -->
+    <p-tabPanel header="Comisiones" leftIcon="pi pi-dollar">
+      <div class="flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="flex gap-2 align-items-center">
+          <p-dropdown [options]="commissionStatusOptions" [(ngModel)]="commissionStatusFilter"
+                      optionLabel="label" optionValue="value" placeholder="Filtrar por estado"
+                      (onChange)="filterCommissions()" styleClass="w-12rem"></p-dropdown>
+        </div>
+        <button pButton label="Marcar como pagado" icon="pi pi-check" class="p-button-sm p-button-success"
+                [disabled]="selectedCommissions.length === 0"
+                (click)="markSelectedPaid()"></button>
+      </div>
+
+      <p-table [value]="commissions" [loading]="loadingCommissions" [paginator]="true" [rows]="15"
+               styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll"
+               [scrollable]="true" scrollDirection="horizontal"
+               [(selection)]="selectedCommissions" dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th pSortableColumn="referral.referrer.name">Referente <p-sortIcon field="referral.referrer.name"></p-sortIcon></th>
+            <th>Cuenta Referida</th>
+            <th pSortableColumn="amount">Monto <p-sortIcon field="amount"></p-sortIcon></th>
+            <th>Estado</th>
+            <th pSortableColumn="paidAt">Fecha Pago <p-sortIcon field="paidAt"></p-sortIcon></th>
+            <th pSortableColumn="createdAt">Fecha <p-sortIcon field="createdAt"></p-sortIcon></th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-c>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="c" [disabled]="c.status === 'paid'"></p-tableCheckbox>
+            </td>
+            <td>{{ c.referral?.referrer?.name || '-' }}</td>
+            <td>{{ c.referral?.account?.name || c.referral?.account?.email || '-' }}</td>
+            <td>{{ formatCurrency(c.amount) }}</td>
+            <td>
+              <p-tag [value]="getStatusLabel(c.status)" [severity]="getStatusSeverity(c.status)"></p-tag>
+            </td>
+            <td>{{ c.paidAt ? (c.paidAt | date:'dd/MM/yyyy') : '-' }}</td>
+            <td>{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-4">No hay comisiones registradas</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+  </p-tabView>
+</div>
+
+<!-- Create/Edit Referrer Dialog -->
+<p-dialog [header]="editingReferrer ? 'Editar Referente' : 'Nuevo Referente'" [(visible)]="showReferrerDialog"
+          [style]="{width: '500px', maxWidth: '95vw'}" [modal]="true">
+  <div class="flex flex-column gap-3 pt-2">
+    <div class="flex flex-column gap-1">
+      <label for="ref-name">Nombre *</label>
+      <input pInputText id="ref-name" [(ngModel)]="referrer.name" placeholder="Nombre del referente" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label for="ref-email">Email</label>
+      <input pInputText id="ref-email" [(ngModel)]="referrer.email" placeholder="email@ejemplo.com" appLowercase />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label for="ref-phone">Teléfono</label>
+      <input pInputText id="ref-phone" [(ngModel)]="referrer.phone" placeholder="+54 11 1234-5678" />
+    </div>
+    <div class="flex flex-column gap-1" *ngIf="editingReferrer">
+      <label for="ref-code">Código</label>
+      <input pInputText id="ref-code" [(ngModel)]="referrer.code" placeholder="Se genera automáticamente" />
+    </div>
+    <div class="flex flex-column gap-1">
+      <label for="ref-discount">Descuento para el referido (%)</label>
+      <p-inputNumber id="ref-discount" [(ngModel)]="referrer.discountPercentage"
+                     [min]="0" [max]="100" suffix="%" mode="decimal"></p-inputNumber>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label for="ref-commission-type">Tipo de comisión</label>
+      <p-dropdown id="ref-commission-type" [options]="commissionTypeOptions"
+                  [(ngModel)]="referrer.commissionType" optionLabel="label" optionValue="value"></p-dropdown>
+    </div>
+    <div class="flex flex-column gap-1">
+      <label for="ref-commission-value">
+        Valor de comisión
+        <span *ngIf="referrer.commissionType !== 'fixed_amount'">(%)</span>
+        <span *ngIf="referrer.commissionType === 'fixed_amount'">(monto fijo)</span>
+      </label>
+      <p-inputNumber id="ref-commission-value" [(ngModel)]="referrer.commissionValue"
+                     [min]="0" mode="decimal"
+                     [suffix]="referrer.commissionType !== 'fixed_amount' ? '%' : ''"></p-inputNumber>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="showReferrerDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" (click)="saveReferrer()" [loading]="savingReferrer"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Detail Dialog (Referrer's Referrals) -->
+<p-dialog header="Referidos de {{ selectedReferrer?.name }}" [(visible)]="showDetailDialog"
+          [style]="{width: '700px', maxWidth: '95vw', maxHeight: '90vh'}" [modal]="true">
+  <ng-container *ngIf="selectedReferrer">
+    <div class="flex gap-3 mb-3 flex-wrap">
+      <p-tag [value]="'Código: ' + selectedReferrer.code" severity="info"></p-tag>
+      <p-tag [value]="'Descuento: ' + formatPercent(selectedReferrer.discountPercentage) + '%'" severity="warning"></p-tag>
+      <p-tag [value]="'Ganancias: ' + formatCurrency(selectedReferrer.totalEarnings)" severity="success"></p-tag>
+    </div>
+
+    <p-table [value]="selectedReferrer.referrals || []" styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Cuenta</th>
+          <th>Email</th>
+          <th>Descuento Aplicado</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ref>
+        <tr>
+          <td>{{ ref.account?.name || '-' }}</td>
+          <td>{{ ref.account?.email || '-' }}</td>
+          <td>{{ ref.discountApplied > 0 ? ref.discountApplied + '%' : 'Sin aplicar' }}</td>
+          <td><p-tag [value]="getStatusLabel(ref.status)" [severity]="getStatusSeverity(ref.status)"></p-tag></td>
+          <td>{{ ref.createdAt | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center p-4">Este referente aún no tiene referidos</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ng-container>
+</p-dialog>
