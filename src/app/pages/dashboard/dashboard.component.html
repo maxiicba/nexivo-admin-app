@@ -1,0 +1,71 @@
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero">
+          <i class="pi pi-th-large"></i>
+        </div>
+        <div>
+          <span class="nx-page-kicker">Nexivo Admin</span>
+          <h2 class="nx-page-header__title m-0">Dashboard</h2>
+          <p class="nx-page-header__subtitle m-0">Resumen unificado de todos los productos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Total MRR -->
+<div class="grid mb-4">
+  <div class="col-12 md:col-3">
+    <div class="nx-stat-card">
+      <div class="nx-stat-card__icon nx-stat-card__icon--green">
+        <i class="pi pi-dollar"></i>
+      </div>
+      <div class="nx-stat-card__info">
+        <span class="nx-stat-card__value">{{ formatCurrency(totalMrr) }}</span>
+        <span class="nx-stat-card__label">MRR Total</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Per-product cards -->
+<div class="grid" *ngIf="!loading">
+  <div class="col-12 md:col-6" *ngFor="let stat of productStats">
+    <p-card [header]="stat.product.label">
+      <div *ngIf="stat.error" class="text-red-400">
+        <i class="pi pi-exclamation-triangle mr-2"></i>No se pudo conectar con la API
+      </div>
+      <div *ngIf="!stat.error">
+        <div class="grid mb-3">
+          <div class="col-6">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--blue"><i class="pi pi-users"></i></div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ stat.total }}</span>
+                <span class="nx-stat-card__label">Total</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--green"><i class="pi pi-dollar"></i></div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ formatCurrency(stat.mrr) }}</span>
+                <span class="nx-stat-card__label">MRR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <p-tag value="Activas: {{ stat.active }}" severity="success" [rounded]="true"></p-tag>
+          <p-tag value="Trial: {{ stat.trialing }}" severity="info" [rounded]="true"></p-tag>
+          <p-tag value="Vencidas: {{ stat.past_due }}" severity="warning" [rounded]="true"></p-tag>
+          <p-tag value="Suspendidas: {{ stat.suspended }}" severity="danger" [rounded]="true"></p-tag>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>

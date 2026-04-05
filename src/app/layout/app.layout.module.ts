@@ -17,6 +17,7 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { DividerModule } from 'primeng/divider';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -42,7 +43,7 @@ import { AppConfigModule } from './config/config.module';
     ToastModule, BrowserModule, FormsModule, HttpClientModule, BrowserAnimationsModule,
     InputTextModule, SidebarModule, BadgeModule, RadioButtonModule, InputSwitchModule,
     RippleModule, RouterModule, AppConfigModule, MenuModule, ButtonModule,
-    PanelMenuModule, DividerModule, OverlayPanelModule, ConfirmDialogModule,
+    PanelMenuModule, DividerModule, OverlayPanelModule, ConfirmDialogModule, ConfirmPopupModule,
     DialogModule, TooltipModule,
   ],
   exports: [AppLayoutComponent]
