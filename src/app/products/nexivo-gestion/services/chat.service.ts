@@ -37,9 +37,6 @@ export class ChatService implements OnDestroy {
 
   private typingTimeout: any;
 
-  /** Set by the widget to suppress sounds when the chat panel is visible */
-  widgetOpen = false;
-
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -158,7 +155,6 @@ export class ChatService implements OnDestroy {
     this.unreadCount$.next(0);
     this.typing$.next(null);
     this.botTyping$.next(null);
-    this.widgetOpen = false;
     clearTimeout(this.typingTimeout);
   }
 
@@ -387,8 +383,9 @@ export class ChatService implements OnDestroy {
       this.conversations$.next(convs);
 
       // Load messages
-      this.getMessages(conv.id).subscribe(msgs => {
-        this.messages$.next(msgs.reverse());
+      this.getMessages(conv.id).subscribe({
+        next: msgs => this.messages$.next(msgs.reverse()),
+        error: err => console.error('[Chat] Failed to load messages:', err),
       });
     } else {
       this.messages$.next([]);
