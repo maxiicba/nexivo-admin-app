@@ -1,0 +1,802 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="admin-container">
+  <!-- Header -->
+  <section class="nx-hero-section">
+    <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+    <div class="nx-hero-section__glow nx-hero-section__glow--accent"></div>
+
+    <div class="nx-hero-section__content">
+      <div class="nx-page-header nx-page-header--hero">
+        <div class="nx-page-header__left">
+          <div class="nx-page-header__icon nx-page-header__icon--hero">
+            <i class="pi pi-shield"></i>
+          </div>
+
+          <div>
+            <span class="nx-page-kicker">Nexivo SuperAdmin</span>
+
+            <div class="flex align-items-center flex-wrap gap-2">
+              <h2 class="nx-page-header__title m-0">Panel de Administración</h2>
+            </div>
+
+            <p class="nx-page-header__subtitle m-0">Monitoreo, estadísticas y soporte de cuentas</p>
+          </div>
+        </div>
+
+        <div class="nx-page-header__actions">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p-tabView (onChange)="onTabChange($event)">
+
+    <!-- ═══ TAB 1: Dashboard ═══ -->
+    <p-tabPanel header="Dashboard" leftIcon="pi pi-chart-bar">
+      <ng-container *ngIf="stats">
+        <!-- Stat Cards -->
+        <div class="grid mb-3">
+          <div class="col-6 md:col-3">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--blue">
+                <i class="pi pi-building"></i>
+              </div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ stats.accounts.total }}</span>
+                <span class="nx-stat-card__label">Cuentas</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--green">
+                <i class="pi pi-dollar"></i>
+              </div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ formatCurrency(stats.subscriptions.mrr) }}</span>
+                <span class="nx-stat-card__label">MRR</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
+                <i class="pi pi-users"></i>
+              </div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ stats.users.total }}</span>
+                <span class="nx-stat-card__label">Usuarios</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 md:col-3">
+            <div class="nx-stat-card">
+              <div class="nx-stat-card__icon nx-stat-card__icon--orange">
+                <i class="pi pi-wifi"></i>
+              </div>
+              <div class="nx-stat-card__info">
+                <span class="nx-stat-card__value">{{ stats.users.activeSessions }}</span>
+                <span class="nx-stat-card__label">Sesiones activas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Breakdown -->
+        <div class="grid mb-3">
+          <div class="col-12 md:col-6">
+            <div class="card">
+              <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">Cuentas por estado</h4>
+              <div class="flex gap-3 flex-wrap">
+                <p-tag value="Activas: {{ stats.accounts.active }}" severity="success"></p-tag>
+                <p-tag value="Suspendidas: {{ stats.accounts.suspended }}" severity="danger"></p-tag>
+                <p-tag value="Inactivas: {{ stats.accounts.inactive }}" severity="secondary"></p-tag>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="card">
+              <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">Suscripciones por estado</h4>
+              <div class="flex gap-3 flex-wrap">
+                <p-tag value="Activas: {{ stats.subscriptions.active }}" severity="success"></p-tag>
+                <p-tag value="Trial: {{ stats.subscriptions.trialing }}" severity="info"></p-tag>
+                <p-tag value="Vencidas: {{ stats.subscriptions.pastDue }}" severity="warning"></p-tag>
+                <p-tag value="Suspendidas: {{ stats.subscriptions.suspended }}" severity="danger"></p-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Accounts -->
+        <div class="card">
+          <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">
+            <i class="pi pi-clock mr-2"></i>Registros recientes (últimos 7 días)
+          </h4>
+          <p-table [value]="stats.recentAccounts" styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-acc>
+              <tr>
+                <td class="font-semibold">{{ acc.name }}</td>
+                <td>{{ acc.email }}</td>
+                <td>{{ acc.planName }}</td>
+                <td><p-tag [value]="getStatusLabel(acc.status)" [severity]="getStatusSeverity(acc.status)"></p-tag></td>
+                <td>{{ formatDate(acc.createdAt) }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="5" class="text-center py-4" style="color: var(--nx-text-muted);">Sin registros recientes</td></tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </ng-container>
+
+      <div *ngIf="loadingDashboard" class="text-center py-5">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+      </div>
+    </p-tabPanel>
+
+    <!-- ═══ TAB 2: Cuentas ═══ -->
+    <p-tabPanel header="Cuentas" leftIcon="pi pi-building">
+      <div class="card">
+        <p-table #dtAccounts [value]="accounts" [paginator]="true" [rows]="15"
+                 [rowsPerPageOptions]="[15, 30, 50]"
+                 [globalFilterFields]="['name', 'email', 'subscription.planName', 'status', 'mode']"
+                 styleClass="p-datatable-sm" [rowHover]="true" [loading]="loadingAccounts"
+                 [showCurrentPageReport]="true" responsiveLayout="scroll"
+                 currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}">
+          <ng-template pTemplate="caption">
+            <div class="flex justify-content-between align-items-center flex-wrap gap-2">
+              <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText (input)="onGlobalFilter(dtAccounts, $event)" placeholder="Buscar cuenta..." />
+              </span>
+              <button pButton icon="pi pi-refresh" class="p-button-outlined p-button-rounded p-button-sm"
+                      (click)="loadAccounts()" pTooltip="Recargar"></button>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+              <th>Email</th>
+              <th>Tipo</th>
+              <th>Registro</th>
+              <th>Estado</th>
+              <th>Plan</th>
+              <th>Precio</th>
+              <th>Tienda</th>
+              <th pSortableColumn="created_at">Creada <p-sortIcon field="created_at"></p-sortIcon></th>
+              <th style="width: 120px"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-acc>
+            <tr>
+              <td class="font-semibold">{{ acc.name }}</td>
+              <td>{{ acc.email }}</td>
+              <td><p-tag [value]="getModeLabel(acc.mode)" [severity]="getModeSeverity(acc.mode)"></p-tag></td>
+              <td><p-tag [value]="getAuthProviderLabel(acc.owner?.authProvider)" [severity]="getAuthProviderSeverity(acc.owner?.authProvider)"></p-tag></td>
+              <td><p-tag [value]="getStatusLabel(acc.status)" [severity]="getStatusSeverity(acc.status)"></p-tag></td>
+              <td>{{ acc.subscription?.planName || '-' }}</td>
+              <td>{{ acc.subscription ? formatCurrency(acc.subscription.currentPrice) : '-' }}</td>
+              <td>
+                <ng-container *ngIf="getStoreForAccount(acc.id) as store">
+                  <div class="flex align-items-center gap-2">
+                    <p-tag [value]="store.isPublished ? 'Publicada' : 'No publicada'"
+                           [severity]="store.isPublished ? 'success' : 'warning'"
+                           [style]="{'font-size': '0.75rem'}"></p-tag>
+                    <a *ngIf="store.isPublished && store.slug"
+                       [href]="getStoreUrl(store.slug)" target="_blank"
+                       class="p-button-text p-button-rounded p-button-sm store-link"
+                       pTooltip="Visitar tienda">
+                      <i class="pi pi-external-link" style="font-size: 0.85rem;"></i>
+                    </a>
+                  </div>
+                </ng-container>
+                <span *ngIf="!getStoreForAccount(acc.id)" style="color: var(--nx-text-muted); font-size: 0.85rem;">Sin tienda</span>
+              </td>
+              <td>{{ formatDate(acc.created_at) }}</td>
+              <td>
+                <div class="flex align-items-center gap-1">
+                  <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-sm"
+                          pTooltip="Ver detalle" (click)="openAccountDetail(acc)"></button>
+                  <a *ngIf="getStoreForAccount(acc.id)?.isPublished && getStoreForAccount(acc.id)?.slug"
+                     [href]="getStoreUrl(getStoreForAccount(acc.id)!.slug)" target="_blank"
+                     pButton icon="pi pi-shopping-cart" class="p-button-text p-button-rounded p-button-sm"
+                     pTooltip="Ir a la tienda"></a>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="10" class="text-center py-5" style="color: var(--nx-text-muted);">
+              <i class="pi pi-inbox text-3xl mb-2 block"></i>Sin cuentas
+            </td></tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+
+    <!-- ═══ TAB 3: Pagos ═══ -->
+    <p-tabPanel header="Pagos" leftIcon="pi pi-credit-card">
+      <!-- Payment Stats -->
+      <div *ngIf="paymentStats" class="grid mb-3">
+        <div class="col-6 md:col-3">
+          <div class="nx-stat-card">
+            <div class="nx-stat-card__icon nx-stat-card__icon--green">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <div class="nx-stat-card__info">
+              <span class="nx-stat-card__value">{{ formatCurrency(paymentStats.revenueLastMonth) }}</span>
+              <span class="nx-stat-card__label">Recaudado (30 dias)</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 md:col-3">
+          <div class="nx-stat-card">
+            <div class="nx-stat-card__icon nx-stat-card__icon--orange">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div class="nx-stat-card__info">
+              <span class="nx-stat-card__value">{{ paymentStats.pending.count }}</span>
+              <span class="nx-stat-card__label">Pendientes ({{ formatCurrency(paymentStats.pending.totalAmount) }})</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 md:col-3">
+          <div class="nx-stat-card">
+            <div class="nx-stat-card__icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+              <i class="pi pi-exclamation-triangle"></i>
+            </div>
+            <div class="nx-stat-card__info">
+              <span class="nx-stat-card__value">{{ paymentStats.overdue.count }}</span>
+              <span class="nx-stat-card__label">Vencidos ({{ formatCurrency(paymentStats.overdue.totalAmount) }})</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 md:col-3">
+          <div class="nx-stat-card">
+            <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
+              <i class="pi pi-sync"></i>
+            </div>
+            <div class="nx-stat-card__info">
+              <span class="nx-stat-card__value">{{ paymentStats.autoDebitActive }}</span>
+              <span class="nx-stat-card__label">Debito automatico</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-row mb-3">
+        <div class="field m-0">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Estado</label>
+          <p-dropdown [options]="paymentStatusOptions" [(ngModel)]="paymentStatusFilter"
+            placeholder="Todos" [showClear]="true" appendTo="body"
+            (onChange)="onPaymentStatusFilterChange()"
+            [style]="{'min-width': '180px'}"></p-dropdown>
+        </div>
+        <div class="flex gap-2" style="align-self: flex-end;">
+          <button pButton icon="pi pi-filter-slash" label="Limpiar"
+            class="p-button-outlined p-button-rounded p-button-sm"
+            (click)="clearPaymentFilters()"></button>
+          <button pButton icon="pi pi-refresh" class="p-button-outlined p-button-rounded p-button-sm"
+            (click)="loadPayments(); loadPaymentStats()" pTooltip="Recargar"></button>
+        </div>
+      </div>
+
+      <!-- Payments Table -->
+      <div class="card">
+        <p-table [value]="payments" styleClass="p-datatable-sm" [rowHover]="true"
+          [loading]="loadingPayments" responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Cuenta</th>
+              <th>Plan</th>
+              <th>Monto</th>
+              <th>Periodo</th>
+              <th>Estado</th>
+              <th>MP Status</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>ID MP</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-payment>
+            <tr>
+              <td class="font-semibold">{{ payment.subscription?.account?.name || '-' }}</td>
+              <td>{{ payment.subscription?.plan?.displayName || '-' }}</td>
+              <td class="font-semibold">{{ formatCurrency(payment.amount) }}</td>
+              <td>
+                <span class="text-sm">{{ formatDate(payment.periodStart) }} - {{ formatDate(payment.periodEnd) }}</span>
+              </td>
+              <td>
+                <p-tag [value]="getPaymentStatusLabel(payment.status)" [severity]="getPaymentStatusSeverity(payment.status)"></p-tag>
+              </td>
+              <td>
+                <p-tag *ngIf="payment.mercadoPagoStatus" [value]="getMpStatusLabel(payment.mercadoPagoStatus)" [severity]="getMpStatusSeverity(payment.mercadoPagoStatus)"></p-tag>
+                <span *ngIf="!payment.mercadoPagoStatus" class="text-500">-</span>
+              </td>
+              <td>
+                <p-tag [value]="getAutoDebitLabel(payment.subscription)" [severity]="getAutoDebitSeverity(payment.subscription)"></p-tag>
+              </td>
+              <td>{{ formatDate(payment.paymentDate) }}</td>
+              <td>
+                <span *ngIf="payment.mercadoPagoTransactionId" class="font-monospace text-xs" style="color: var(--nx-text-muted);">
+                  {{ payment.mercadoPagoTransactionId }}
+                </span>
+                <span *ngIf="!payment.mercadoPagoTransactionId" class="text-500">-</span>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="9" class="text-center py-5" style="color: var(--nx-text-muted);">
+              <i class="pi pi-inbox text-3xl mb-2 block"></i>Sin pagos registrados
+            </td></tr>
+          </ng-template>
+        </p-table>
+        <p-paginator [rows]="paymentsLimit" [totalRecords]="paymentsTotal"
+          [rowsPerPageOptions]="[20, 50, 100]"
+          (onPageChange)="onPaymentsPageChange($event)"></p-paginator>
+      </div>
+    </p-tabPanel>
+
+    <!-- ═══ TAB 4: Actividad ═══ -->
+    <p-tabPanel header="Actividad" leftIcon="pi pi-history">
+      <!-- Filters -->
+      <div class="filters-row mb-3">
+        <div class="field m-0">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Cuenta</label>
+          <p-dropdown [options]="accountOptions" [(ngModel)]="activityFilters.accountId"
+                      placeholder="Todas" [showClear]="true" appendTo="body"
+                      [filter]="true" filterPlaceholder="Buscar..."
+                      [style]="{'min-width': '220px'}"></p-dropdown>
+        </div>
+        <div class="field m-0">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Acción</label>
+          <p-dropdown [options]="controllerOptions" [(ngModel)]="activityFilters.controller"
+                      placeholder="Todas" [showClear]="true" appendTo="body"
+                      [style]="{'min-width': '200px'}"></p-dropdown>
+        </div>
+        <div class="field m-0">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Rango de fechas</label>
+          <p-calendar [(ngModel)]="activityFilters.dateRange" selectionMode="range"
+                      dateFormat="dd/mm/yy" placeholder="Seleccionar rango"
+                      [showIcon]="true" appendTo="body"></p-calendar>
+        </div>
+        <div class="field m-0" style="align-self: flex-end;">
+          <button pButton icon="pi pi-search" label="Buscar"
+                  class="p-button-rounded" (click)="activityPage = 1; loadActivity()"></button>
+        </div>
+        <div class="field m-0" style="align-self: flex-end;">
+          <button pButton icon="pi pi-filter-slash" label="Limpiar"
+                  class="p-button-outlined p-button-rounded"
+                  (click)="clearActivityFilters()"></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <p-table [value]="activityLogs" styleClass="p-datatable-sm" [rowHover]="true"
+                 [loading]="loadingActivity" responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 160px">Fecha</th>
+              <th>Usuario</th>
+              <th>Cuenta</th>
+              <th>Módulo</th>
+              <th>Acción</th>
+              <th style="width: 80px">Método</th>
+              <th>Path</th>
+              <th style="width: 120px">IP</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-log>
+            <tr>
+              <td>{{ formatDateTime(log.createdAt) }}</td>
+              <td>{{ log.user?.username || '-' }}</td>
+              <td>{{ log.account?.name || '-' }}</td>
+              <td>{{ formatControllerName(log.controller) }}</td>
+              <td>{{ log.action }}</td>
+              <td><p-tag [value]="log.method" [severity]="getMethodSeverity(log.method)"></p-tag></td>
+              <td style="font-size: 0.85rem; color: var(--nx-text-muted);">{{ log.path }}</td>
+              <td style="font-size: 0.85rem;">{{ log.ip || '-' }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="8" class="text-center py-5" style="color: var(--nx-text-muted);">
+              <i class="pi pi-inbox text-3xl mb-2 block"></i>Sin actividad registrada
+            </td></tr>
+          </ng-template>
+        </p-table>
+        <p-paginator [rows]="activityLimit" [totalRecords]="activityTotal"
+                     [rowsPerPageOptions]="[20, 50, 100]"
+                     (onPageChange)="onActivityPageChange($event)"></p-paginator>
+      </div>
+    </p-tabPanel>
+
+    <!-- ═══ TAB 5: Soporte ═══ -->
+    <p-tabPanel header="Soporte" leftIcon="pi pi-comments">
+      <div class="filters-row mb-3">
+        <div class="field m-0 flex-1">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Seleccionar cuenta</label>
+          <p-dropdown [options]="accountOptions" [(ngModel)]="selectedSupportAccountId"
+                      placeholder="Seleccionar cuenta" [showClear]="true" appendTo="body"
+                      [filter]="true" filterPlaceholder="Buscar..."
+                      (onChange)="onSupportAccountChange()"
+                      [style]="{'width': '100%', 'max-width': '400px'}"></p-dropdown>
+        </div>
+        <button *ngIf="selectedSupportAccountId" pButton icon="pi pi-plus" label="Agregar nota"
+                class="p-button-rounded" style="align-self: flex-end;" (click)="openNewNote()"></button>
+      </div>
+
+      <div *ngIf="loadingNotes" class="text-center py-5">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+      </div>
+
+      <div *ngIf="!loadingNotes && selectedSupportAccountId && notes.length === 0" class="text-center py-5" style="color: var(--nx-text-muted);">
+        <i class="pi pi-comments text-3xl mb-2 block"></i>
+        <span>No hay notas para esta cuenta</span>
+      </div>
+
+      <div class="notes-list">
+        <div *ngFor="let note of notes" class="note-card">
+          <div class="note-header">
+            <div class="note-author">
+              <i class="pi pi-user mr-2"></i>
+              <span class="font-semibold">{{ getNoteAuthor(note) }}</span>
+              <span class="note-date">{{ formatDateTime(note.createdAt) }}</span>
+            </div>
+            <div class="note-actions">
+              <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-sm"
+                      pTooltip="Editar" (click)="openEditNote(note)"></button>
+              <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-sm p-button-danger"
+                      pTooltip="Eliminar" (click)="deleteNote(note)"></button>
+            </div>
+          </div>
+          <div class="note-content">{{ note.content }}</div>
+        </div>
+      </div>
+    </p-tabPanel>
+
+  <!-- Demos Tab -->
+  <p-tabPanel header="Demos" leftIcon="pi pi-calendar">
+    <div class="grid mt-3">
+      <!-- Stat cards -->
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="nx-stat-card">
+          <div class="nx-stat-card__icon nx-stat-card__icon--blue">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="nx-stat-card__info">
+            <span class="nx-stat-card__value">{{ demoStats?.total || 0 }}</span>
+            <span class="nx-stat-card__label">Total demos</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="nx-stat-card">
+          <div class="nx-stat-card__icon nx-stat-card__icon--orange">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="nx-stat-card__info">
+            <span class="nx-stat-card__value">{{ demoStats?.pending || 0 }}</span>
+            <span class="nx-stat-card__label">Pendientes</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="nx-stat-card">
+          <div class="nx-stat-card__icon nx-stat-card__icon--green">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="nx-stat-card__info">
+            <span class="nx-stat-card__value">{{ demoStats?.completed || 0 }}</span>
+            <span class="nx-stat-card__label">Completadas</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="nx-stat-card">
+          <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
+            <i class="pi pi-percentage"></i>
+          </div>
+          <div class="nx-stat-card__info">
+            <span class="nx-stat-card__value">{{ demoStats?.conversionRate || 0 }}%</span>
+            <span class="nx-stat-card__label">Conversión</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent demos table -->
+    <div class="card mt-3">
+      <div class="flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0">Solicitudes recientes</h3>
+        <a routerLink="/demo-management" class="p-button p-button-text p-button-sm">
+          Ver todo <i class="pi pi-arrow-right ml-1"></i>
+        </a>
+      </div>
+      <p-table [value]="recentDemos" styleClass="p-datatable-sm" [rowHover]="true"
+               responsiveLayout="scroll" [scrollable]="true" scrollDirection="horizontal">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Fecha/Hora</th>
+            <th>Nombre</th>
+            <th>Negocio</th>
+            <th>Estado</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-demo>
+          <tr>
+            <td>{{ demo.scheduled_date | date:'dd/MM/yy' }} {{ demo.scheduled_time }}</td>
+            <td>{{ demo.full_name }}</td>
+            <td>{{ demo.business_name }}</td>
+            <td>
+              <p-tag [value]="getDemoStatusLabel(demo.status)" [severity]="getDemoStatusSeverity(demo.status)"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="4" class="text-center p-4">No hay solicitudes de demo</td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-tabPanel>
+
+  </p-tabView>
+</div>
+
+<!-- Account Detail Dialog -->
+<p-dialog header="Detalle de Cuenta" [(visible)]="showDetailDialog" [modal]="true"
+          [style]="{width: '700px', maxWidth: '95vw', maxHeight: '90vh'}" [closable]="true" styleClass="nx-dialog">
+  <div *ngIf="loadingDetail" class="text-center py-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+  </div>
+
+  <div *ngIf="accountDetail && !loadingDetail">
+    <!-- Account Info -->
+    <div class="detail-section">
+      <h4 class="detail-section__title"><i class="pi pi-building mr-2"></i>Cuenta</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Nombre</span>
+          <span class="detail-value">{{ accountDetail.account.name }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ accountDetail.account.email }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Tipo</span>
+          <p-tag [value]="getModeLabel(accountDetail.account.mode)" [severity]="getModeSeverity(accountDetail.account.mode)"></p-tag>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Registro</span>
+          <p-tag [value]="getAuthProviderLabel(accountDetail.account.owner?.authProvider)" [severity]="getAuthProviderSeverity(accountDetail.account.owner?.authProvider)"></p-tag>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Estado</span>
+          <p-tag [value]="getStatusLabel(accountDetail.account.status)" [severity]="getStatusSeverity(accountDetail.account.status)"></p-tag>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Creada</span>
+          <span class="detail-value">{{ formatDate(accountDetail.account.created_at) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Subscription -->
+    <div class="detail-section" *ngIf="accountDetail.subscription">
+      <h4 class="detail-section__title"><i class="pi pi-credit-card mr-2"></i>Suscripción</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Plan</span>
+          <span class="detail-value font-semibold">{{ accountDetail.subscription.plan?.displayName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Estado</span>
+          <p-tag [value]="getStatusLabel(accountDetail.subscription.status)" [severity]="getStatusSeverity(accountDetail.subscription.status)"></p-tag>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Precio</span>
+          <span class="detail-value">{{ formatCurrency(accountDetail.subscription.currentPrice) }}/{{ accountDetail.subscription.billingCycle === 'monthly' ? 'mes' : 'año' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Usage -->
+    <div class="detail-section">
+      <h4 class="detail-section__title"><i class="pi pi-chart-bar mr-2"></i>Uso</h4>
+      <div class="usage-grid">
+        <div class="usage-item">
+          <span class="usage-value">{{ accountDetail.usage.products }}</span>
+          <span class="usage-label">Productos</span>
+        </div>
+        <div class="usage-item">
+          <span class="usage-value">{{ accountDetail.usage.clients }}</span>
+          <span class="usage-label">Clientes</span>
+        </div>
+        <div class="usage-item">
+          <span class="usage-value">{{ accountDetail.usage.suppliers }}</span>
+          <span class="usage-label">Proveedores</span>
+        </div>
+        <div class="usage-item">
+          <span class="usage-value">{{ accountDetail.usage.users }}</span>
+          <span class="usage-label">Usuarios</span>
+        </div>
+        <div class="usage-item">
+          <span class="usage-value">{{ accountDetail.usage.salePoints }}</span>
+          <span class="usage-label">Puntos de venta</span>
+        </div>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Sales & Treasury -->
+    <div class="detail-section">
+      <h4 class="detail-section__title"><i class="pi pi-wallet mr-2"></i>Finanzas (últimos 30 días)</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Ventas</span>
+          <span class="detail-value">{{ accountDetail.recentSalesSummary.totalSales }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Facturación</span>
+          <span class="detail-value">{{ formatCurrency(accountDetail.recentSalesSummary.totalRevenue) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Balance tesorería</span>
+          <span class="detail-value font-semibold">{{ formatCurrency(accountDetail.treasuryBalance) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="detail-section" *ngIf="accountDetail.paymentHistory?.length">
+      <p-divider></p-divider>
+      <h4 class="detail-section__title"><i class="pi pi-history mr-2"></i>Últimos pagos</h4>
+      <p-table [value]="accountDetail.paymentHistory" styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>MP Status</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-payment>
+          <tr>
+            <td>{{ formatDate(payment.paymentDate) }}</td>
+            <td>{{ formatCurrency(payment.amount) }}</td>
+            <td><p-tag [value]="getPaymentStatusLabel(payment.status)" [severity]="getPaymentStatusSeverity(payment.status)"></p-tag></td>
+            <td>
+              <p-tag *ngIf="payment.mercadoPagoStatus" [value]="getMpStatusLabel(payment.mercadoPagoStatus)" [severity]="getMpStatusSeverity(payment.mercadoPagoStatus)"></p-tag>
+              <span *ngIf="!payment.mercadoPagoStatus" class="text-500">-</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Auto-debit status in detail -->
+    <div class="detail-section" *ngIf="accountDetail.subscription?.mercadoPagoPreapprovalId">
+      <p-divider></p-divider>
+      <h4 class="detail-section__title"><i class="pi pi-sync mr-2"></i>Débito automático</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Estado MP</span>
+          <p-tag [value]="getMpStatusLabel(accountDetail.subscription.mercadoPagoSubscriptionStatus)"
+            [severity]="getMpStatusSeverity(accountDetail.subscription.mercadoPagoSubscriptionStatus)"></p-tag>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Preapproval ID</span>
+          <span class="detail-value font-monospace text-xs">{{ accountDetail.subscription.mercadoPagoPreapprovalId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store Info -->
+    <div class="detail-section">
+      <p-divider></p-divider>
+      <h4 class="detail-section__title"><i class="pi pi-shopping-cart mr-2"></i>Tienda online</h4>
+      <div *ngIf="loadingDetailStore" class="text-center py-3">
+        <i class="pi pi-spin pi-spinner"></i>
+      </div>
+      <div *ngIf="!loadingDetailStore && !detailStore" style="color: var(--nx-text-muted); font-size: 0.9rem;">
+        No tiene tienda configurada
+      </div>
+      <div *ngIf="!loadingDetailStore && detailStore">
+        <div class="detail-grid mb-3">
+          <div class="detail-item">
+            <span class="detail-label">Nombre</span>
+            <span class="detail-value">{{ detailStore.name || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Slug</span>
+            <span class="detail-value font-monospace">{{ detailStore.slug || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Estado</span>
+            <p-tag [value]="detailStore.isPublished ? 'Publicada' : 'No publicada'"
+                   [severity]="detailStore.isPublished ? 'success' : 'warning'"></p-tag>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">MercadoPago</span>
+            <p-tag [value]="detailStore.mercadoPagoConnected ? 'Conectado' : 'No conectado'"
+                   [severity]="detailStore.mercadoPagoConnected ? 'success' : 'secondary'"></p-tag>
+          </div>
+        </div>
+        <div class="detail-grid mb-3">
+          <div class="detail-item">
+            <span class="detail-label">Modo catálogo</span>
+            <span class="detail-value">{{ detailStore.homeConfig?.catalogMode ? 'Sí' : 'No' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Requiere registro</span>
+            <span class="detail-value">{{ detailStore.homeConfig?.requireRegistration ? 'Sí' : 'No' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Muestra stock</span>
+            <span class="detail-value">{{ detailStore.homeConfig?.showStock ? 'Sí' : 'No' }}</span>
+          </div>
+        </div>
+        <div class="flex gap-2" *ngIf="detailStore.slug">
+          <a [href]="getStoreUrl(detailStore.slug)" target="_blank"
+             pButton icon="pi pi-external-link" label="Visitar tienda"
+             class="p-button-outlined p-button-rounded p-button-sm"></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes in Detail -->
+    <div class="detail-section">
+      <p-divider></p-divider>
+      <h4 class="detail-section__title"><i class="pi pi-comments mr-2"></i>Notas de soporte</h4>
+      <div class="flex gap-2 mb-3">
+        <textarea pInputTextarea [(ngModel)]="detailNoteContent" rows="2" class="flex-1"
+                  placeholder="Agregar una nota..."></textarea>
+        <button pButton icon="pi pi-send" class="p-button-rounded align-self-end"
+                [loading]="savingDetailNote" [disabled]="!detailNoteContent.trim()"
+                (click)="addDetailNote()"></button>
+      </div>
+      <div *ngFor="let note of detailNotes" class="mini-note">
+        <div class="mini-note__header">
+          <span class="font-semibold">{{ getNoteAuthor(note) }}</span>
+          <span style="color: var(--nx-text-muted); font-size: 0.8rem;">{{ formatDateTime(note.createdAt) }}</span>
+        </div>
+        <div>{{ note.content }}</div>
+      </div>
+      <div *ngIf="detailNotes.length === 0" style="color: var(--nx-text-muted); font-size: 0.9rem;">
+        Sin notas
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Note Dialog -->
+<p-dialog [header]="editingNoteId ? 'Editar nota' : 'Nueva nota'" [(visible)]="showNoteDialog"
+          [modal]="true" [style]="{width: '450px', maxWidth: '95vw'}">
+  <div class="field">
+    <label>Contenido</label>
+    <textarea pInputTextarea [(ngModel)]="noteContent" rows="5" class="w-full"
+              placeholder="Escribir nota..."></textarea>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showNoteDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" [loading]="savingNote"
+            [disabled]="!noteContent.trim()" (click)="saveNote()"></button>
+  </ng-template>
+</p-dialog>

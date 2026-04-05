@@ -13,6 +13,10 @@ import { RouterModule } from '@angular/router';
         path: 'plans',
         loadComponent: () => import('./plans/gestion-plans.component').then(m => m.GestionPlansComponent),
       },
+      {
+        path: 'panel-admin',
+        loadComponent: () => import('./panel-admin/panel-admin.component').then(m => m.PanelAdminComponent),
+      },
     ]),
   ],
 })
