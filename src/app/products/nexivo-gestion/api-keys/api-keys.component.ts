@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -8,7 +9,6 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputSwitchModule } from 'primeng/inputswitch';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
@@ -27,12 +27,14 @@ import { IntegrationApiKeyService, IntegrationApiKey, ActivationKey } from '../s
   imports: [
     CommonModule, FormsModule,
     TableModule, ButtonModule, DialogModule, DropdownModule,
-    InputTextModule, InputSwitchModule, ToastModule, TagModule,
+    InputTextModule, ToastModule, TagModule,
     TooltipModule, ConfirmDialogModule, SkeletonModule,
   ],
   providers: [MessageService, ConfirmationService],
 })
 export class ApiKeysComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+
   accounts: any[] = [];
   selectedAccountId: string | null = null;
 
@@ -72,11 +74,14 @@ export class ApiKeysComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.accountsService.getAccounts().subscribe({
-      next: (accounts) => {
-        this.accounts = accounts.map((a: any) => ({ label: a.name, value: a.id }));
-      },
-    });
+    this.accountsService.getAccounts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (accounts) => {
+          this.accounts = accounts.map((a: any) => ({ label: a.name, value: a.id }));
+        },
+        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las cuentas' }),
+      });
   }
 
   onAccountChange(): void {
@@ -93,7 +98,9 @@ export class ApiKeysComponent implements OnInit {
 
   loadApiKeys(): void {
     this.loading = true;
-    this.apiKeyService.getByAccount(this.selectedAccountId!).subscribe({
+    this.apiKeyService.getByAccount(this.selectedAccountId!)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (keys) => {
         this.apiKeys = keys;
         this.loading = false;
@@ -106,22 +113,28 @@ export class ApiKeysComponent implements OnInit {
   }
 
   loadSalesPoints(): void {
-    this.http.get<any[]>(`${environment.managementApiUrl}/sale-point/${this.selectedAccountId}`, { withCredentials: true }).subscribe({
-      next: (sp) => {
-        this.salesPoints = sp.map((s: any) => ({ label: s.name, value: s.id }));
-      },
-    });
+    this.http.get<any[]>(`${environment.managementApiUrl}/sale-point/${this.selectedAccountId}`, { withCredentials: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (sp) => {
+          this.salesPoints = sp.map((s: any) => ({ label: s.name, value: s.id }));
+        },
+        error: () => this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se pudieron cargar los puntos de venta' }),
+      });
   }
 
   loadUsers(): void {
-    this.http.get<any[]>(`${environment.managementApiUrl}/user/account/${this.selectedAccountId}`, { withCredentials: true }).subscribe({
-      next: (users) => {
-        this.users = users.map((u: any) => ({
-          label: `${u.firstName || ''} ${u.lastName || ''} (${u.email})`.trim(),
-          value: u.id,
-        }));
-      },
-    });
+    this.http.get<any[]>(`${environment.managementApiUrl}/user/account/${this.selectedAccountId}`, { withCredentials: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (users) => {
+          this.users = users.map((u: any) => ({
+            label: `${u.firstName || ''} ${u.lastName || ''} (${u.email})`.trim(),
+            value: u.id,
+          }));
+        },
+        error: () => this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se pudieron cargar los usuarios' }),
+      });
   }
 
   // --- Create ---
@@ -143,6 +156,7 @@ export class ApiKeysComponent implements OnInit {
       salesPointId,
       userId: this.newKey.userId,
     }).pipe(
+      takeUntilDestroyed(this.destroyRef),
       switchMap((res) => {
         this.createdPlainKey = res.plainKey;
         this.createdSalesPointId = salesPointId;
@@ -167,7 +181,9 @@ export class ApiKeysComponent implements OnInit {
   // --- Toggle active ---
   toggleActive(key: IntegrationApiKey): void {
     const newState = !key.isActive;
-    this.apiKeyService.update(key.id, { isActive: newState }).subscribe({
+    this.apiKeyService.update(key.id, { isActive: newState })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         key.isActive = newState;
         this.messageService.add({
@@ -192,7 +208,9 @@ export class ApiKeysComponent implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.apiKeyService.remove(key.id).subscribe({
+        this.apiKeyService.remove(key.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
           next: () => {
             this.apiKeys = this.apiKeys.filter(k => k.id !== key.id);
             this.messageService.add({ severity: 'success', summary: 'Eliminada', detail: `API Key "${key.name}" eliminada.` });
@@ -228,7 +246,9 @@ export class ApiKeysComponent implements OnInit {
 
   loadActivationKeys(apiKeyId: string): void {
     this.loadingActivationKeys = true;
-    this.apiKeyService.getActivationKeys(apiKeyId).subscribe({
+    this.apiKeyService.getActivationKeys(apiKeyId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (keys) => {
         this.activationKeys = keys;
         this.loadingActivationKeys = false;
@@ -247,7 +267,8 @@ export class ApiKeysComponent implements OnInit {
     this.apiKeyService.createActivationKey(this.selectedApiKeyForActivation.id, {
       accountId: this.selectedAccountId!,
       salesPointId: this.selectedApiKeyForActivation.salesPoint.id,
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (res) => {
         this.creatingActivation = false;
         this.createdActivationKey = res.key;
@@ -271,7 +292,9 @@ export class ApiKeysComponent implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.apiKeyService.revokeActivationKey(ak.id).subscribe({
+        this.apiKeyService.revokeActivationKey(ak.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
           next: () => {
             ak.isActive = false;
             this.messageService.add({ severity: 'info', summary: 'Revocada', detail: 'Clave de activación revocada.' });
