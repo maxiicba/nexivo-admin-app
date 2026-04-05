@@ -38,6 +38,17 @@ export class AuthService {
     return this.checkStatus$;
   }
 
+  login(credentials: { email: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/login`, credentials, { withCredentials: true }).pipe(
+      map((res: any) => {
+        const user = res.user ?? res;
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(!!user);
+        return res;
+      }),
+    );
+  }
+
   logout(): Observable<any> {
     return this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).pipe(
       map(() => {

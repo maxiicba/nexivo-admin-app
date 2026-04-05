@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -15,16 +15,22 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
+  const redirectToLogin = () => {
+    if (environment.localLogin) {
+      return router.parseUrl('/login');
+    }
+    window.location.href = `${environment.ssoUrl}/login?returnUrl=${encodeURIComponent(state.url)}`;
+    return false;
+  };
+
   return authService.checkAuthStatus().pipe(
     map(user => {
-      if (!user) {
-        window.location.href = `${environment.ssoUrl}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
-        return false;
-      }
+      if (!user) return redirectToLogin();
       if (!user.isSuperAdmin) return router.parseUrl('/unauthorized');
       return true;
     }),
     catchError(() => {
+      if (environment.localLogin) return of(router.parseUrl('/login'));
       window.location.href = `${environment.ssoUrl}/login`;
       return of(false);
     }),
