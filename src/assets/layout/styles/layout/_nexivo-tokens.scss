@@ -32,27 +32,26 @@
   --nx-indigo-700: #4338CA;
 
   // Radius
-  --nx-radius-sm: 6px;
-  --nx-radius-md: 8px;
+  --nx-radius-sm: 8px;
+  --nx-radius-md: 10px;
   --nx-radius-lg: 14px;
-  --nx-radius-xl: 18px;
+  --nx-radius-xl: 20px;
   --nx-radius-full: 9999px;
 
   // Shadows
-  --nx-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
-  --nx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --nx-shadow-md: 0 4px 16px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.08);
-  --nx-shadow-lg: 0 10px 24px -4px rgba(99, 102, 241, 0.12), 0 4px 8px -4px rgba(0, 0, 0, 0.1);
+  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --nx-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --nx-shadow-md: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.05);
+  --nx-shadow-lg: 0 8px 24px -6px rgba(0, 0, 0, 0.12), 0 2px 8px -4px rgba(0, 0, 0, 0.06);
 
   // Transitions
-  --nx-transition: 200ms ease;
-  --nx-transition-fast: 150ms ease;
-  --nx-transition-slow: 300ms ease;
+  --nx-transition: 180ms ease;
+  --nx-transition-fast: 120ms ease;
+  --nx-transition-slow: 280ms ease;
 
   // Typography
-  --nx-font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --nx-font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-  --nx-font-feature: 'cv02', 'cv03', 'cv04', 'cv11';
+  --nx-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nx-font-feature: normal;
 }
 
 // ── Layer 2: Semantic (Light mode — default) ───────────────────────────────
@@ -60,7 +59,7 @@
 :root,
 .layout-theme-light {
   // Backgrounds
-  --nx-bg-ground: var(--nx-slate-50);
+  --nx-bg-ground: #F9FAFB;
   --nx-bg-card: #FFFFFF;
   --nx-bg-card-rgb: 255, 255, 255;
   --nx-bg-elevated: #FFFFFF;
@@ -76,9 +75,9 @@
   --nx-border-subtle: var(--nx-slate-100);
 
   // Primary
-  --nx-primary: var(--nx-indigo-500);
-  --nx-primary-hover: var(--nx-indigo-600);
-  --nx-primary-soft: rgba(99, 102, 241, 0.12);
+  --nx-primary: #5B5FF7;
+  --nx-primary-hover: #4F46E5;
+  --nx-primary-soft: rgba(91, 95, 247, 0.08);
   --nx-primary-text: #FFFFFF;
 
   // Status
@@ -126,22 +125,22 @@
 // ── Layer 2: Semantic (Dark mode) ──────────────────────────────────────────
 
 .layout-theme-dark {
-  --nx-bg-ground: var(--nx-slate-950);
-  --nx-bg-card: var(--nx-slate-900);
-  --nx-bg-card-rgb: 15, 23, 42;
-  --nx-bg-elevated: var(--nx-slate-800);
+  --nx-bg-ground: #09090B;
+  --nx-bg-card: #18181B;
+  --nx-bg-card-rgb: 24, 24, 27;
+  --nx-bg-elevated: #27272A;
 
-  --nx-text-primary: var(--nx-slate-50);
-  --nx-text-secondary: var(--nx-slate-400);
-  --nx-text-muted: var(--nx-slate-600);
+  --nx-text-primary: #FAFAFA;
+  --nx-text-secondary: #A1A1AA;
+  --nx-text-muted: #52525B;
 
-  --nx-border: var(--nx-slate-800);
-  --nx-border-rgb: 30, 41, 59;
-  --nx-border-subtle: rgba(255, 255, 255, 0.06);
+  --nx-border: #27272A;
+  --nx-border-rgb: 39, 39, 42;
+  --nx-border-subtle: rgba(255, 255, 255, 0.05);
 
-  --nx-primary: var(--nx-indigo-400);
-  --nx-primary-hover: var(--nx-indigo-300);
-  --nx-primary-soft: rgba(129, 140, 248, 0.15);
+  --nx-primary: #7C7FF9;
+  --nx-primary-hover: #9B9DFA;
+  --nx-primary-soft: rgba(124, 127, 249, 0.12);
   --nx-primary-text: var(--nx-slate-900);
 
   --nx-hover: rgba(255, 255, 255, 0.04);
@@ -214,9 +213,9 @@
 
   // Topbar
   --nx-topbar-bg: var(--nx-bg-card);
-  --nx-topbar-height: 60px;
+  --nx-topbar-height: 56px;
   --nx-topbar-border: var(--nx-border);
-  --nx-topbar-shadow: 0 1px 0 var(--nx-border), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --nx-topbar-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 
   // Cards
   --nx-card-bg: var(--nx-bg-card);
@@ -231,7 +230,7 @@
   --nx-card-shadow-colored-red: 0 4px 16px -2px rgba(239, 68, 68, 0.12);
   --nx-card-shadow-colored-cyan: 0 4px 16px -2px rgba(6, 182, 212, 0.12);
   --nx-card-shadow-colored-pink: 0 4px 16px -2px rgba(236, 72, 153, 0.12);
-  --nx-card-padding: 1.75rem;
+  --nx-card-padding: 1.5rem;
 
   // Tables
   --nx-table-header-bg: var(--nx-slate-50);
@@ -240,7 +239,7 @@
   --nx-table-radius: var(--nx-radius-lg);
 
   // Buttons
-  --nx-btn-radius: var(--nx-radius-sm);
+  --nx-btn-radius: var(--nx-radius-md);
   --nx-btn-font-weight: 500;
   --nx-btn-transition: var(--nx-transition-fast);
 
