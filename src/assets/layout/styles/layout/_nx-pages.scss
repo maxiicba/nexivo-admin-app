@@ -401,7 +401,7 @@
   transition: transform var(--nx-transition-fast), box-shadow var(--nx-transition-fast);
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: var(--nx-shadow-md);
   }
 
@@ -411,7 +411,7 @@
     justify-content: center;
     width: 48px;
     height: 48px;
-    border-radius: var(--nx-radius-lg);
+    border-radius: 12px;
     flex-shrink: 0;
 
     i, .material-symbols-outlined {
@@ -422,41 +422,49 @@
     &--blue {
       background: var(--nx-accent-blue-soft);
       color: var(--nx-accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.2);
     }
 
     &--green {
       background: var(--nx-accent-green-soft);
       color: var(--nx-accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     &--orange {
       background: var(--nx-accent-orange-soft);
       color: var(--nx-accent-orange);
+      border: 1px solid rgba(245, 158, 11, 0.2);
     }
 
     &--red {
       background: var(--nx-accent-red-soft);
       color: var(--nx-accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     &--purple {
       background: var(--nx-accent-purple-soft);
       color: var(--nx-accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
     &--cyan {
       background: var(--nx-accent-cyan-soft);
       color: var(--nx-accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.2);
     }
 
     &--pink {
       background: var(--nx-accent-pink-soft);
       color: var(--nx-accent-pink);
+      border: 1px solid rgba(236, 72, 153, 0.2);
     }
 
     &--primary {
       background: var(--nx-primary-soft);
       color: var(--nx-primary);
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
   }
 
@@ -467,8 +475,9 @@
   }
 
   &__value {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1.35rem;
+    font-weight: 400;
+    font-family: var(--nx-font-display);
     color: var(--nx-text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -536,6 +545,15 @@
     }
   }
 }
+
+// Colored hover shadows for stat card variants
+.nx-stat-card--blue:hover   { box-shadow: var(--nx-card-shadow-colored-blue); }
+.nx-stat-card--green:hover  { box-shadow: var(--nx-card-shadow-colored-green); }
+.nx-stat-card--orange:hover { box-shadow: var(--nx-card-shadow-colored-orange); }
+.nx-stat-card--purple:hover { box-shadow: var(--nx-card-shadow-colored-purple); }
+.nx-stat-card--red:hover    { box-shadow: var(--nx-card-shadow-colored-red); }
+.nx-stat-card--cyan:hover   { box-shadow: var(--nx-card-shadow-colored-cyan); }
+.nx-stat-card--pink:hover   { box-shadow: var(--nx-card-shadow-colored-pink); }
 
 // ── Filter Bar ──────────────────────────────────────────────────────────────
 
