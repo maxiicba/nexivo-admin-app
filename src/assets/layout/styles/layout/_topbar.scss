@@ -10,11 +10,13 @@
     top: 0;
     right: 0;
     padding: 0 1.5rem;
-    background-color: var(--nx-topbar-bg);
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--nx-topbar-shadow);
     transition: left $transitionDuration;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--nx-topbar-border);
 
     .layout-topbar-button {
         display: inline-flex;
@@ -84,8 +86,8 @@
     gap: 0.5rem;
     padding: 0.45rem 0.85rem;
     border-radius: var(--nx-radius-full);
-    border: 1px solid var(--nx-border);
-    background: linear-gradient(180deg, var(--nx-bg-card), var(--nx-bg-elevated));
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    background: linear-gradient(180deg, rgba(238, 242, 255, 0.6), rgba(224, 231, 255, 0.4));
     cursor: pointer;
     transition: all var(--nx-transition-fast);
     color: var(--nx-text-primary);
@@ -258,7 +260,7 @@
     padding: 0.25rem;
     padding-right: 0.5rem;
     border-radius: var(--nx-radius-full);
-    border: 1px solid transparent;
+    border: 1px solid var(--nx-border);
     background: transparent;
     cursor: pointer;
     transition: all var(--nx-transition-fast);
@@ -283,7 +285,7 @@
 
     &:hover {
         background: var(--nx-hover);
-        border-color: var(--nx-border);
+        border-color: var(--nx-primary);
     }
 }
 
@@ -900,6 +902,13 @@
 
     .topbar-mobile-user-label {
         color: var(--nx-text-secondary);
+    }
+
+    .layout-topbar {
+        background-color: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 1px 0 var(--nx-border), 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
     @media (max-width: 991px) {
