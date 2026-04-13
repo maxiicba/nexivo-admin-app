@@ -47,3 +47,41 @@ a {
     0% { background-position: 100% 0; }
     100% { background-position: -100% 0; }
 }
+
+// ============================================================================
+// NEXIVO — Global Animations
+// ============================================================================
+
+@keyframes nx-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nx-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes nx-slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+// Animation utility classes
+.nx-animate-fade-up    { animation: nx-fade-up 0.3s ease both; }
+.nx-animate-fade-in    { animation: nx-fade-in 0.25s ease both; }
+.nx-animate-slide-left { animation: nx-slide-in-left 0.25s ease both; }
+
+// Stagger delays (50ms increments)
+.nx-animate-delay-1 { animation-delay: 50ms; }
+.nx-animate-delay-2 { animation-delay: 100ms; }
+.nx-animate-delay-3 { animation-delay: 150ms; }
+.nx-animate-delay-4 { animation-delay: 200ms; }
+.nx-animate-delay-5 { animation-delay: 250ms; }
+
+// Button press feedback — global
+button:not([disabled]):active,
+.p-button:not([disabled]):active {
+  transform: scale(0.97);
+  transition: transform 80ms ease;
+}
