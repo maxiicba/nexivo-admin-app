@@ -18,7 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="nx-login-brand">
           <div class="nx-login-logo">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="#6366f1"/>
+              <rect width="32" height="32" rx="8" fill="#5B5FF7"/>
               <rect x="8" y="10" width="16" height="3" rx="1.5" fill="white" opacity="0.9"/>
               <rect x="8" y="14.5" width="10" height="3" rx="1.5" fill="white" opacity="0.9"/>
               <rect x="8" y="19" width="16" height="3" rx="1.5" fill="white" opacity="0.9"/>
@@ -109,7 +109,7 @@ import { AuthService } from '../../core/services/auth.service';
     .nx-login-blob--1 {
       width: 400px; height: 400px;
       top: -100px; left: -100px;
-      background: rgba(99, 102, 241, 0.12);
+      background: rgba(91, 95, 247, 0.12);
       animation-duration: 25s;
     }
 
@@ -164,7 +164,7 @@ import { AuthService } from '../../core/services/auth.service';
       border-radius: 10px;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 4px 12px rgba(91, 95, 247, 0.25);
     }
 
     .nx-login-logo svg {
@@ -178,11 +178,11 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .nx-login-brand-name {
-      font-family: 'Instrument Serif', Georgia, serif;
-      font-size: 1.35rem;
-      font-weight: 400;
-      color: #0f172a;
-      letter-spacing: -0.01em;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #09090B;
+      letter-spacing: -0.03em;
     }
 
     .nx-login-brand-subtitle {
@@ -230,7 +230,7 @@ import { AuthService } from '../../core/services/auth.service';
       background: rgba(255, 255, 255, 0.9);
       color: #0f172a;
       font-size: 0.9rem;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       transition: border-color 150ms ease, box-shadow 150ms ease;
       outline: none;
       box-sizing: border-box;
@@ -251,14 +251,14 @@ import { AuthService } from '../../core/services/auth.service';
       padding: 0.7rem 1.25rem;
       border: 1px solid rgba(99, 102, 241, 0.22);
       border-radius: 10px;
-      background: linear-gradient(135deg, #6366f1, #5b5ff0 55%, #4f46e5);
+      background: linear-gradient(135deg, #5B5FF7, #4F46E5);
       color: #fff;
       font-size: 0.92rem;
       font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       cursor: pointer;
       transition: transform 150ms ease, box-shadow 150ms ease;
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22), inset 0 1px 0 rgba(255,255,255,0.18);
+      box-shadow: 0 8px 20px rgba(91, 95, 247, 0.22), inset 0 1px 0 rgba(255,255,255,0.18);
     }
 
     .nx-login-btn:hover:not(:disabled) {
