@@ -34,15 +34,15 @@
   // Radius
   --nx-radius-sm: 6px;
   --nx-radius-md: 8px;
-  --nx-radius-lg: 12px;
-  --nx-radius-xl: 16px;
+  --nx-radius-lg: 14px;
+  --nx-radius-xl: 18px;
   --nx-radius-full: 9999px;
 
   // Shadows
-  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --nx-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
   --nx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --nx-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --nx-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --nx-shadow-md: 0 4px 16px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.08);
+  --nx-shadow-lg: 0 10px 24px -4px rgba(99, 102, 241, 0.12), 0 4px 8px -4px rgba(0, 0, 0, 0.1);
 
   // Transitions
   --nx-transition: 200ms ease;
@@ -198,6 +198,7 @@
   --nx-sidebar-item-hover: rgba(255, 255, 255, 0.06);
   --nx-sidebar-item-active-bg: rgba(99, 102, 241, 0.12);
   --nx-sidebar-item-active-shadow: inset 3px 0 0 var(--nx-indigo-500);
+  --nx-sidebar-active-icon-bg: rgba(99, 102, 241, 0.14);
   --nx-sidebar-item-active-text: #FFFFFF;
   --nx-sidebar-item-active-icon: var(--nx-indigo-300);
   --nx-sidebar-item-radius: var(--nx-radius-md);
@@ -213,15 +214,24 @@
 
   // Topbar
   --nx-topbar-bg: var(--nx-bg-card);
-  --nx-topbar-height: 56px;
+  --nx-topbar-height: 60px;
   --nx-topbar-border: var(--nx-border);
+  --nx-topbar-shadow: 0 1px 0 var(--nx-border), 0 4px 16px rgba(0, 0, 0, 0.04);
 
   // Cards
   --nx-card-bg: var(--nx-bg-card);
   --nx-card-border: var(--nx-border);
   --nx-card-radius: var(--nx-radius-lg);
   --nx-card-shadow: var(--nx-shadow-card);
-  --nx-card-padding: 1.5rem;
+  // Colored shadows for stat cards
+  --nx-card-shadow-colored-blue: 0 4px 16px -2px rgba(59, 130, 246, 0.12);
+  --nx-card-shadow-colored-green: 0 4px 16px -2px rgba(16, 185, 129, 0.12);
+  --nx-card-shadow-colored-orange: 0 4px 16px -2px rgba(245, 158, 11, 0.12);
+  --nx-card-shadow-colored-purple: 0 4px 16px -2px rgba(139, 92, 246, 0.12);
+  --nx-card-shadow-colored-red: 0 4px 16px -2px rgba(239, 68, 68, 0.12);
+  --nx-card-shadow-colored-cyan: 0 4px 16px -2px rgba(6, 182, 212, 0.12);
+  --nx-card-shadow-colored-pink: 0 4px 16px -2px rgba(236, 72, 153, 0.12);
+  --nx-card-padding: 1.75rem;
 
   // Tables
   --nx-table-header-bg: var(--nx-slate-50);
