@@ -37,8 +37,8 @@
 
     // Light mode: add right border for separation
     .layout-theme-light & {
-        border-right: 1px solid var(--nx-slate-200);
-        box-shadow: 1px 0 3px rgba(0, 0, 0, 0.04);
+        border-right: 1px solid var(--nx-slate-300);
+        box-shadow: 1px 0 6px rgba(0, 0, 0, 0.06);
     }
 }
 
@@ -52,6 +52,7 @@
     min-height: $topbarHeight;
     border-bottom: 1px solid var(--nx-sidebar-divider);
     flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), transparent 60%);
 
     .sidebar-logo {
         width: 32px;
@@ -63,6 +64,7 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 
         svg {
             width: 32px;
@@ -368,7 +370,7 @@
             color: var(--nx-sidebar-section-text);
             margin: 1.25rem 0 0.4rem 0;
             padding: 0 0.75rem 0 0.75rem;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.10em;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -479,6 +481,13 @@
 
                 .layout-menuitem-icon {
                     color: var(--nx-sidebar-item-active-icon);
+                    background: var(--nx-sidebar-active-icon-bg);
+                    border-radius: 8px;
+                    width: 1.6rem;
+                    height: 1.6rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
                 }
             }
 
