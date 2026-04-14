@@ -20,60 +20,80 @@
   </div>
 </section>
 
-<!-- Plans grid with drag & drop -->
-<div cdkDropList (cdkDropListDropped)="onDrop($event)" class="grid mt-3">
-  <div class="col-12 md:col-4" *ngFor="let plan of plans" cdkDrag>
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="flex justify-content-between align-items-center p-3">
-          <div class="flex align-items-center gap-2">
-            <i class="pi pi-bars text-color-secondary" cdkDragHandle style="cursor:grab"></i>
-            <span class="font-semibold text-lg">{{ plan.displayName }}</span>
-          </div>
-          <p-tag [value]="plan.isActive ? 'Activo' : 'Inactivo'" [severity]="plan.isActive ? 'success' : 'secondary'" />
-        </div>
-      </ng-template>
+<!-- Grilla de planes -->
+<div cdkDropList (cdkDropListDropped)="onDrop($event)" class="nx-plans-grid">
+  <div class="nx-plan-card" *ngFor="let plan of plans; let i = index" cdkDrag
+       [class.nx-plan-card--inactive]="!plan.isActive">
 
-      <p class="text-color-secondary text-sm mb-3">{{ plan.description }}</p>
-
-      <div class="grid mb-3">
-        <div class="col-6">
-          <span class="text-sm text-color-secondary">Mensual</span>
-          <div class="font-bold">${{ plan.monthlyPrice | number:'1.0-0' }}</div>
-        </div>
-        <div class="col-6">
-          <span class="text-sm text-color-secondary">Anual</span>
-          <div class="font-bold">${{ plan.annualPrice | number:'1.0-0' }}</div>
-        </div>
+    <!-- Header -->
+    <div class="nx-plan-card__header">
+      <div class="nx-plan-card__drag" cdkDragHandle>
+        <i class="pi pi-bars"></i>
       </div>
+      <div class="nx-plan-card__name">{{ plan.displayName }}</div>
+      <span class="nx-plan-card__badge" [class.nx-plan-card__badge--active]="plan.isActive"
+            [class.nx-plan-card__badge--inactive]="!plan.isActive">
+        {{ plan.isActive ? 'Activo' : 'Inactivo' }}
+      </span>
+    </div>
 
-      <p-divider></p-divider>
+    <!-- Description -->
+    <p class="nx-plan-card__desc" *ngIf="plan.description">{{ plan.description }}</p>
 
-      <!-- Limits -->
-      <div class="grid text-sm mb-2">
-        <div class="col-6">Profesionales: <strong>{{ plan.maxProfessionals }}</strong></div>
-        <div class="col-6">Servicios: <strong>{{ plan.maxServices }}</strong></div>
-        <div class="col-6">Turnos/mes: <strong>{{ plan.maxMonthlyAppointments }}</strong></div>
-        <div class="col-6">Clientes: <strong>{{ plan.maxClients }}</strong></div>
+    <!-- Pricing -->
+    <div class="nx-plan-card__pricing">
+      <div class="nx-plan-card__price">
+        <span class="nx-plan-card__price-label">Mensual</span>
+        <span class="nx-plan-card__price-value">${{ plan.monthlyPrice | number:'1.0-0' }}</span>
       </div>
-
-      <!-- Feature flags -->
-      <div class="flex flex-wrap gap-1 mb-3">
-        <p-tag *ngIf="plan.hasOnlineBooking" value="Reservas Online" severity="success" />
-        <p-tag *ngIf="plan.hasWhatsappBot" value="WhatsApp Bot" severity="success" />
-        <p-tag *ngIf="plan.hasPromotions" value="Promociones" severity="success" />
-        <p-tag *ngIf="plan.hasCoupons" value="Cupones" severity="success" />
-        <p-tag *ngIf="plan.hasAdvancedReports" value="Reportes" severity="success" />
-        <p-tag *ngIf="plan.hasFinance" value="Finanzas" severity="success" />
-        <p-tag *ngIf="plan.hasCustomBranding" value="Branding" severity="success" />
-        <p-tag *ngIf="plan.hasTrialPeriod" value="Trial {{ plan.trialDays }}d" severity="info" />
+      <div class="nx-plan-card__price-divider"></div>
+      <div class="nx-plan-card__price">
+        <span class="nx-plan-card__price-label">Anual</span>
+        <span class="nx-plan-card__price-value">${{ plan.annualPrice | number:'1.0-0' }}</span>
       </div>
+    </div>
 
-      <div class="flex gap-2">
-        <button pButton label="Editar" icon="pi pi-pencil" class="p-button-outlined p-button-sm flex-1" (click)="openEdit(plan)"></button>
-        <button pButton icon="pi pi-trash" class="p-button-outlined p-button-danger p-button-sm" (click)="confirmDelete(plan)" pTooltip="Eliminar"></button>
+    <!-- Limits -->
+    <div class="nx-plan-card__limits">
+      <div class="nx-plan-card__limit">
+        <span class="nx-plan-card__limit-value">{{ plan.maxProfessionals }}</span>
+        <span class="nx-plan-card__limit-label">Profesionales</span>
       </div>
-    </p-card>
+      <div class="nx-plan-card__limit">
+        <span class="nx-plan-card__limit-value">{{ plan.maxServices }}</span>
+        <span class="nx-plan-card__limit-label">Servicios</span>
+      </div>
+      <div class="nx-plan-card__limit">
+        <span class="nx-plan-card__limit-value">{{ plan.maxMonthlyAppointments }}</span>
+        <span class="nx-plan-card__limit-label">Turnos/mes</span>
+      </div>
+      <div class="nx-plan-card__limit">
+        <span class="nx-plan-card__limit-value">{{ plan.maxClients }}</span>
+        <span class="nx-plan-card__limit-label">Clientes</span>
+      </div>
+    </div>
+
+    <!-- Feature tags -->
+    <div class="nx-plan-card__features" *ngIf="plan.hasOnlineBooking || plan.hasWhatsappBot || plan.hasPromotions || plan.hasCoupons || plan.hasAdvancedReports || plan.hasFinance || plan.hasCustomBranding || plan.hasTrialPeriod">
+      <span class="nx-plan-card__tag" *ngIf="plan.hasOnlineBooking">Reservas Online</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasWhatsappBot">Bot WhatsApp</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasPromotions">Promociones</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasCoupons">Cupones</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasAdvancedReports">Reportes</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasFinance">Finanzas</span>
+      <span class="nx-plan-card__tag" *ngIf="plan.hasCustomBranding">Marca propia</span>
+      <span class="nx-plan-card__tag nx-plan-card__tag--info" *ngIf="plan.hasTrialPeriod">Prueba {{ plan.trialDays }} días</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="nx-plan-card__actions">
+      <button class="nx-plan-card__btn nx-plan-card__btn--edit" (click)="openEdit(plan)">
+        <i class="pi pi-pencil"></i> Editar
+      </button>
+      <button class="nx-plan-card__btn nx-plan-card__btn--delete" (click)="confirmDelete(plan)">
+        <i class="pi pi-trash"></i>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -130,7 +150,7 @@
       </div>
     </div>
 
-    <p-divider align="left"><b>Features</b></p-divider>
+    <p-divider align="left"><b>Funcionalidades</b></p-divider>
 
     <div class="grid">
       <div class="col-6 flex align-items-center justify-content-between">
@@ -138,7 +158,7 @@
         <p-inputSwitch [(ngModel)]="editingPlan.hasOnlineBooking"></p-inputSwitch>
       </div>
       <div class="col-6 flex align-items-center justify-content-between">
-        <label>WhatsApp Bot</label>
+        <label>Bot WhatsApp</label>
         <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsappBot"></p-inputSwitch>
       </div>
       <div class="col-6 flex align-items-center justify-content-between">
@@ -158,7 +178,7 @@
         <p-inputSwitch [(ngModel)]="editingPlan.hasFinance"></p-inputSwitch>
       </div>
       <div class="col-6 flex align-items-center justify-content-between">
-        <label>Branding personalizado</label>
+        <label>Marca personalizada</label>
         <p-inputSwitch [(ngModel)]="editingPlan.hasCustomBranding"></p-inputSwitch>
       </div>
       <div class="col-6 flex align-items-center justify-content-between">
@@ -178,12 +198,12 @@
       </div>
     </div>
 
-    <p-divider align="left"><b>Features visibles (chips)</b></p-divider>
+    <p-divider align="left"><b>Funcionalidades visibles</b></p-divider>
 
     <div class="flex gap-2">
       <input pInputText [(ngModel)]="featureInput" placeholder="Ej: 3 profesionales" class="flex-1"
         (keyup.enter)="addFeature()">
-      <button pButton icon="pi pi-plus" (click)="addFeature()" pTooltip="Agregar feature"></button>
+      <button pButton icon="pi pi-plus" (click)="addFeature()" pTooltip="Agregar"></button>
     </div>
     <div class="flex flex-wrap gap-2">
       <span *ngFor="let f of editingPlan.features" class="p-tag p-tag-info flex align-items-center gap-1">

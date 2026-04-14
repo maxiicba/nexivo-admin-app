@@ -1188,3 +1188,234 @@ p-inputnumber,
     color: var(--nx-text-secondary);
   }
 }
+
+// ============================================================================
+// Plan Cards
+// ============================================================================
+
+.nx-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.nx-plan-card {
+  background: var(--nx-card-bg);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-xl);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--nx-transition), transform var(--nx-transition);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--nx-shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &--inactive {
+    opacity: 0.6;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--nx-border-subtle);
+  }
+
+  &__drag {
+    color: var(--nx-text-muted);
+    cursor: grab;
+    font-size: 0.85rem;
+    padding: 0.25rem;
+    border-radius: var(--nx-radius-sm);
+    transition: color var(--nx-transition-fast);
+
+    &:hover {
+      color: var(--nx-text-secondary);
+    }
+  }
+
+  &__name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--nx-text-primary);
+    flex: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--nx-radius-full);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+
+    &--active {
+      background: var(--nx-success-soft);
+      color: var(--nx-success);
+    }
+
+    &--inactive {
+      background: var(--nx-hover);
+      color: var(--nx-text-muted);
+    }
+  }
+
+  &__desc {
+    padding: 0.75rem 1.25rem 0;
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--nx-text-secondary);
+    line-height: 1.5;
+  }
+
+  &__pricing {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 1rem 1.25rem;
+  }
+
+  &__price {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  &__price-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--nx-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__price-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--nx-text-primary);
+    letter-spacing: -0.03em;
+  }
+
+  &__price-divider {
+    width: 1px;
+    height: 2.5rem;
+    background: var(--nx-border);
+    margin: 0 1rem;
+    flex-shrink: 0;
+  }
+
+  &__limits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0 1.25rem 1rem;
+    border-bottom: 1px solid var(--nx-border-subtle);
+  }
+
+  &__limit {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  &__limit-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--nx-text-primary);
+  }
+
+  &__limit-label {
+    font-size: 0.75rem;
+    color: var(--nx-text-secondary);
+  }
+
+  &__features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.85rem 1.25rem;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--nx-radius-full);
+    background: var(--nx-primary-soft);
+    color: var(--nx-primary);
+    letter-spacing: 0.01em;
+
+    &--info {
+      background: var(--nx-info-soft);
+      color: var(--nx-info);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem 1.15rem;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--nx-border);
+    border-radius: var(--nx-radius-md);
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all var(--nx-transition-fast);
+    padding: 0.5rem 1rem;
+
+    i {
+      font-size: 0.8rem;
+    }
+
+    &--edit {
+      flex: 1;
+      color: var(--nx-text-primary);
+
+      &:hover {
+        background: var(--nx-hover);
+        border-color: var(--nx-primary);
+        color: var(--nx-primary);
+      }
+    }
+
+    &--delete {
+      color: var(--nx-text-muted);
+      padding: 0.5rem 0.65rem;
+
+      &:hover {
+        background: var(--nx-error-soft);
+        border-color: var(--nx-error);
+        color: var(--nx-error);
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .nx-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nx-plan-card__price-value {
+    font-size: 1.15rem;
+  }
+}
