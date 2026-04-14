@@ -19,7 +19,8 @@ export const authGuard: CanActivateFn = (route, state) => {
     if (environment.localLogin) {
       return router.parseUrl('/login');
     }
-    window.location.href = `${environment.ssoUrl}/login?returnUrl=${encodeURIComponent(state.url)}`;
+    const fullReturnUrl = `${environment.appUrl}${state.url}`;
+    window.location.href = `${environment.ssoUrl}/login?returnUrl=${encodeURIComponent(fullReturnUrl)}`;
     return false;
   };
 
@@ -31,7 +32,8 @@ export const authGuard: CanActivateFn = (route, state) => {
     }),
     catchError(() => {
       if (environment.localLogin) return of(router.parseUrl('/login'));
-      window.location.href = `${environment.ssoUrl}/login`;
+      const fullReturnUrl = `${environment.appUrl}/`;
+      window.location.href = `${environment.ssoUrl}/login?returnUrl=${encodeURIComponent(fullReturnUrl)}`;
       return of(false);
     }),
   );
