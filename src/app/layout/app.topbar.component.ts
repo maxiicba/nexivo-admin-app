@@ -3,6 +3,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { LayoutService } from "./service/app.layout.service";
 import { Router } from '@angular/router';
 import { ConfirmPopup } from 'primeng/confirmpopup';
+import { AuthService } from '../core/services/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-topbar',
@@ -35,6 +37,7 @@ export class AppTopBarComponent implements OnInit {
     private router: Router,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
+    private authService: AuthService,
   ) { }
 
   ngOnInit(): void { }
@@ -62,8 +65,14 @@ export class AppTopBarComponent implements OnInit {
   }
 
   logout(): void {
-    localStorage.clear();
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe(() => {
+      localStorage.clear();
+      if (environment.localLogin) {
+        this.router.navigate(['/login']);
+      } else {
+        window.location.href = `${environment.ssoUrl}/login`;
+      }
+    });
   }
 
   accept(): void {
