@@ -71,19 +71,33 @@
         <span class="nx-plan-card__limit-value">{{ plan.maxClients }}</span>
         <span class="nx-plan-card__limit-label">Clientes</span>
       </div>
+      <div class="nx-plan-card__limit" *ngIf="plan.maxWhatsappBotDailyMessagesPerNumber && (plan.hasWhatsappBotSequential || plan.hasWhatsappBotAI)">
+        <span class="nx-plan-card__limit-value">{{ plan.maxWhatsappBotDailyMessagesPerNumber }}</span>
+        <span class="nx-plan-card__limit-label">Msgs bot/día</span>
+      </div>
     </div>
 
     <!-- Feature tags -->
-    <div class="nx-plan-card__features" *ngIf="plan.hasOnlineBooking || plan.hasWhatsappBot || plan.hasPromotions || plan.hasCoupons || plan.hasAdvancedReports || plan.hasFinance || plan.hasCustomBranding || plan.hasTrialPeriod">
-      <span class="nx-plan-card__tag" *ngIf="plan.hasOnlineBooking">Reservas Online</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasWhatsappBot">Bot WhatsApp</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasPromotions">Promociones</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasCoupons">Cupones</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasAdvancedReports">Reportes</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasFinance">Finanzas</span>
-      <span class="nx-plan-card__tag" *ngIf="plan.hasCustomBranding">Marca propia</span>
-      <span class="nx-plan-card__tag nx-plan-card__tag--info" *ngIf="plan.hasTrialPeriod">Prueba {{ plan.trialDays }} días</span>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <p-tag *ngIf="plan.hasOnlineBooking" value="Reservas Online" severity="success" [rounded]="true" icon="pi pi-calendar"></p-tag>
+      <p-tag *ngIf="plan.hasWhatsappBotSequential" value="Bot WhatsApp" severity="success" [rounded]="true" icon="pi pi-whatsapp"></p-tag>
+      <p-tag *ngIf="plan.hasWhatsappBotAI" value="Bot WhatsApp IA" severity="success" [rounded]="true" icon="pi pi-sparkles"></p-tag>
+      <p-tag *ngIf="plan.hasPromotions" value="Promociones" severity="success" [rounded]="true" icon="pi pi-megaphone"></p-tag>
+      <p-tag *ngIf="plan.hasCoupons" value="Cupones" severity="success" [rounded]="true" icon="pi pi-ticket"></p-tag>
+      <p-tag *ngIf="plan.hasAdvancedReports" value="Reportes" severity="success" [rounded]="true" icon="pi pi-chart-bar"></p-tag>
+      <p-tag *ngIf="plan.hasFinance" value="Finanzas" severity="success" [rounded]="true" icon="pi pi-money-bill"></p-tag>
+      <p-tag *ngIf="plan.hasCustomBranding" value="Marca propia" severity="success" [rounded]="true" icon="pi pi-palette"></p-tag>
+      <p-tag *ngIf="plan.hasAudioTranscription" value="Transcripcion" severity="success" [rounded]="true" icon="pi pi-microphone"></p-tag>
+      <p-tag *ngIf="plan.hasTrialPeriod" [value]="'Prueba ' + plan.trialDays + ' dias'" severity="info" [rounded]="true" icon="pi pi-clock"></p-tag>
     </div>
+
+    <!-- Feature list -->
+    <ul class="list-none p-0 m-0 mb-3" *ngIf="plan.features?.length">
+      <li *ngFor="let f of plan.features" class="py-1 flex align-items-center gap-2 text-sm">
+        <i class="pi pi-check-circle" style="color: var(--nx-accent-green)"></i>
+        <span>{{ f }}</span>
+      </li>
+    </ul>
 
     <!-- Actions -->
     <div class="nx-plan-card__actions">
@@ -98,124 +112,164 @@
 </div>
 
 <!-- Plan dialog -->
-<p-dialog [(visible)]="planDialog" [header]="isNewPlan ? 'Nuevo Plan' : 'Editar Plan'"
-  [modal]="true" [style]="{width: '600px'}" [draggable]="false">
-  <div class="flex flex-column gap-3 py-2">
-
+<p-dialog [(visible)]="planDialog" [style]="{width: '520px', maxWidth: '95vw'}" [header]="isNewPlan ? 'Nuevo Plan' : 'Editar Plan'"
+  [modal]="true" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="p-fluid">
     <div class="grid">
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Nombre interno *</label>
-        <input pInputText [(ngModel)]="editingPlan.name" placeholder="ej: basic" class="w-full">
+      <div class="col-6 field">
+        <label class="nx-form-label">Nombre interno *</label>
+        <input pInputText [(ngModel)]="editingPlan.name" [disabled]="!isNewPlan" placeholder="ej: basic" class="w-full">
       </div>
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Nombre visible *</label>
+      <div class="col-6 field">
+        <label class="nx-form-label">Nombre visible *</label>
         <input pInputText [(ngModel)]="editingPlan.displayName" placeholder="ej: Básico" class="w-full">
       </div>
     </div>
-
-    <div>
-      <label class="block mb-1 font-medium">Descripción</label>
+    <div class="field">
+      <label class="nx-form-label">Descripcion</label>
       <textarea pInputTextarea [(ngModel)]="editingPlan.description" rows="2" class="w-full"></textarea>
     </div>
-
     <div class="grid">
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Precio mensual ($)</label>
-        <p-inputNumber [(ngModel)]="editingPlan.monthlyPrice" [min]="0" mode="decimal" [useGrouping]="false" inputStyleClass="w-full"></p-inputNumber>
+      <div class="col-6 field">
+        <label class="nx-form-label">Precio mensual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.monthlyPrice" mode="currency" currency="ARS" locale="es-AR" class="w-full"></p-inputNumber>
       </div>
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Precio anual ($)</label>
-        <p-inputNumber [(ngModel)]="editingPlan.annualPrice" [min]="0" mode="decimal" [useGrouping]="false" inputStyleClass="w-full"></p-inputNumber>
+      <div class="col-6 field">
+        <label class="nx-form-label">Precio anual</label>
+        <p-inputNumber [(ngModel)]="editingPlan.annualPrice" mode="currency" currency="ARS" locale="es-AR" class="w-full"></p-inputNumber>
       </div>
     </div>
 
-    <p-divider align="left"><b>Límites</b></p-divider>
-
+    <!-- Limites de recursos -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Limites de recursos</span></p-divider>
     <div class="grid">
-      <div class="col-6">
-        <label class="block mb-1 text-sm">Profesionales</label>
-        <p-inputNumber [(ngModel)]="editingPlan.maxProfessionals" [min]="1" inputStyleClass="w-full"></p-inputNumber>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. profesionales</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxProfessionals" [min]="1" class="w-full"></p-inputNumber>
       </div>
-      <div class="col-6">
-        <label class="block mb-1 text-sm">Servicios</label>
-        <p-inputNumber [(ngModel)]="editingPlan.maxServices" [min]="1" inputStyleClass="w-full"></p-inputNumber>
-      </div>
-      <div class="col-6">
-        <label class="block mb-1 text-sm">Turnos/mes</label>
-        <p-inputNumber [(ngModel)]="editingPlan.maxMonthlyAppointments" [min]="1" inputStyleClass="w-full"></p-inputNumber>
-      </div>
-      <div class="col-6">
-        <label class="block mb-1 text-sm">Clientes</label>
-        <p-inputNumber [(ngModel)]="editingPlan.maxClients" [min]="1" inputStyleClass="w-full"></p-inputNumber>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. servicios</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxServices" [min]="1" class="w-full"></p-inputNumber>
       </div>
     </div>
-
-    <p-divider align="left"><b>Funcionalidades</b></p-divider>
-
     <div class="grid">
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Reservas online</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasOnlineBooking"></p-inputSwitch>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. turnos por mes</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxMonthlyAppointments" [min]="1" class="w-full"></p-inputNumber>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Bot WhatsApp</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsappBot"></p-inputSwitch>
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. clientes</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxClients" [min]="1" class="w-full"></p-inputNumber>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Promociones</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasPromotions"></p-inputSwitch>
+    </div>
+    <div class="grid" *ngIf="editingPlan.hasWhatsappBotSequential || editingPlan.hasWhatsappBotAI">
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. msgs bot WA/dia por numero</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxWhatsappBotDailyMessagesPerNumber" [min]="0" class="w-full"></p-inputNumber>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Cupones</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasCoupons"></p-inputSwitch>
+    </div>
+    <div class="nx-dialog-hint mb-3">
+      <i class="pi pi-info-circle"></i>
+      <span>Usa 99999 para ilimitado en cualquier campo numerico.</span>
+    </div>
+
+    <!-- Funcionalidades -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Funcionalidades</span></p-divider>
+    <div class="grid mb-2">
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasOnlineBooking"></p-inputSwitch>
+          <label class="text-sm">Reservas Online</label>
+        </div>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Reportes avanzados</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasAdvancedReports"></p-inputSwitch>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsappBotSequential"></p-inputSwitch>
+          <label class="text-sm">Bot WhatsApp</label>
+        </div>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Finanzas</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasFinance"></p-inputSwitch>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasWhatsappBotAI"></p-inputSwitch>
+          <label class="text-sm">Bot WhatsApp IA</label>
+        </div>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Marca personalizada</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasCustomBranding"></p-inputSwitch>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasPromotions"></p-inputSwitch>
+          <label class="text-sm">Promociones</label>
+        </div>
       </div>
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Activo</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.isActive"></p-inputSwitch>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasCoupons"></p-inputSwitch>
+          <label class="text-sm">Cupones</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasAdvancedReports"></p-inputSwitch>
+          <label class="text-sm">Reportes</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasFinance"></p-inputSwitch>
+          <label class="text-sm">Finanzas</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasCustomBranding"></p-inputSwitch>
+          <label class="text-sm">Marca Personalizada</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasAudioTranscription"></p-inputSwitch>
+          <label class="text-sm">Transcripcion de Audio</label>
+        </div>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="col-6 flex align-items-center justify-content-between">
-        <label>Período de prueba</label>
-        <p-inputSwitch [(ngModel)]="editingPlan.hasTrialPeriod"></p-inputSwitch>
+    <!-- Periodo de prueba -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Periodo de prueba</span></p-divider>
+    <div class="flex align-items-center gap-2 mb-3">
+      <p-inputSwitch [(ngModel)]="editingPlan.hasTrialPeriod"></p-inputSwitch>
+      <label class="text-sm">Tiene periodo de prueba gratuito</label>
+    </div>
+    <div *ngIf="editingPlan.hasTrialPeriod" class="field mb-3">
+      <label class="nx-form-label">Dias de prueba</label>
+      <p-dropdown [(ngModel)]="editingPlan.trialDays"
+        [options]="[{label: '7 dias', value: 7}, {label: '14 dias', value: 14}, {label: '21 dias', value: 21}, {label: '30 dias', value: 30}]"
+        optionLabel="label" optionValue="value" class="w-full" appendTo="body"
+        placeholder="Seleccionar dias"></p-dropdown>
+    </div>
+    <div class="nx-dialog-hint mb-3">
+      <i class="pi pi-info-circle"></i>
+      <span *ngIf="editingPlan.hasTrialPeriod">El usuario podra usar la app gratis durante {{ editingPlan.trialDays }} dias. Al vencer se le cobrara el proporcional del mes.</span>
+      <span *ngIf="!editingPlan.hasTrialPeriod">Sin periodo de prueba: la cuenta se crea suspendida hasta que el usuario realice el primer pago.</span>
+    </div>
+
+    <!-- Otros -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Otros</span></p-divider>
+    <div class="field">
+      <div class="flex align-items-center justify-content-between mb-2">
+        <label class="nx-form-label mb-0">Caracteristicas (una por linea)</label>
+        <button pButton type="button" label="Generar automaticamente" icon="pi pi-sync"
+          class="p-button-outlined p-button-sm p-button-secondary" (click)="generateFeatures()"></button>
       </div>
-      <div class="col-6" *ngIf="editingPlan.hasTrialPeriod">
-        <label class="block mb-1 text-sm">Días de prueba</label>
-        <p-inputNumber [(ngModel)]="editingPlan.trialDays" [min]="1" inputStyleClass="w-full"></p-inputNumber>
-      </div>
+      <textarea pInputTextarea [(ngModel)]="featuresText" rows="4" class="w-full"
+        placeholder="Una caracteristica por linea"></textarea>
     </div>
-
-    <p-divider align="left"><b>Funcionalidades visibles</b></p-divider>
-
-    <div class="flex gap-2">
-      <input pInputText [(ngModel)]="featureInput" placeholder="Ej: 3 profesionales" class="flex-1"
-        (keyup.enter)="addFeature()">
-      <button pButton icon="pi pi-plus" (click)="addFeature()" pTooltip="Agregar"></button>
+    <div class="flex align-items-center gap-2 mt-2">
+      <label class="nx-form-label" style="margin-bottom: 0">Activo</label>
+      <p-inputSwitch [(ngModel)]="editingPlan.isActive"></p-inputSwitch>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <span *ngFor="let f of editingPlan.features" class="p-tag p-tag-info flex align-items-center gap-1">
-        {{ f }}
-        <i class="pi pi-times ml-1 cursor-pointer" (click)="removeFeature(f)"></i>
-      </span>
-    </div>
-
   </div>
-
   <ng-template pTemplate="footer">
-    <button pButton label="Cancelar" class="p-button-text" (click)="planDialog = false"></button>
-    <button pButton label="Guardar" [loading]="saving" (click)="savePlan()"></button>
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-outlined p-button-sm"
+      (click)="planDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" class="p-button-sm" [loading]="saving" (click)="savePlan()"></button>
   </ng-template>
 </p-dialog>
