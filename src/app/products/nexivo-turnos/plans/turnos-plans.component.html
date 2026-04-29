@@ -88,6 +88,7 @@
       <p-tag *ngIf="plan.hasFinance" value="Finanzas" severity="success" [rounded]="true" icon="pi pi-money-bill"></p-tag>
       <p-tag *ngIf="plan.hasCustomBranding" value="Marca propia" severity="success" [rounded]="true" icon="pi pi-palette"></p-tag>
       <p-tag *ngIf="plan.hasAudioTranscription" value="Transcripcion" severity="success" [rounded]="true" icon="pi pi-microphone"></p-tag>
+      <p-tag *ngIf="plan.hasServiceInfoBot" value="Bot info servicios" severity="success" [rounded]="true" icon="pi pi-list"></p-tag>
       <p-tag *ngIf="plan.hasTrialPeriod" [value]="'Prueba ' + plan.trialDays + ' dias'" severity="info" [rounded]="true" icon="pi pi-clock"></p-tag>
     </div>
 
@@ -228,6 +229,12 @@
         <div class="flex align-items-center gap-2">
           <p-inputSwitch [(ngModel)]="editingPlan.hasAudioTranscription"></p-inputSwitch>
           <label class="text-sm">Transcripcion de Audio</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasServiceInfoBot"></p-inputSwitch>
+          <label class="text-sm">Bot responde sobre servicios</label>
         </div>
       </div>
     </div>
