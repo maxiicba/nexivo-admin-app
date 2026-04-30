@@ -1195,70 +1195,163 @@ p-inputnumber,
 
 .nx-plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
-  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .nx-plan-card {
+  position: relative;
   background: var(--nx-card-bg);
   border: 1px solid var(--nx-border);
   border-radius: var(--nx-radius-xl);
   padding: 0;
   display: flex;
   flex-direction: column;
-  transition: box-shadow var(--nx-transition), transform var(--nx-transition);
+  transition: box-shadow var(--nx-transition), transform var(--nx-transition), border-color var(--nx-transition);
   overflow: hidden;
+
+  // Decorative top accent strip
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--nx-primary), var(--nx-accent-purple, #8b5cf6));
+    opacity: 0;
+    transition: opacity var(--nx-transition);
+  }
 
   &:hover {
     box-shadow: var(--nx-shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: var(--nx-border-strong, var(--nx-border));
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   &--inactive {
-    opacity: 0.6;
+    opacity: 0.55;
+    background: var(--nx-card-bg);
+  }
+
+  &--featured {
+    border-color: var(--nx-primary);
+    box-shadow: 0 0 0 1px var(--nx-primary), var(--nx-shadow-sm);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &__ribbon {
+    position: absolute;
+    top: 0.85rem;
+    right: -2.25rem;
+    transform: rotate(35deg);
+    background: linear-gradient(135deg, var(--nx-primary), var(--nx-accent-purple, #8b5cf6));
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    z-index: 1;
+    pointer-events: none;
+
+    i {
+      font-size: 0.6rem;
+    }
   }
 
   &__header {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 1rem 1.25rem;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 1.15rem 1.25rem 1rem;
     border-bottom: 1px solid var(--nx-border-subtle);
   }
 
   &__drag {
+    flex-shrink: 0;
     color: var(--nx-text-muted);
     cursor: grab;
-    font-size: 0.85rem;
-    padding: 0.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.45rem;
     border-radius: var(--nx-radius-sm);
-    transition: color var(--nx-transition-fast);
+    transition: all var(--nx-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.15rem;
 
     &:hover {
-      color: var(--nx-text-secondary);
+      color: var(--nx-text-primary);
+      background: var(--nx-hover);
+      border-color: var(--nx-border);
+    }
+
+    &:active {
+      cursor: grabbing;
     }
   }
 
+  &__heading {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   &__name {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--nx-text-primary);
-    flex: 1;
     letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--nx-text-secondary);
+    line-height: 1.45;
   }
 
   &__badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.2rem 0.6rem;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem 0.25rem 0.55rem;
     border-radius: var(--nx-radius-full);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    line-height: 1;
+    margin-top: 0.15rem;
+
+    &-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+    }
 
     &--active {
-      background: var(--nx-success-soft);
-      color: var(--nx-success);
+      background: var(--nx-accent-green-soft, var(--nx-success-soft));
+      color: var(--nx-accent-green, var(--nx-success));
     }
 
     &--inactive {
@@ -1267,46 +1360,64 @@ p-inputnumber,
     }
   }
 
-  &__desc {
-    padding: 0.75rem 1.25rem 0;
-    margin: 0;
-    font-size: 0.82rem;
-    color: var(--nx-text-secondary);
-    line-height: 1.5;
-  }
-
   &__pricing {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 0;
-    padding: 1rem 1.25rem;
+    padding: 1.15rem 1.25rem;
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--nx-primary) 4%, transparent) 0%,
+      transparent 100%);
   }
 
   &__price {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.3rem;
+    min-width: 0;
+
+    &--primary {
+      .nx-plan-card__price-value,
+      .nx-plan-card__price-currency {
+        color: var(--nx-text-primary);
+      }
+    }
   }
 
   &__price-label {
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: 600;
     color: var(--nx-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    line-height: 1;
+  }
+
+  &__price-currency {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--nx-text-secondary);
+    letter-spacing: -0.02em;
   }
 
   &__price-value {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--nx-text-primary);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
   }
 
   &__price-divider {
     width: 1px;
-    height: 2.5rem;
+    align-self: stretch;
     background: var(--nx-border);
     margin: 0 1rem;
     flex-shrink: 0;
@@ -1315,63 +1426,108 @@ p-inputnumber,
   &__limits {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0 1.25rem 1rem;
+    gap: 0.65rem 0.75rem;
+    padding: 0.25rem 1.25rem 1.15rem;
     border-bottom: 1px solid var(--nx-border-subtle);
   }
 
   &__limit {
     display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      min-width: 0;
+    }
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__limit-icon {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--nx-radius-md);
+    background: var(--nx-primary-soft);
+    color: var(--nx-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
   }
 
   &__limit-value {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--nx-text-primary);
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
   }
 
   &__limit-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--nx-text-secondary);
+    line-height: 1.2;
   }
 
-  &__features {
+  &__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    padding: 0.85rem 1.25rem;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem 0.5rem;
   }
 
-  &__tag {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--nx-radius-full);
-    background: var(--nx-primary-soft);
-    color: var(--nx-primary);
-    letter-spacing: 0.01em;
+  &__features-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 1.25rem 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 
-    &--info {
-      background: var(--nx-info-soft);
-      color: var(--nx-info);
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      font-size: 0.82rem;
+      color: var(--nx-text-secondary);
+      line-height: 1.4;
+    }
+
+    i {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--nx-accent-green-soft, var(--nx-success-soft));
+      color: var(--nx-accent-green, var(--nx-success));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      margin-top: 0.15rem;
     }
   }
 
   &__actions {
     display: flex;
     gap: 0.5rem;
-    padding: 0.85rem 1.25rem 1.15rem;
+    padding: 1rem 1.25rem 1.15rem;
+    margin-top: auto;
   }
 
   &__btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     border: 1px solid var(--nx-border);
     border-radius: var(--nx-radius-md);
     background: transparent;
@@ -1380,7 +1536,8 @@ p-inputnumber,
     font-size: 0.82rem;
     font-weight: 600;
     transition: all var(--nx-transition-fast);
-    padding: 0.5rem 1rem;
+    padding: 0.55rem 1rem;
+    min-height: 38px;
 
     i {
       font-size: 0.8rem;
@@ -1389,9 +1546,10 @@ p-inputnumber,
     &--edit {
       flex: 1;
       color: var(--nx-text-primary);
+      background: var(--nx-hover);
 
       &:hover {
-        background: var(--nx-hover);
+        background: var(--nx-primary-soft);
         border-color: var(--nx-primary);
         color: var(--nx-primary);
       }
@@ -1399,23 +1557,71 @@ p-inputnumber,
 
     &--delete {
       color: var(--nx-text-muted);
-      padding: 0.5rem 0.65rem;
+      padding: 0.55rem 0.7rem;
 
       &:hover {
-        background: var(--nx-error-soft);
-        border-color: var(--nx-error);
-        color: var(--nx-error);
+        background: var(--nx-error-soft, var(--nx-accent-red-soft));
+        border-color: var(--nx-error, var(--nx-accent-red));
+        color: var(--nx-error, var(--nx-accent-red));
       }
     }
   }
 }
 
+// ============================================================================
+// Themed chips (used by plan cards and other lists)
+// ============================================================================
+.nx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--nx-radius-full);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  background: var(--nx-primary-soft);
+  color: var(--nx-primary);
+  border: 1px solid transparent;
+  white-space: nowrap;
+
+  i {
+    font-size: 0.7rem;
+  }
+
+  &--green   { background: var(--nx-accent-green-soft);  color: var(--nx-accent-green); }
+  &--blue    { background: var(--nx-accent-blue-soft);   color: var(--nx-accent-blue); }
+  &--purple  { background: var(--nx-accent-purple-soft); color: var(--nx-accent-purple); }
+  &--pink    { background: var(--nx-accent-pink-soft);   color: var(--nx-accent-pink); }
+  &--orange  { background: var(--nx-accent-orange-soft); color: var(--nx-accent-orange); }
+  &--cyan    { background: var(--nx-accent-cyan-soft);   color: var(--nx-accent-cyan); }
+  &--red     { background: var(--nx-accent-red-soft);    color: var(--nx-accent-red); }
+  &--info    { background: var(--nx-info-soft);          color: var(--nx-info); }
+}
+
 @media (max-width: 767px) {
   .nx-plans-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
-  .nx-plan-card__price-value {
-    font-size: 1.15rem;
+  .nx-plan-card {
+    &__price-value {
+      font-size: 1.25rem;
+    }
+
+    &__pricing {
+      padding: 1rem;
+    }
+
+    &__header,
+    &__limits,
+    &__chips,
+    &__features-list,
+    &__actions {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }
