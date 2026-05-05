@@ -28,6 +28,7 @@ const DEFAULT_PLAN = () => ({
   hasAudioTranscription: false,
   hasServiceInfoBot: false,
   hasLeaderboard: false,
+  hasCashbox: false,
   maxWhatsappBotDailyMessagesPerNumber: 30,
   hasTrialPeriod: false, trialDays: 14,
   features: [] as string[],
@@ -126,6 +127,7 @@ export class TurnosPlansComponent implements OnInit, OnDestroy {
     if (p.hasAudioTranscription) lines.push('Transcripcion de audio');
     if (p.hasServiceInfoBot) lines.push('Bot responde sobre servicios');
     if (p.hasLeaderboard) lines.push('Top semanal en TV');
+    if (p.hasCashbox) lines.push('Caja registradora');
     lines.push('Soporte por email');
 
     this.editingPlan.features = lines;
