@@ -120,6 +120,7 @@
       <span class="nx-chip nx-chip--purple" *ngIf="plan.hasCustomBranding"><i class="pi pi-palette"></i>Marca propia</span>
       <span class="nx-chip nx-chip--blue" *ngIf="plan.hasAudioTranscription"><i class="pi pi-microphone"></i>Transcripción</span>
       <span class="nx-chip nx-chip--cyan" *ngIf="plan.hasServiceInfoBot"><i class="pi pi-list"></i>Bot info servicios</span>
+      <span class="nx-chip nx-chip--orange" *ngIf="plan.hasLeaderboard"><i class="pi pi-trophy"></i>Top semanal</span>
       <span class="nx-chip nx-chip--info" *ngIf="plan.hasTrialPeriod"><i class="pi pi-clock"></i>Prueba {{ plan.trialDays }} días</span>
     </div>
 
@@ -267,6 +268,12 @@
         <div class="flex align-items-center gap-2">
           <p-inputSwitch [(ngModel)]="editingPlan.hasServiceInfoBot"></p-inputSwitch>
           <label class="text-sm">Bot responde sobre servicios</label>
+        </div>
+      </div>
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasLeaderboard"></p-inputSwitch>
+          <label class="text-sm">Top semanal en TV</label>
         </div>
       </div>
     </div>
