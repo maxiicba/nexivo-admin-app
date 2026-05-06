@@ -57,47 +57,106 @@
   </div>
 </div>
 
-<!-- Status chips -->
+<!-- Filters -->
 <div class="card mb-3 p-3">
+  <div class="grid">
+    <div class="col-12 md:col-3">
+      <label class="block text-sm font-medium mb-1">Búsqueda</label>
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" placeholder="Nombre, slug o email…"
+               [ngModel]="searchInput" (ngModelChange)="onSearchChange($event)" class="w-full">
+      </span>
+    </div>
+    <div class="col-6 md:col-2">
+      <label class="block text-sm font-medium mb-1">Estado</label>
+      <p-dropdown [options]="statusOptions" [(ngModel)]="filters.status" optionLabel="label" optionValue="value"
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div class="col-6 md:col-2">
+      <label class="block text-sm font-medium mb-1">Plan</label>
+      <p-dropdown [options]="plans" [(ngModel)]="filters.planId" optionLabel="label" optionValue="value"
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div class="col-6 md:col-2">
+      <label class="block text-sm font-medium mb-1">Vence en (días)</label>
+      <p-inputNumber [(ngModel)]="filters.expiringInDays" (ngModelChange)="applyFilters()"
+                     [min]="0" [showButtons]="false" [style]="{width:'100%'}"></p-inputNumber>
+    </div>
+    <div class="col-6 md:col-2">
+      <label class="block text-sm font-medium mb-1">MP status</label>
+      <input pInputText [(ngModel)]="filters.mpStatus" (change)="applyFilters()" placeholder="ej: authorized" class="w-full">
+    </div>
+    <div class="col-12 md:col-1 flex align-items-end">
+      <button pButton icon="pi pi-times" class="p-button-text" pTooltip="Limpiar filtros" (click)="clearFilters()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk actions bar -->
+<div *ngIf="selected.length > 0" class="card mb-3 p-3 nx-bulk-bar" style="background: var(--nx-surface-hover, #f8fafc);">
   <div class="flex flex-wrap gap-2 align-items-center">
-    <span class="text-sm font-medium mr-2">Estado:</span>
-    <p-tag value="Prueba: {{ stats.byStatus?.trialing }}" severity="info" [rounded]="true"></p-tag>
-    <p-tag value="Activas: {{ stats.byStatus?.active }}" severity="success" [rounded]="true"></p-tag>
-    <p-tag value="Vencidas: {{ stats.byStatus?.past_due }}" severity="warning" [rounded]="true"></p-tag>
-    <p-tag value="Suspendidas: {{ stats.byStatus?.suspended }}" severity="danger" [rounded]="true"></p-tag>
+    <span class="font-medium">{{ selected.length }} seleccionada(s)</span>
+    <span class="flex-1"></span>
+    <button pButton label="Regalar meses" icon="pi pi-gift" class="p-button-sm" (click)="openBulkComp()"></button>
+    <button pButton label="Cambiar estado" icon="pi pi-sync" class="p-button-sm p-button-secondary" (click)="openBulkStatus()"></button>
+    <button pButton label="Notificar" icon="pi pi-send" class="p-button-sm p-button-secondary" (click)="openBulkNotify()"></button>
+    <button pButton label="Limpiar" icon="pi pi-times" class="p-button-sm p-button-text" (click)="selected = []"></button>
   </div>
 </div>
 
 <!-- Table -->
 <div class="card">
-  <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="15"
-    [globalFilterFields]="['business.name','plan.displayName','status']" [rowHover]="true">
+  <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords"
+           [lazy]="true" (onLazyLoad)="onPageChange($event)" [rowsPerPageOptions]="[20, 50, 100]"
+           [rowHover]="true" dataKey="id" [(selection)]="selected">
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="business.name">Negocio <p-sortIcon field="business.name"/></th>
-        <th pSortableColumn="plan.displayName">Plan <p-sortIcon field="plan.displayName"/></th>
+        <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+        <th>Negocio</th>
+        <th>Plan</th>
         <th>Ciclo</th>
-        <th pSortableColumn="currentPrice">Precio <p-sortIcon field="currentPrice"/></th>
-        <th pSortableColumn="status">Estado <p-sortIcon field="status"/></th>
-        <th>Período actual</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Vence</th>
+        <th>Período</th>
         <th>Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-sub>
-      <tr>
-        <td>{{ sub.business?.name || sub.businessId }}</td>
+      <tr style="cursor: pointer" (click)="goToDetail(sub)">
+        <td (click)="$event.stopPropagation()">
+          <p-tableCheckbox [value]="sub"></p-tableCheckbox>
+        </td>
+        <td>
+          <div class="font-medium">{{ sub.business?.name || sub.businessId }}</div>
+          <div class="text-xs text-color-secondary" *ngIf="sub.business?.email">{{ sub.business.email }}</div>
+        </td>
         <td>{{ sub.plan?.displayName || '—' }}</td>
         <td>{{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</td>
         <td>{{ formatCurrency(sub.currentPrice) }}</td>
         <td><p-tag [value]="sub.status" [severity]="getStatusSeverity(sub.status)" /></td>
+        <td>
+          <ng-container *ngIf="sub.currentPeriodEnd">
+            <p-tag [value]="daysUntil(sub.currentPeriodEnd) + 'd'"
+                   [severity]="daysBadgeSeverity(daysUntil(sub.currentPeriodEnd))" [rounded]="true"></p-tag>
+          </ng-container>
+        </td>
         <td class="text-sm">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
         <td>
           <div class="flex gap-1">
-            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="openEdit(sub)" pTooltip="Editar"></button>
-            <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="openCancel(sub)" pTooltip="Cancelar"></button>
+            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
+                    (click)="goToDetail(sub); $event.stopPropagation()" pTooltip="Ver detalle"></button>
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
+                    (click)="openEdit(sub, $event)" pTooltip="Editar plan/ciclo"></button>
+            <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                    (click)="openCancel(sub, $event)" pTooltip="Cancelar"></button>
           </div>
         </td>
       </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="9" class="text-center p-4 text-color-secondary">Sin resultados</td></tr>
     </ng-template>
   </p-table>
 </div>
@@ -121,13 +180,94 @@
 </p-dialog>
 
 <!-- Cancel dialog -->
-<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true" [style]="{width: '400px'}">
-  <div class="py-2">
-    <label class="block mb-1 font-medium">Motivo de cancelación</label>
-    <input pInputText [(ngModel)]="cancelReason" placeholder="Motivo..." class="w-full">
+<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <input pInputText [(ngModel)]="cancelReason" placeholder="Motivo…" class="w-full">
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-checkbox [(ngModel)]="cancelImmediate" [binary]="true" inputId="cancel-immediate"></p-checkbox>
+      <label for="cancel-immediate" class="text-sm">Cancelación inmediata (revoca preapproval MP)</label>
+    </div>
+    <div class="text-xs text-color-secondary" *ngIf="!cancelImmediate">
+      Sin marcar, la suscripción queda marcada como cancelada al fin del período actual.
+    </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton label="Volver" class="p-button-text" (click)="cancelDialog = false"></button>
-    <button pButton label="Confirmar cancelación" class="p-button-danger" [loading]="saving" (click)="confirmCancel()"></button>
+    <button pButton label="Confirmar" class="p-button-danger" [loading]="saving" (click)="confirmCancel()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Bulk grant comp dialog -->
+<p-dialog [(visible)]="bulkCompDialog" header="Regalar meses (masivo)" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
+    <div>
+      <label class="block mb-1 font-medium">Meses</label>
+      <p-inputNumber [(ngModel)]="bulkCompMonths" [min]="1" [max]="24" [showButtons]="true" [style]="{width:'100%'}"></p-inputNumber>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="bulkCompReason" rows="3" class="w-full" placeholder="Ej: Campaña de fidelización…"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="bulkCompDialog = false"></button>
+    <button pButton label="Aplicar" [loading]="saving"
+            [disabled]="!bulkCompReason.trim() || bulkCompMonths < 1"
+            (click)="confirmBulkComp()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Bulk change status dialog -->
+<p-dialog [(visible)]="bulkStatusDialog" header="Cambiar estado (masivo)" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
+    <div>
+      <label class="block mb-1 font-medium">Nuevo estado</label>
+      <p-dropdown [options]="bulkStatusOptions" [(ngModel)]="bulkStatusValue" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="bulkStatusReason" rows="3" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="bulkStatusDialog = false"></button>
+    <button pButton label="Aplicar" [loading]="saving"
+            [disabled]="!bulkStatusReason.trim()"
+            (click)="confirmBulkStatus()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Bulk notify dialog -->
+<p-dialog [(visible)]="bulkNotifyDialog" header="Notificar (masivo)" [modal]="true" [style]="{width: '500px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
+    <div class="grid">
+      <div class="col-6">
+        <label class="block mb-1 font-medium">Canal</label>
+        <p-dropdown [options]="notifyChannelOptions" [(ngModel)]="bulkNotifyChannel" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+      </div>
+      <div class="col-6">
+        <label class="block mb-1 font-medium">Plantilla</label>
+        <input pInputText [(ngModel)]="bulkNotifyTemplate" placeholder="reminder | overdue | trial_ending" class="w-full">
+      </div>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Mensaje custom (opcional)</label>
+      <textarea pInputTextarea [(ngModel)]="bulkNotifyMessage" rows="3" class="w-full"></textarea>
+    </div>
+    <div class="text-xs text-color-secondary">
+      El envío real está diferido — por ahora se registra la intención en auditoría.
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="bulkNotifyDialog = false"></button>
+    <button pButton label="Notificar" [loading]="saving"
+            [disabled]="!bulkNotifyTemplate.trim()"
+            (click)="confirmBulkNotify()"></button>
   </ng-template>
 </p-dialog>
