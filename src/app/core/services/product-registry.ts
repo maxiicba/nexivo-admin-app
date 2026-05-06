@@ -36,5 +36,10 @@ export const PRODUCTS: ProductConfig[] = [
     icon: 'pi pi-calendar',
     apiUrl: environment.turnosApiUrl,
     routePath: '/products/nexivo-turnos',
+    menuItems: [
+      { label: 'Suscripciones', icon: 'pi pi-list',        routeSuffix: 'subscriptions' },
+      { label: 'Planes',        icon: 'pi pi-tag',         routeSuffix: 'plans' },
+      { label: 'Métricas',      icon: 'pi pi-chart-line',  routeSuffix: 'metrics' },
+    ],
   },
 ];
