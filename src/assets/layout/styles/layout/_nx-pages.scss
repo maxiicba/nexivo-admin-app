@@ -1358,6 +1358,16 @@ p-inputnumber,
       background: var(--nx-hover);
       color: var(--nx-text-muted);
     }
+
+    &--private {
+      background: color-mix(in srgb, var(--nx-warning, #f59e0b) 15%, transparent);
+      color: var(--nx-warning, #f59e0b);
+    }
+
+    &--restricted {
+      background: color-mix(in srgb, var(--nx-danger, #ef4444) 15%, transparent);
+      color: var(--nx-danger, #ef4444);
+    }
   }
 
   &__pricing {

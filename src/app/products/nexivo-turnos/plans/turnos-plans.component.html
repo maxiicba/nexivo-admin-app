@@ -47,6 +47,16 @@
         <span class="nx-plan-card__badge-dot"></span>
         {{ plan.isActive ? 'Activo' : 'Inactivo' }}
       </span>
+      <span class="nx-plan-card__badge nx-plan-card__badge--private"
+            *ngIf="plan.visibility === 'private'">
+        <i class="pi pi-lock"></i>
+        Privado
+      </span>
+      <span class="nx-plan-card__badge nx-plan-card__badge--restricted"
+            *ngIf="plan.visibility === 'restricted'">
+        <i class="pi pi-shield"></i>
+        Restringido
+      </span>
     </div>
 
     <!-- Pricing -->
