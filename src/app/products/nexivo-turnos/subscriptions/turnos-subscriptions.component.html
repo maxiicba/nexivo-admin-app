@@ -93,6 +93,18 @@
   </div>
 </div>
 
+<!-- Bulk failures banner -->
+<div *ngIf="bulkFailures.length > 0" class="card mb-3 p-3"
+     style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid var(--yellow-500, #f59e0b);">
+  <div class="flex align-items-center gap-2">
+    <i class="pi pi-exclamation-triangle" style="color: var(--yellow-500);"></i>
+    <span class="font-medium">{{ bulkFailures.length }} suscripciones no se procesaron en la última acción masiva</span>
+    <span class="flex-1"></span>
+    <button pButton label="Ver detalle" icon="pi pi-eye" class="p-button-sm p-button-text" (click)="openBulkFailures()"></button>
+    <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm" (click)="bulkFailures = []" pTooltip="Descartar"></button>
+  </div>
+</div>
+
 <!-- Bulk actions bar -->
 <div *ngIf="selected.length > 0" class="card mb-3 p-3 nx-bulk-bar" style="background: var(--nx-surface-hover, #f8fafc);">
   <div class="flex flex-wrap gap-2 align-items-center">
@@ -104,6 +116,20 @@
     <button pButton label="Limpiar" icon="pi pi-times" class="p-button-sm p-button-text" (click)="selected = []"></button>
   </div>
 </div>
+
+<!-- Bulk failures dialog -->
+<p-dialog [(visible)]="bulkFailuresDialog" header="Acciones que fallaron" [modal]="true" [style]="{width: '600px'}">
+  <div class="text-sm text-color-secondary mb-2">{{ bulkFailures.length }} suscripciones no se procesaron:</div>
+  <div class="p-0" style="max-height: 400px; overflow-y: auto;">
+    <div *ngFor="let f of bulkFailures" class="p-2 border-bottom-1 border-200">
+      <code class="text-xs">{{ f.id }}</code>
+      <div class="text-sm text-red-500 mt-1">{{ f.error }}</div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cerrar" (click)="bulkFailuresDialog = false"></button>
+  </ng-template>
+</p-dialog>
 
 <!-- Table -->
 <div class="card">

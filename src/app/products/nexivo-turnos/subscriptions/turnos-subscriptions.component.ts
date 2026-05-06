@@ -78,6 +78,10 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   bulkNotifyTemplate = 'reminder';
   bulkNotifyMessage = '';
 
+  // Bulk failures dialog
+  bulkFailuresDialog = false;
+  bulkFailures: { id: string; error: string }[] = [];
+
   saving = false;
 
   // Options
@@ -363,9 +367,18 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     if (ko === 0) {
       this.messageService.add({ severity: 'success', summary: 'OK', detail: `${ok} ${verb}` });
     } else {
-      this.messageService.add({ severity: 'warn', summary: 'Parcial', detail: `${ok} ${verb}, ${ko} fallaron` });
+      this.bulkFailures = res.failed;
+      this.messageService.add({
+        severity: 'warn', summary: 'Parcial',
+        detail: `${ok} ${verb}, ${ko} fallaron — abrí el detalle para ver`,
+        sticky: true,
+      });
     }
     this.selected = [];
     this.load();
+  }
+
+  openBulkFailures(): void {
+    this.bulkFailuresDialog = true;
   }
 }
