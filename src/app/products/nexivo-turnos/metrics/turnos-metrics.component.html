@@ -1,0 +1,104 @@
+<p-toast></p-toast>
+
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero"><i class="pi pi-chart-line"></i></div>
+        <div>
+          <span class="nx-page-kicker">Nexivo Turnos</span>
+          <h2 class="nx-page-header__title m-0">Métricas</h2>
+          <p class="nx-page-header__subtitle m-0">MRR, churn, conversión y desglose por plan</p>
+        </div>
+      </div>
+      <div class="nx-page-header__right flex align-items-center gap-2">
+        <p-dropdown [options]="rangeOptions" [(ngModel)]="rangeMonths" optionLabel="label" optionValue="value"
+                    (onChange)="onRangeChange()" [style]="{minWidth: '200px'}"></p-dropdown>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="loading" class="card p-6 text-center">
+  <i class="pi pi-spin pi-spinner text-2xl"></i>
+</div>
+
+<div *ngIf="!loading && metrics?.noData" class="card p-6 text-center text-color-secondary">
+  <i class="pi pi-info-circle text-2xl mb-2 block"></i>
+  Sin datos suficientes en este rango.
+</div>
+
+<ng-container *ngIf="!loading && metrics && !metrics.noData">
+  <div class="grid">
+    <!-- MRR -->
+    <div class="col-12 lg:col-6">
+      <div class="card h-full">
+        <h4 class="mt-0">MRR mensual</h4>
+        <div style="height: 280px;">
+          <p-chart type="line" [data]="mrrChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nuevas subs -->
+    <div class="col-12 lg:col-6">
+      <div class="card h-full">
+        <h4 class="mt-0">Nuevas suscripciones</h4>
+        <div style="height: 280px;">
+          <p-chart type="bar" [data]="newSubsChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Churn -->
+    <div class="col-12 lg:col-6">
+      <div class="card h-full">
+        <h4 class="mt-0">Churn % mensual</h4>
+        <div style="height: 280px;">
+          <p-chart type="line" [data]="churnChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion -->
+    <div class="col-12 lg:col-6">
+      <div class="card h-full">
+        <h4 class="mt-0">Conversión trial → active</h4>
+        <div style="height: 280px;">
+          <p-chart type="bar" [data]="conversionChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan distribution -->
+    <div class="col-12 lg:col-4">
+      <div class="card h-full">
+        <h4 class="mt-0">Distribución por plan</h4>
+        <div style="height: 320px;">
+          <p-chart type="pie" [data]="planDistChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- MRR por plan stacked -->
+    <div class="col-12 lg:col-8">
+      <div class="card h-full">
+        <h4 class="mt-0">MRR por plan</h4>
+        <div style="height: 320px;">
+          <p-chart type="bar" [data]="mrrByPlanChart" [options]="stackedBarOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- LTV por plan -->
+    <div class="col-12">
+      <div class="card">
+        <h4 class="mt-0">LTV por plan (ARS)</h4>
+        <div style="height: 280px;">
+          <p-chart type="bar" [data]="ltvByPlanChart" [options]="baseOptions"></p-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
