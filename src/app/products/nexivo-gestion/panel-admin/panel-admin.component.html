@@ -194,7 +194,7 @@
                            [severity]="store.isPublished ? 'success' : 'warning'"
                            [style]="{'font-size': '0.75rem'}"></p-tag>
                     <a *ngIf="store.isPublished && store.slug"
-                       [href]="getStoreUrl(store.slug)" target="_blank"
+                       [href]="getStoreUrl(store.slug)" target="_blank" rel="noopener noreferrer"
                        class="p-button-text p-button-rounded p-button-sm store-link"
                        pTooltip="Visitar tienda">
                       <i class="pi pi-external-link" style="font-size: 0.85rem;"></i>
@@ -209,7 +209,7 @@
                   <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-sm"
                           pTooltip="Ver detalle" (click)="openAccountDetail(acc)"></button>
                   <a *ngIf="getStoreForAccount(acc.id)?.isPublished && getStoreForAccount(acc.id)?.slug"
-                     [href]="getStoreUrl(getStoreForAccount(acc.id)!.slug)" target="_blank"
+                     [href]="getStoreUrl(getStoreForAccount(acc.id)!.slug)" target="_blank" rel="noopener noreferrer"
                      pButton icon="pi pi-shopping-cart" class="p-button-text p-button-rounded p-button-sm"
                      pTooltip="Ir a la tienda"></a>
                 </div>
@@ -754,7 +754,7 @@
           </div>
         </div>
         <div class="flex gap-2" *ngIf="detailStore.slug">
-          <a [href]="getStoreUrl(detailStore.slug)" target="_blank"
+          <a [href]="getStoreUrl(detailStore.slug)" target="_blank" rel="noopener noreferrer"
              pButton icon="pi pi-external-link" label="Visitar tienda"
              class="p-button-outlined p-button-rounded p-button-sm"></a>
         </div>
