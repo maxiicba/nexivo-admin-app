@@ -1,0 +1,404 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Header -->
+<section class="nx-hero-section" *ngIf="detail">
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <button pButton icon="pi pi-arrow-left" class="p-button-text p-button-rounded mr-2" (click)="back()" pTooltip="Volver"></button>
+        <div>
+          <span class="nx-page-kicker">Suscripción</span>
+          <h2 class="nx-page-header__title m-0">
+            {{ detail.business?.name || detail.subscription?.id }}
+            <p-tag [value]="detail.subscription?.status" [severity]="getStatusSeverity(detail.subscription?.status)" class="ml-2"></p-tag>
+          </h2>
+          <p class="nx-page-header__subtitle m-0">
+            {{ detail.plan?.displayName || '—' }} · {{ detail.subscription?.billingCycle === 'annual' ? 'Anual' : 'Mensual' }} · {{ formatCurrency(detail.subscription?.currentPrice) }}
+          </p>
+        </div>
+      </div>
+      <div class="nx-page-header__right flex flex-wrap gap-2">
+        <button pButton label="Regalar tiempo" icon="pi pi-gift" class="p-button-sm" (click)="openGrantComp()"></button>
+        <button pButton label="Aplicar crédito" icon="pi pi-percentage" class="p-button-sm p-button-secondary" (click)="openApplyCredit()"></button>
+        <button pButton label="Cambiar estado" icon="pi pi-sync" class="p-button-sm p-button-secondary" (click)="openChangeStatus()"></button>
+        <button *ngIf="detail.subscription?.status === 'cancelled' || detail.subscription?.status === 'suspended'"
+                pButton label="Reactivar" icon="pi pi-replay" class="p-button-sm p-button-success" (click)="reactivate()"></button>
+        <button *ngIf="detail.subscription?.status !== 'cancelled'"
+                pButton label="Cancelar" icon="pi pi-ban" class="p-button-sm p-button-danger" (click)="openCancel()"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="loading && !detail" class="card p-6 text-center">
+  <i class="pi pi-spin pi-spinner text-2xl"></i>
+</div>
+
+<p-tabView *ngIf="detail" [(activeIndex)]="activeTab">
+
+  <!-- ── OVERVIEW ──────────────────────────────────────────────────────────── -->
+  <p-tabPanel header="Resumen" leftIcon="pi pi-info-circle">
+    <div class="grid">
+      <!-- Negocio -->
+      <div class="col-12 md:col-6">
+        <div class="card h-full">
+          <h4 class="mt-0"><i class="pi pi-briefcase mr-2"></i>Negocio</h4>
+          <div class="flex flex-column gap-2">
+            <div><span class="text-color-secondary">Nombre:</span> <strong>{{ detail.business?.name || '—' }}</strong></div>
+            <div><span class="text-color-secondary">Slug:</span> {{ detail.business?.slug || '—' }}</div>
+            <div><span class="text-color-secondary">Email:</span> {{ detail.business?.email || '—' }}</div>
+            <div><span class="text-color-secondary">User ID:</span> <code class="text-xs">{{ detail.business?.userId || '—' }}</code></div>
+            <div *ngIf="detail.business?.deletedAt" class="text-red-500"><i class="pi pi-exclamation-triangle"></i> Negocio eliminado: {{ detail.business?.deletedAt | date:'dd/MM/yy HH:mm' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan -->
+      <div class="col-12 md:col-6">
+        <div class="card h-full">
+          <h4 class="mt-0"><i class="pi pi-tag mr-2"></i>Plan y período</h4>
+          <div class="flex flex-column gap-2">
+            <div><span class="text-color-secondary">Plan:</span> <strong>{{ detail.plan?.displayName || '—' }}</strong></div>
+            <div><span class="text-color-secondary">Ciclo:</span> {{ detail.subscription?.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</div>
+            <div><span class="text-color-secondary">Precio actual:</span> {{ formatCurrency(detail.subscription?.currentPrice) }}</div>
+            <div><span class="text-color-secondary">Inicio:</span> {{ detail.subscription?.startDate | date:'dd/MM/yy' }}</div>
+            <div><span class="text-color-secondary">Período actual:</span> {{ detail.subscription?.currentPeriodStart | date:'dd/MM/yy' }} — {{ detail.subscription?.currentPeriodEnd | date:'dd/MM/yy' }}</div>
+            <div *ngIf="detail.subscription?.trialEndsAt"><span class="text-color-secondary">Trial vence:</span> {{ detail.subscription?.trialEndsAt | date:'dd/MM/yy' }}</div>
+            <div *ngIf="detail.subscription?.gracePeriodEndsAt"><span class="text-color-secondary">Grace period termina:</span> {{ detail.subscription?.gracePeriodEndsAt | date:'dd/MM/yy' }}</div>
+            <div *ngIf="detail.subscription?.cancelledAt" class="text-orange-500">
+              <i class="pi pi-ban"></i> Cancelada: {{ detail.subscription?.cancelledAt | date:'dd/MM/yy' }} — {{ detail.subscription?.cancellationReason }}
+            </div>
+            <div *ngIf="detail.subscription?.pendingPlan" class="mt-2 p-2" style="background: var(--surface-50, #f8fafc); border-radius: 6px;">
+              <i class="pi pi-clock"></i> Cambio pendiente a <strong>{{ detail.subscription?.pendingPlan?.displayName }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uso vs límites -->
+      <div class="col-12 md:col-6" *ngIf="detail.usage">
+        <div class="card h-full">
+          <h4 class="mt-0"><i class="pi pi-chart-bar mr-2"></i>Uso vs límites</h4>
+          <div class="flex flex-column gap-3">
+            <ng-container *ngFor="let key of ['monthlyAppointments', 'professionals', 'services', 'clients']">
+              <div *ngIf="detail.usage[key]">
+                <div class="flex justify-content-between text-sm mb-1">
+                  <span>{{ key === 'monthlyAppointments' ? 'Turnos del mes' : key === 'professionals' ? 'Profesionales' : key === 'services' ? 'Servicios' : 'Clientes' }}</span>
+                  <span><strong>{{ detail.usage[key].used }}</strong> / {{ detail.usage[key].limit < 0 ? '∞' : detail.usage[key].limit }}</span>
+                </div>
+                <p-progressBar *ngIf="detail.usage[key].limit >= 0"
+                               [value]="usagePct(detail.usage[key].used, detail.usage[key].limit)"
+                               [showValue]="false" [style]="{height: '6px'}"></p-progressBar>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulos activos -->
+      <div class="col-12 md:col-6">
+        <div class="card h-full">
+          <h4 class="mt-0"><i class="pi pi-th-large mr-2"></i>Módulos activos</h4>
+          <div class="flex flex-wrap gap-2" *ngIf="moduleKeys(detail.modules).length > 0; else noModules">
+            <p-chip *ngFor="let k of moduleKeys(detail.modules)" [label]="moduleLabel(k)" icon="pi pi-check"></p-chip>
+          </div>
+          <ng-template #noModules>
+            <div class="text-color-secondary">Plan sin features adicionales</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Pagos / MP -->
+      <div class="col-12">
+        <div class="card">
+          <h4 class="mt-0"><i class="pi pi-credit-card mr-2"></i>Mercado Pago</h4>
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div><span class="text-color-secondary">Preapproval ID:</span> <code class="text-xs">{{ detail.subscription?.mercadoPagoPreapprovalId || '—' }}</code></div>
+              <div><span class="text-color-secondary">Estado MP:</span> {{ detail.subscription?.mercadoPagoStatus || '—' }}</div>
+            </div>
+            <div class="col-12 md:col-6 flex flex-wrap gap-2 align-items-start">
+              <button pButton label="Reconciliar pagos" icon="pi pi-search-plus" class="p-button-sm p-button-secondary"
+                      (click)="reconcilePayments()" pTooltip="Buscar pagos en MP que no llegaron por webhook"></button>
+              <button pButton label="Generar link de pago" icon="pi pi-link" class="p-button-sm p-button-secondary"
+                      (click)="generateManualLink()" pTooltip="Link puntual para tarjeta vencida"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Créditos pendientes -->
+      <div class="col-12" *ngIf="credits.length > 0">
+        <div class="card">
+          <h4 class="mt-0"><i class="pi pi-percentage mr-2"></i>Créditos pendientes</h4>
+          <p-table [value]="credits" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr><th>Tipo</th><th>Monto</th><th>Motivo</th><th>Creado</th><th></th></tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-c>
+              <tr>
+                <td>{{ c.type === 'percentage' ? '%' : '$' }}</td>
+                <td>{{ c.amount }}{{ c.type === 'percentage' ? '%' : '' }}</td>
+                <td>{{ c.reason }}</td>
+                <td>{{ c.createdAt | date:'dd/MM/yy' }}</td>
+                <td><button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="deleteCredit(c)" pTooltip="Eliminar"></button></td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </p-tabPanel>
+
+  <!-- ── PAYMENTS ──────────────────────────────────────────────────────────── -->
+  <p-tabPanel [header]="'Pagos (' + payments.length + ')'" leftIcon="pi pi-dollar">
+    <div class="card">
+      <p-table [value]="payments" styleClass="p-datatable-sm" [paginator]="true" [rows]="20">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Tipo</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Período</th>
+            <th>MP ID</th>
+            <th>Notas</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-p>
+          <tr>
+            <td><p-tag [value]="p.type || 'charge'" [severity]="getPaymentTypeSeverity(p.type)" [rounded]="true"></p-tag></td>
+            <td>{{ formatCurrency(p.amount) }}</td>
+            <td><p-tag [value]="p.status" [severity]="getPaymentStatusSeverity(p.status)"></p-tag></td>
+            <td>{{ (p.paidAt || p.createdAt) | date:'dd/MM/yy HH:mm' }}</td>
+            <td class="text-xs">{{ p.periodStart | date:'dd/MM/yy' }} → {{ p.periodEnd | date:'dd/MM/yy' }}</td>
+            <td><code class="text-xs">{{ p.mpPaymentId || '—' }}</code></td>
+            <td class="text-xs">{{ p.notes || '—' }}</td>
+            <td>
+              <button *ngIf="p.status === 'approved' && p.type !== 'refund'"
+                      pButton icon="pi pi-undo" class="p-button-rounded p-button-text p-button-warning p-button-sm"
+                      (click)="openMarkRefunded(p)" pTooltip="Marcar refundeado"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="8" class="text-center p-4 text-color-secondary">Sin pagos registrados</td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-tabPanel>
+
+  <!-- ── AUDIT ─────────────────────────────────────────────────────────────── -->
+  <p-tabPanel [header]="'Auditoría (' + audit.total + ')'" leftIcon="pi pi-history">
+    <div class="card mb-3 p-3">
+      <div class="flex flex-wrap gap-3 align-items-center">
+        <span class="font-medium">Filtrar:</span>
+        <p-dropdown [options]="actorFilterOptions" [(ngModel)]="auditActor" optionLabel="label" optionValue="value"
+                    (onChange)="applyAuditFilters()" placeholder="Actor" [showClear]="true"></p-dropdown>
+        <div class="flex align-items-center gap-2">
+          <p-checkbox [(ngModel)]="auditShowCron" [binary]="true" inputId="show-cron" (onChange)="applyAuditFilters()"></p-checkbox>
+          <label for="show-cron" class="text-sm">Mostrar eventos de cron</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-0">
+      <div *ngIf="audit.items.length === 0" class="p-4 text-center text-color-secondary">Sin eventos</div>
+      <ul class="m-0 p-0" style="list-style: none;">
+        <li *ngFor="let entry of audit.items"
+            class="p-3"
+            style="border-bottom: 1px solid var(--surface-200, #e5e7eb);">
+          <div class="flex gap-3 align-items-start">
+            <div class="text-xl"><i [class]="actionIcon(entry.action)"></i></div>
+            <div class="flex-1">
+              <div class="flex justify-content-between align-items-center">
+                <strong>{{ actionLabel(entry.action) }}</strong>
+                <span class="text-xs text-color-secondary">{{ entry.createdAt | date:'dd/MM/yy HH:mm:ss' }}</span>
+              </div>
+              <div class="text-sm text-color-secondary mt-1">
+                <p-tag [value]="entry.actor" severity="secondary" [rounded]="true"></p-tag>
+                <span *ngIf="entry.actorUserId" class="ml-2"><code class="text-xs">{{ entry.actorUserId }}</code></span>
+              </div>
+              <details *ngIf="jsonPreview(entry.metadata)" class="mt-2">
+                <summary class="text-xs text-color-secondary" style="cursor: pointer;">Ver metadata</summary>
+                <pre class="text-xs mt-2 p-2" style="background: var(--surface-50, #f8fafc); border-radius: 4px; overflow-x: auto;">{{ jsonPreview(entry.metadata) }}</pre>
+              </details>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </p-tabPanel>
+
+  <!-- ── NOTES ─────────────────────────────────────────────────────────────── -->
+  <p-tabPanel [header]="'Notas (' + notes.length + ')'" leftIcon="pi pi-pencil">
+    <div class="card mb-3">
+      <h4 class="mt-0">Nueva nota</h4>
+      <textarea pInputTextarea [(ngModel)]="newNoteBody" rows="3" class="w-full" placeholder="Escribí una nota interna…"></textarea>
+      <div class="flex justify-content-end mt-2">
+        <button pButton label="Agregar nota" icon="pi pi-plus" [loading]="saving" [disabled]="!newNoteBody.trim()" (click)="addNote()"></button>
+      </div>
+    </div>
+
+    <div class="card p-0" *ngIf="notes.length > 0">
+      <div *ngFor="let note of notes" class="p-3" style="border-bottom: 1px solid var(--surface-200, #e5e7eb);">
+        <ng-container *ngIf="editingNoteId === note.id; else viewNote">
+          <textarea pInputTextarea [(ngModel)]="editingNoteBody" rows="3" class="w-full"></textarea>
+          <div class="flex justify-content-end gap-2 mt-2">
+            <button pButton label="Cancelar" class="p-button-text p-button-sm" (click)="cancelEditNote()"></button>
+            <button pButton label="Guardar" class="p-button-sm" [disabled]="!editingNoteBody.trim()" (click)="saveEditNote()"></button>
+          </div>
+        </ng-container>
+        <ng-template #viewNote>
+          <div class="flex justify-content-between align-items-start">
+            <div class="flex-1">
+              <div class="white-space-pre-line">{{ note.body }}</div>
+              <div class="text-xs text-color-secondary mt-2">
+                {{ note.createdAt | date:'dd/MM/yy HH:mm' }}
+                <span *ngIf="note.updatedAt && note.updatedAt !== note.createdAt"> · editada {{ note.updatedAt | date:'dd/MM/yy HH:mm' }}</span>
+                · <code>{{ note.authorUserId }}</code>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="startEditNote(note)" pTooltip="Editar"></button>
+              <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="deleteNote(note)" pTooltip="Eliminar"></button>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    <div *ngIf="notes.length === 0" class="card text-center p-4 text-color-secondary">Sin notas</div>
+  </p-tabPanel>
+
+</p-tabView>
+
+<!-- ── DIALOGS ────────────────────────────────────────────────────────────── -->
+
+<!-- Grant comp -->
+<p-dialog [(visible)]="grantCompDialog" header="Regalar tiempo" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div class="grid">
+      <div class="col-6">
+        <label class="block mb-1 font-medium">Meses</label>
+        <p-inputNumber [(ngModel)]="grantCompMonths" [min]="0" [max]="24" [showButtons]="true" [style]="{width:'100%'}"></p-inputNumber>
+      </div>
+      <div class="col-6">
+        <label class="block mb-1 font-medium">Días</label>
+        <p-inputNumber [(ngModel)]="grantCompDays" [min]="0" [max]="365" [showButtons]="true" [style]="{width:'100%'}"></p-inputNumber>
+      </div>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="grantCompReason" rows="3" class="w-full" placeholder="Ej: cortesía por incidente…"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="grantCompDialog = false"></button>
+    <button pButton label="Aplicar" [loading]="saving"
+            [disabled]="(grantCompMonths <= 0 && grantCompDays <= 0) || !grantCompReason.trim()"
+            (click)="confirmGrantComp()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Apply credit -->
+<p-dialog [(visible)]="applyCreditDialog" header="Aplicar crédito" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div>
+      <label class="block mb-1 font-medium">Tipo</label>
+      <p-dropdown [options]="creditTypeOptions" [(ngModel)]="creditType" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">{{ creditType === 'percentage' ? 'Porcentaje (1-100)' : 'Monto (ARS)' }}</label>
+      <p-inputNumber [(ngModel)]="creditAmount" [min]="0" [max]="creditType === 'percentage' ? 100 : 999999" [style]="{width:'100%'}"></p-inputNumber>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="creditReason" rows="3" class="w-full"></textarea>
+    </div>
+    <div class="text-xs text-color-secondary">
+      Se aplicará al próximo cobro. <em>(Consumo automático en cron pendiente.)</em>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="applyCreditDialog = false"></button>
+    <button pButton label="Aplicar" [loading]="saving"
+            [disabled]="creditAmount <= 0 || (creditType === 'percentage' && creditAmount > 100) || !creditReason.trim()"
+            (click)="confirmApplyCredit()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Change status -->
+<p-dialog [(visible)]="changeStatusDialog" header="Cambiar estado" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div>
+      <label class="block mb-1 font-medium">Nuevo estado</label>
+      <p-dropdown [options]="statusOptions" [(ngModel)]="newStatus" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="statusReason" rows="3" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="changeStatusDialog = false"></button>
+    <button pButton label="Aplicar" [loading]="saving"
+            [disabled]="!statusReason.trim()"
+            (click)="confirmChangeStatus()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Cancel -->
+<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2">
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <input pInputText [(ngModel)]="cancelReason" placeholder="Motivo…" class="w-full">
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-checkbox [(ngModel)]="cancelImmediate" [binary]="true" inputId="cancel-immediate-detail"></p-checkbox>
+      <label for="cancel-immediate-detail" class="text-sm">Cancelación inmediata (revoca preapproval MP)</label>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="cancelDialog = false"></button>
+    <button pButton label="Confirmar" class="p-button-danger" [loading]="saving" (click)="confirmCancel()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Mark refunded -->
+<p-dialog [(visible)]="markRefundedDialog" header="Marcar pago como refundeado" [modal]="true" [style]="{width: '450px'}">
+  <div class="flex flex-column gap-3 py-2" *ngIf="refundingPayment">
+    <div class="text-sm">
+      Pago de <strong>{{ formatCurrency(refundingPayment.amount) }}</strong> del {{ refundingPayment.paidAt | date:'dd/MM/yy' }}
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="refundReason" rows="3" class="w-full"></textarea>
+    </div>
+    <div class="text-xs text-color-secondary">
+      <i class="pi pi-info-circle"></i> El refund real debe hacerse en la consola de MercadoPago. Esto solo marca el sistema.
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="markRefundedDialog = false"></button>
+    <button pButton label="Marcar refundeado" class="p-button-warning" [loading]="saving"
+            [disabled]="!refundReason.trim()" (click)="confirmMarkRefunded()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Manual checkout link result -->
+<p-dialog [(visible)]="manualLinkDialog" header="Link de pago generado" [modal]="true" [style]="{width: '500px'}">
+  <div class="flex flex-column gap-3 py-2" *ngIf="manualLinkResult">
+    <div class="text-sm">Link MercadoPago para que el cliente pague el período pendiente:</div>
+    <div class="p-2" style="background: var(--surface-50, #f8fafc); border-radius: 6px; word-break: break-all;">
+      <code class="text-xs">{{ manualLinkResult.checkoutUrl }}</code>
+    </div>
+    <div class="text-xs text-color-secondary">Preference ID: <code>{{ manualLinkResult.preferenceId }}</code></div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Copiar link" icon="pi pi-copy" class="p-button-secondary" (click)="copyManualLink()"></button>
+    <button pButton label="Cerrar" (click)="manualLinkDialog = false"></button>
+  </ng-template>
+</p-dialog>
