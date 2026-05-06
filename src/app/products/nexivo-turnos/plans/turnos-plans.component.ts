@@ -31,6 +31,8 @@ const DEFAULT_PLAN = () => ({
   hasCashbox: false,
   maxWhatsappBotDailyMessagesPerNumber: 30,
   hasTrialPeriod: false, trialDays: 14,
+  visibility: 'public',
+  assignableBySelf: true,
   features: [] as string[],
 });
 
@@ -53,6 +55,15 @@ export class TurnosPlansComponent implements OnInit, OnDestroy {
   editingPlan: any = DEFAULT_PLAN();
   featureInput = '';
   saving = false;
+  visibilityOptions = [
+    { label: 'Pública', value: 'public' },
+    { label: 'Privada', value: 'private' },
+    { label: 'Restringida', value: 'restricted' },
+  ];
+  whitelist: { businessId: string; name: string; slug: string }[] = [];
+  loadingWhitelist = false;
+  businessSearchQuery = '';
+  businessSearchResults: { id: string; name: string; slug: string }[] = [];
   private dragDropSub?: Subscription;
 
   constructor(
@@ -80,10 +91,68 @@ export class TurnosPlansComponent implements OnInit, OnDestroy {
   }
 
   openEdit(plan: any): void {
-    this.editingPlan = { ...plan, features: [...(plan.features || [])] };
+    this.editingPlan = {
+      ...plan,
+      features: [...(plan.features || [])],
+      visibility: plan.visibility ?? 'public',
+      assignableBySelf: plan.assignableBySelf ?? true,
+    };
     this.featureInput = '';
     this.isNewPlan = false;
     this.planDialog = true;
+    this.businessSearchQuery = '';
+    this.businessSearchResults = [];
+    this.whitelist = [];
+    this.loadWhitelist();
+  }
+
+  loadWhitelist(): void {
+    if (!this.editingPlan?.id || this.editingPlan.visibility === 'public') {
+      this.whitelist = [];
+      return;
+    }
+    this.loadingWhitelist = true;
+    this.svc.listWhitelist(this.editingPlan.id).subscribe({
+      next: (data) => { this.whitelist = data; this.loadingWhitelist = false; },
+      error: () => { this.loadingWhitelist = false; },
+    });
+  }
+
+  onVisibilityChange(): void {
+    this.loadWhitelist();
+  }
+
+  searchBusinesses(): void {
+    const q = this.businessSearchQuery?.trim() ?? '';
+    if (q.length < 2) { this.businessSearchResults = []; return; }
+    this.svc.searchBusinesses(q).subscribe({
+      next: (results) => { this.businessSearchResults = results; },
+    });
+  }
+
+  addBusinessToWhitelist(b: { id: string; name: string; slug: string }): void {
+    if (!this.editingPlan?.id) return;
+    this.svc.addToWhitelist(this.editingPlan.id, b.id).subscribe({
+      next: () => {
+        this.whitelist = [{ businessId: b.id, name: b.name, slug: b.slug }, ...this.whitelist];
+        this.businessSearchQuery = '';
+        this.businessSearchResults = [];
+      },
+      error: (err) => this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: err?.error?.message ?? 'No se pudo agregar el negocio',
+      }),
+    });
+  }
+
+  removeBusinessFromWhitelist(businessId: string): void {
+    if (!this.editingPlan?.id) return;
+    this.svc.removeFromWhitelist(this.editingPlan.id, businessId).subscribe({
+      next: () => {
+        this.whitelist = this.whitelist.filter((w) => w.businessId !== businessId);
+      },
+    });
   }
 
   addFeature(): void {

@@ -304,6 +304,60 @@
       <span *ngIf="!editingPlan.hasTrialPeriod">Sin periodo de prueba: la cuenta se crea suspendida hasta que el usuario realice el primer pago.</span>
     </div>
 
+    <!-- Visibilidad -->
+    <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Visibilidad</span></p-divider>
+    <div class="field">
+      <label class="nx-form-label">Tipo de plan</label>
+      <p-dropdown
+        [(ngModel)]="editingPlan.visibility"
+        [options]="visibilityOptions"
+        optionLabel="label" optionValue="value"
+        appendTo="body" class="w-full"
+        (onChange)="onVisibilityChange()">
+      </p-dropdown>
+    </div>
+    <div class="flex align-items-center gap-2 mb-2" *ngIf="editingPlan.visibility !== 'public'">
+      <p-inputSwitch [(ngModel)]="editingPlan.assignableBySelf"></p-inputSwitch>
+      <label class="text-sm">El negocio puede elegirlo desde su panel</label>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.visibility !== 'public'">
+      <i class="pi pi-info-circle"></i>
+      <span *ngIf="editingPlan.assignableBySelf">El negocio whitelisteado verá este plan en su lista y podrá suscribirse solo.</span>
+      <span *ngIf="!editingPlan.assignableBySelf">Solo el superadmin puede asignar este plan. El negocio no lo verá en su lista.</span>
+    </div>
+
+    <div class="field" *ngIf="editingPlan.visibility !== 'public' && editingPlan.id">
+      <label class="nx-form-label">Negocios autorizados</label>
+      <input pInputText [(ngModel)]="businessSearchQuery" (input)="searchBusinesses()"
+        placeholder="Buscar por nombre o slug…" class="w-full mb-2">
+      <ul *ngIf="businessSearchResults.length" class="list-none p-0 mb-2"
+        style="max-height: 160px; overflow-y: auto; border: 1px solid var(--nx-border); border-radius: 6px;">
+        <li *ngFor="let b of businessSearchResults"
+          class="flex align-items-center justify-content-between p-2"
+          style="border-bottom: 1px solid var(--nx-border);">
+          <span class="text-sm">{{ b.name }} <small style="color: var(--nx-text-secondary)">({{ b.slug }})</small></span>
+          <button pButton type="button" label="Agregar" icon="pi pi-plus"
+            class="p-button-sm p-button-outlined" (click)="addBusinessToWhitelist(b)"></button>
+        </li>
+      </ul>
+      <div *ngIf="loadingWhitelist" class="text-sm" style="color: var(--nx-text-secondary)">Cargando…</div>
+      <ul *ngIf="!loadingWhitelist" class="list-none p-0">
+        <li *ngFor="let w of whitelist" class="flex align-items-center justify-content-between p-2"
+          style="border-bottom: 1px solid var(--nx-border);">
+          <span class="text-sm">{{ w.name }} <small style="color: var(--nx-text-secondary)">({{ w.slug }})</small></span>
+          <button pButton type="button" icon="pi pi-times" class="p-button-sm p-button-text p-button-danger"
+            (click)="removeBusinessFromWhitelist(w.businessId)" aria-label="Quitar"></button>
+        </li>
+        <li *ngIf="!whitelist.length" class="p-2 text-sm" style="color: var(--nx-text-secondary)">
+          Aún no hay negocios autorizados.
+        </li>
+      </ul>
+    </div>
+    <div class="nx-dialog-hint mb-3" *ngIf="editingPlan.visibility !== 'public' && !editingPlan.id">
+      <i class="pi pi-info-circle"></i>
+      <span>Guardá el plan primero para gestionar la lista de negocios autorizados.</span>
+    </div>
+
     <!-- Otros -->
     <p-divider align="left"><span class="text-sm font-semibold" style="color: var(--nx-text-secondary)">Otros</span></p-divider>
     <div class="field">
