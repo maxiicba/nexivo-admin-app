@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class NexivoTurnosAdminService {
   private base = `${environment.turnosApiUrl}/subscriptions`;
+  private businessesBase = `${environment.turnosApiUrl}/businesses`;
 
   constructor(private http: HttpClient) {}
 
@@ -31,7 +32,7 @@ export class NexivoTurnosAdminService {
   // Routes under @Controller('subscriptions'): /api/subscriptions/plans/...
 
   getAllPlans(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/plans`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.base}/plans/admin`, { withCredentials: true });
   }
 
   createPlan(data: any): Observable<any> {
@@ -44,5 +45,28 @@ export class NexivoTurnosAdminService {
 
   deletePlan(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/plans/${id}`, { withCredentials: true });
+  }
+
+  // ── Plan whitelist ─────────────────────────────────────────────────────────
+
+  listWhitelist(planId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/plans/${planId}/whitelist`, { withCredentials: true });
+  }
+
+  addToWhitelist(planId: string, businessId: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/plans/${planId}/whitelist`, { businessId }, { withCredentials: true });
+  }
+
+  removeFromWhitelist(planId: string, businessId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/plans/${planId}/whitelist/${businessId}`, { withCredentials: true });
+  }
+
+  // ── Business search ────────────────────────────────────────────────────────
+
+  searchBusinesses(q: string): Observable<{ id: string; name: string; slug: string }[]> {
+    return this.http.get<{ id: string; name: string; slug: string }[]>(
+      `${this.businessesBase}/admin/search`,
+      { params: { q }, withCredentials: true },
+    );
   }
 }
