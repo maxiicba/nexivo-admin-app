@@ -18,78 +18,105 @@
 </section>
 
 <!-- KPIs -->
-<div class="grid mb-3">
+<div class="grid mb-3 nx-kpi-grid">
   <div class="col-6 md:col-3">
-    <div class="nx-stat-card">
-      <div class="nx-stat-card__icon nx-stat-card__icon--blue"><i class="pi pi-users"></i></div>
-      <div class="nx-stat-card__info">
-        <span class="nx-stat-card__value">{{ stats.total }}</span>
-        <span class="nx-stat-card__label">Total</span>
+    <div class="nx-kpi nx-kpi--blue">
+      <div class="nx-kpi__head">
+        <span class="nx-kpi__icon"><i class="pi pi-users"></i></span>
+        <span class="nx-kpi__label">Total</span>
       </div>
+      <div class="nx-kpi__value">{{ stats.total }}</div>
+      <div class="nx-kpi__hint">suscripciones</div>
     </div>
   </div>
   <div class="col-6 md:col-3">
-    <div class="nx-stat-card">
-      <div class="nx-stat-card__icon nx-stat-card__icon--green"><i class="pi pi-dollar"></i></div>
-      <div class="nx-stat-card__info">
-        <span class="nx-stat-card__value">{{ formatCurrency(stats.mrr) }}</span>
-        <span class="nx-stat-card__label">MRR</span>
+    <div class="nx-kpi nx-kpi--green">
+      <div class="nx-kpi__head">
+        <span class="nx-kpi__icon"><i class="pi pi-dollar"></i></span>
+        <span class="nx-kpi__label">MRR</span>
       </div>
+      <div class="nx-kpi__value">{{ formatCurrency(stats.mrr) }}</div>
+      <div class="nx-kpi__hint">ingreso recurrente</div>
     </div>
   </div>
   <div class="col-6 md:col-3">
-    <div class="nx-stat-card">
-      <div class="nx-stat-card__icon nx-stat-card__icon--cyan"><i class="pi pi-check-circle"></i></div>
-      <div class="nx-stat-card__info">
-        <span class="nx-stat-card__value">{{ stats.byStatus?.active }}</span>
-        <span class="nx-stat-card__label">Activas</span>
+    <div class="nx-kpi nx-kpi--cyan">
+      <div class="nx-kpi__head">
+        <span class="nx-kpi__icon"><i class="pi pi-check-circle"></i></span>
+        <span class="nx-kpi__label">Activas</span>
+        <span class="nx-kpi__pct" *ngIf="kpiPct(stats.byStatus?.active) !== null">
+          {{ kpiPct(stats.byStatus?.active) }}%
+        </span>
       </div>
+      <div class="nx-kpi__value">{{ stats.byStatus?.active || 0 }}</div>
+      <div class="nx-kpi__bar" *ngIf="kpiPct(stats.byStatus?.active) !== null">
+        <div class="nx-kpi__bar-fill" [style.width.%]="kpiPct(stats.byStatus?.active)"></div>
+      </div>
+      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.active) === null">del total</div>
     </div>
   </div>
   <div class="col-6 md:col-3">
-    <div class="nx-stat-card">
-      <div class="nx-stat-card__icon nx-stat-card__icon--orange"><i class="pi pi-clock"></i></div>
-      <div class="nx-stat-card__info">
-        <span class="nx-stat-card__value">{{ stats.byStatus?.trialing }}</span>
-        <span class="nx-stat-card__label">Trial</span>
+    <div class="nx-kpi nx-kpi--orange">
+      <div class="nx-kpi__head">
+        <span class="nx-kpi__icon"><i class="pi pi-clock"></i></span>
+        <span class="nx-kpi__label">Trial</span>
+        <span class="nx-kpi__pct" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
+          {{ kpiPct(stats.byStatus?.trialing) }}%
+        </span>
       </div>
+      <div class="nx-kpi__value">{{ stats.byStatus?.trialing || 0 }}</div>
+      <div class="nx-kpi__bar" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
+        <div class="nx-kpi__bar-fill" [style.width.%]="kpiPct(stats.byStatus?.trialing)"></div>
+      </div>
+      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.trialing) === null">del total</div>
     </div>
   </div>
 </div>
 
 <!-- Filters -->
-<div class="card mb-3 p-3">
-  <div class="grid">
-    <div class="col-12 md:col-3">
-      <label class="block text-sm font-medium mb-1">Búsqueda</label>
+<div class="nx-filters card mb-3">
+  <div class="nx-filters__row">
+    <div class="nx-filters__field nx-filters__field--search">
+      <label class="nx-filters__label">Búsqueda</label>
       <span class="p-input-icon-left w-full">
         <i class="pi pi-search"></i>
         <input pInputText type="text" placeholder="Nombre, slug o email…"
                [ngModel]="searchInput" (ngModelChange)="onSearchChange($event)" class="w-full">
       </span>
     </div>
-    <div class="col-6 md:col-2">
-      <label class="block text-sm font-medium mb-1">Estado</label>
+    <div class="nx-filters__field">
+      <label class="nx-filters__label">Estado</label>
       <p-dropdown [options]="statusOptions" [(ngModel)]="filters.status" optionLabel="label" optionValue="value"
                   (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
     </div>
-    <div class="col-6 md:col-2">
-      <label class="block text-sm font-medium mb-1">Plan</label>
+    <div class="nx-filters__field">
+      <label class="nx-filters__label">Plan</label>
       <p-dropdown [options]="plans" [(ngModel)]="filters.planId" optionLabel="label" optionValue="value"
                   (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
     </div>
-    <div class="col-6 md:col-2">
-      <label class="block text-sm font-medium mb-1">Vence en (días)</label>
+    <div class="nx-filters__field nx-filters__field--narrow">
+      <label class="nx-filters__label">Vence en (días)</label>
       <p-inputNumber [(ngModel)]="filters.expiringInDays" (ngModelChange)="applyFilters()"
                      [min]="0" [showButtons]="false" [style]="{width:'100%'}"></p-inputNumber>
     </div>
-    <div class="col-6 md:col-2">
-      <label class="block text-sm font-medium mb-1">MP status</label>
-      <input pInputText [(ngModel)]="filters.mpStatus" (change)="applyFilters()" placeholder="ej: authorized" class="w-full">
+    <div class="nx-filters__field">
+      <label class="nx-filters__label">MP status</label>
+      <p-dropdown [options]="mpStatusOptions" [(ngModel)]="filters.mpStatus" optionLabel="label" optionValue="value"
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
     </div>
-    <div class="col-12 md:col-1 flex align-items-end">
-      <button pButton icon="pi pi-times" class="p-button-text" pTooltip="Limpiar filtros" (click)="clearFilters()"></button>
-    </div>
+  </div>
+
+  <div class="nx-filters__chips" *ngIf="activeFilterChips.length > 0">
+    <i class="pi pi-filter-fill nx-filters__chips-icon"></i>
+    <span class="nx-filters__chips-label">Filtros activos:</span>
+    <span class="nx-chip" *ngFor="let chip of activeFilterChips">
+      {{ chip.label }}
+      <button class="nx-chip__close" (click)="removeFilter(chip.key)" pTooltip="Quitar">
+        <i class="pi pi-times"></i>
+      </button>
+    </span>
+    <button pButton label="Limpiar todo" icon="pi pi-times" class="p-button-sm p-button-text nx-filters__clear"
+            (click)="clearFilters()"></button>
   </div>
 </div>
 
@@ -132,45 +159,58 @@
 </p-dialog>
 
 <!-- Table -->
-<div class="card">
+<div class="card nx-subs-table">
   <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords"
            [lazy]="true" (onLazyLoad)="onPageChange($event)" [rowsPerPageOptions]="[20, 50, 100]"
-           [rowHover]="true" dataKey="id" [(selection)]="selected">
+           [rowHover]="true" dataKey="id" [(selection)]="selected" styleClass="nx-table">
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
         <th>Negocio</th>
         <th>Plan</th>
         <th>Ciclo</th>
-        <th>Precio</th>
-        <th>Estado</th>
-        <th>Vence</th>
+        <th class="text-right">Precio</th>
+        <th class="text-center">Estado</th>
+        <th class="text-center" pTooltip="Días restantes hasta el fin del período actual">Vence</th>
         <th>Período</th>
-        <th>Acciones</th>
+        <th class="text-center">Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-sub>
-      <tr style="cursor: pointer" (click)="goToDetail(sub)">
+      <tr class="nx-row-clickable" (click)="goToDetail(sub)">
         <td (click)="$event.stopPropagation()">
           <p-tableCheckbox [value]="sub"></p-tableCheckbox>
         </td>
         <td>
-          <div class="font-medium">{{ sub.business?.name || sub.businessId }}</div>
-          <div class="text-xs text-color-secondary" *ngIf="sub.business?.email">{{ sub.business.email }}</div>
+          <div class="nx-biz">
+            <div class="nx-biz__avatar"
+                 [style.background]="avatarColor(sub.business?.name || sub.businessId)">
+              {{ initials(sub.business?.name || sub.businessId) }}
+            </div>
+            <div class="nx-biz__info">
+              <div class="nx-biz__name">{{ sub.business?.name || sub.businessId }}</div>
+              <div class="nx-biz__email" *ngIf="sub.business?.email">{{ sub.business.email }}</div>
+            </div>
+          </div>
         </td>
         <td>{{ sub.plan?.displayName || '—' }}</td>
-        <td>{{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}</td>
-        <td>{{ formatCurrency(sub.currentPrice) }}</td>
-        <td><p-tag [value]="sub.status" [severity]="getStatusSeverity(sub.status)" /></td>
         <td>
+          <span class="nx-cycle-pill" [class.nx-cycle-pill--annual]="sub.billingCycle === 'annual'">
+            {{ sub.billingCycle === 'annual' ? 'Anual' : 'Mensual' }}
+          </span>
+        </td>
+        <td class="text-right font-medium">{{ formatCurrency(sub.currentPrice) }}</td>
+        <td class="text-center"><p-tag [value]="sub.status" [severity]="getStatusSeverity(sub.status)" /></td>
+        <td class="text-center">
           <ng-container *ngIf="sub.currentPeriodEnd">
             <p-tag [value]="daysUntil(sub.currentPeriodEnd) + 'd'"
-                   [severity]="daysBadgeSeverity(daysUntil(sub.currentPeriodEnd))" [rounded]="true"></p-tag>
+                   [severity]="daysBadgeSeverity(daysUntil(sub.currentPeriodEnd))" [rounded]="true"
+                   [pTooltip]="'Vence el ' + (sub.currentPeriodEnd | date:'dd/MM/yy')"></p-tag>
           </ng-container>
         </td>
-        <td class="text-sm">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
+        <td class="text-sm text-color-secondary">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
         <td>
-          <div class="flex gap-1">
+          <div class="nx-actions">
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
                     (click)="goToDetail(sub); $event.stopPropagation()" pTooltip="Ver detalle"></button>
             <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
@@ -182,7 +222,19 @@
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
-      <tr><td colspan="9" class="text-center p-4 text-color-secondary">Sin resultados</td></tr>
+      <tr>
+        <td colspan="9" class="p-0">
+          <div class="nx-empty">
+            <i class="pi pi-inbox nx-empty__icon"></i>
+            <div class="nx-empty__title">No hay suscripciones que coincidan</div>
+            <div class="nx-empty__hint">
+              {{ activeFilterChips.length > 0 ? 'Probá quitar algunos filtros.' : 'Aún no hay datos para mostrar.' }}
+            </div>
+            <button *ngIf="activeFilterChips.length > 0" pButton label="Limpiar filtros" icon="pi pi-times"
+                    class="p-button-sm p-button-text mt-3" (click)="clearFilters()"></button>
+          </div>
+        </td>
+      </tr>
     </ng-template>
   </p-table>
 </div>

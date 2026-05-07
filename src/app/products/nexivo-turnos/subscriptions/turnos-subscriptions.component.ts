@@ -30,6 +30,7 @@ import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.servic
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './turnos-subscriptions.component.html',
+  styleUrls: ['./turnos-subscriptions.component.scss'],
 })
 export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   subscriptions: any[] = [];
@@ -105,6 +106,13 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   notifyChannelOptions = [
     { label: 'Email',    value: 'email' },
     { label: 'WhatsApp', value: 'whatsapp' },
+  ];
+  mpStatusOptions = [
+    { label: 'Todos',      value: null },
+    { label: 'Authorized', value: 'authorized' },
+    { label: 'Paused',     value: 'paused' },
+    { label: 'Cancelled',  value: 'cancelled' },
+    { label: 'Pending',    value: 'pending' },
   ];
 
   private loadSub?: RxSub;
@@ -198,6 +206,58 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
 
   formatCurrency(val: number): string {
     return `$${Number(val ?? 0).toLocaleString('es-AR')}`;
+  }
+
+  // KPI proportion (% of total) — null when total is 0 to hide the bar
+  kpiPct(value: number): number | null {
+    const total = this.stats?.total || 0;
+    if (!total || !value) return null;
+    return Math.min(100, Math.round((Number(value) / total) * 100));
+  }
+
+  // Active filter chips (only those that are set)
+  get activeFilterChips(): { key: string; label: string }[] {
+    const chips: { key: string; label: string }[] = [];
+    if (this.filters.search)         chips.push({ key: 'search',          label: `Busqueda: "${this.filters.search}"` });
+    if (this.filters.status)         chips.push({ key: 'status',          label: `Estado: ${this.statusLabel(this.filters.status)}` });
+    if (this.filters.planId)         chips.push({ key: 'planId',          label: `Plan: ${this.planLabel(this.filters.planId)}` });
+    if (this.filters.mpStatus)       chips.push({ key: 'mpStatus',        label: `MP: ${this.filters.mpStatus}` });
+    if (this.filters.expiringInDays) chips.push({ key: 'expiringInDays',  label: `Vence en ${this.filters.expiringInDays}d` });
+    return chips;
+  }
+
+  removeFilter(key: string): void {
+    if (key === 'search') {
+      this.filters.search = undefined;
+      this.searchInput = '';
+    } else {
+      (this.filters as any)[key] = undefined;
+    }
+    this.page = 1;
+    this.load();
+  }
+
+  private statusLabel(value: string): string {
+    return this.statusOptions.find((o) => o.value === value)?.label ?? value;
+  }
+
+  private planLabel(value: string): string {
+    return this.plans.find((o) => o.value === value)?.label ?? value;
+  }
+
+  // Initials for business avatar
+  initials(name: string | undefined | null): string {
+    if (!name) return '?';
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  }
+
+  // Stable color hash for the avatar — same business gets same color
+  avatarColor(name: string | undefined | null): string {
+    if (!name) return '#94a3b8';
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    const palette = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6'];
+    return palette[hash % palette.length];
   }
 
   // ── Row click → detail ─────────────────────────────────────────────────────
