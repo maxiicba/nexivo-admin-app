@@ -206,12 +206,21 @@
         <td class="text-sm text-color-secondary">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
         <td>
           <div class="nx-actions">
-            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
-                    (click)="goToDetail(sub); $event.stopPropagation()" pTooltip="Ver detalle" tooltipPosition="top"></button>
-            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
-                    (click)="openEdit(sub, $event)" pTooltip="Editar plan/ciclo" tooltipPosition="top"></button>
-            <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                    (click)="openCancel(sub, $event)" pTooltip="Cancelar" tooltipPosition="top"></button>
+            <button type="button" class="nx-action-btn nx-action-btn--view"
+                    (click)="goToDetail(sub); $event.stopPropagation()"
+                    pTooltip="Ver detalle" tooltipPosition="top" aria-label="Ver detalle">
+              <i class="pi pi-eye"></i>
+            </button>
+            <button type="button" class="nx-action-btn nx-action-btn--edit"
+                    (click)="openEdit(sub, $event)"
+                    pTooltip="Editar plan/ciclo" tooltipPosition="top" aria-label="Editar">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button type="button" class="nx-action-btn nx-action-btn--danger"
+                    (click)="openCancel(sub, $event)"
+                    pTooltip="Cancelar" tooltipPosition="top" aria-label="Cancelar">
+              <i class="pi pi-ban"></i>
+            </button>
           </div>
         </td>
       </tr>

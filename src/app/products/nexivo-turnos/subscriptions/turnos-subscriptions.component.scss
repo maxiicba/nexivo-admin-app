@@ -517,15 +517,41 @@
 .nx-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
-  padding: 2px;
-  background: var(--nx-surface-soft);
-  border-radius: 10px;
-  border: 1px solid var(--nx-border);
+  gap: 0.25rem;
+  justify-content: center;
+}
 
-  ::ng-deep .p-button.p-button-rounded {
-    width: 30px; height: 30px;
+.nx-action-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--nx-text-secondary);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  padding: 0;
+  line-height: 1;
+
+  .pi { font-size: 0.95rem; line-height: 1; }
+
+  &:hover {
+    background: var(--nx-surface-soft);
+    border-color: var(--nx-border);
   }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nx-primary) 25%, transparent);
+  }
+
+  &--view:hover   { color: var(--nx-primary); }
+  &--edit:hover   { color: #6366f1; }
+  &--danger       { color: #ef4444; }
+  &--danger:hover { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
 }
 
 // ── Empty state ──────────────────────────────────────────────────────────────
