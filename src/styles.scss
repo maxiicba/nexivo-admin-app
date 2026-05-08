@@ -1,3 +1,9 @@
 @import "assets/layout/styles/layout/layout.scss";
 @import "primeicons/primeicons.css";
 @import "primeflex/primeflex.css";
+
+// Mata cualquier scroll horizontal generado por tooltips/popups/animaciones
+// que se monten en <body> y desborden por unos pocos px.
+html, body {
+  overflow-x: clip;
+}

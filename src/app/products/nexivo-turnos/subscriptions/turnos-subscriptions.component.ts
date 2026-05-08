@@ -93,7 +93,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   ];
   statusOptions = [
     { label: 'Todos',       value: null },
-    { label: 'Trial',       value: 'trialing' },
+    { label: 'Prueba',      value: 'trialing' },
     { label: 'Activa',      value: 'active' },
     { label: 'Vencida',     value: 'past_due' },
     { label: 'Suspendida',  value: 'suspended' },
@@ -198,7 +198,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   statusLabelEs(status: string): string {
     const map: Record<string, string> = {
       active: 'Activa',
-      trialing: 'Trial',
+      trialing: 'Prueba',
       past_due: 'Vencida',
       suspended: 'Suspendida',
       cancelled: 'Cancelada',
