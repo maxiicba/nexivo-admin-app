@@ -18,91 +18,87 @@
 </section>
 
 <!-- KPIs -->
-<div class="grid mb-3 nx-kpi-grid">
-  <div class="col-6 md:col-3">
-    <div class="nx-kpi nx-kpi--blue">
-      <div class="nx-kpi__head">
-        <span class="nx-kpi__icon"><i class="pi pi-users"></i></span>
-        <span class="nx-kpi__label">Total</span>
-      </div>
+<div class="nx-kpi-grid">
+  <div class="nx-kpi nx-kpi--blue">
+    <div class="nx-kpi__icon"><i class="pi pi-users"></i></div>
+    <div class="nx-kpi__body">
+      <span class="nx-kpi__label">Total</span>
       <div class="nx-kpi__value">{{ stats.total }}</div>
       <div class="nx-kpi__hint">suscripciones</div>
     </div>
   </div>
-  <div class="col-6 md:col-3">
-    <div class="nx-kpi nx-kpi--green">
-      <div class="nx-kpi__head">
-        <span class="nx-kpi__icon"><i class="pi pi-dollar"></i></span>
-        <span class="nx-kpi__label">MRR</span>
-      </div>
+
+  <div class="nx-kpi nx-kpi--green">
+    <div class="nx-kpi__icon"><i class="pi pi-dollar"></i></div>
+    <div class="nx-kpi__body">
+      <span class="nx-kpi__label">MRR</span>
       <div class="nx-kpi__value">{{ formatCurrency(stats.mrr) }}</div>
       <div class="nx-kpi__hint">ingreso recurrente</div>
     </div>
   </div>
-  <div class="col-6 md:col-3">
-    <div class="nx-kpi nx-kpi--cyan">
-      <div class="nx-kpi__head">
-        <span class="nx-kpi__icon"><i class="pi pi-check-circle"></i></span>
-        <span class="nx-kpi__label">Activas</span>
-        <span class="nx-kpi__pct" *ngIf="kpiPct(stats.byStatus?.active) !== null">
+
+  <div class="nx-kpi nx-kpi--cyan">
+    <div class="nx-kpi__icon"><i class="pi pi-check-circle"></i></div>
+    <div class="nx-kpi__body">
+      <span class="nx-kpi__label">Activas</span>
+      <div class="nx-kpi__value">
+        {{ stats.byStatus?.active || 0 }}
+        <span class="nx-kpi__delta nx-kpi__delta--up" *ngIf="kpiPct(stats.byStatus?.active) !== null">
           {{ kpiPct(stats.byStatus?.active) }}%
         </span>
       </div>
-      <div class="nx-kpi__value">{{ stats.byStatus?.active || 0 }}</div>
-      <div class="nx-kpi__bar" *ngIf="kpiPct(stats.byStatus?.active) !== null">
-        <div class="nx-kpi__bar-fill" [style.width.%]="kpiPct(stats.byStatus?.active)"></div>
-      </div>
-      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.active) === null">del total</div>
+      <div class="nx-kpi__hint">del total</div>
     </div>
   </div>
-  <div class="col-6 md:col-3">
-    <div class="nx-kpi nx-kpi--orange">
-      <div class="nx-kpi__head">
-        <span class="nx-kpi__icon"><i class="pi pi-clock"></i></span>
-        <span class="nx-kpi__label">Trial</span>
-        <span class="nx-kpi__pct" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
+
+  <div class="nx-kpi nx-kpi--orange">
+    <div class="nx-kpi__icon"><i class="pi pi-clock"></i></div>
+    <div class="nx-kpi__body">
+      <span class="nx-kpi__label">Trial</span>
+      <div class="nx-kpi__value">
+        {{ stats.byStatus?.trialing || 0 }}
+        <span class="nx-kpi__delta nx-kpi__delta--up" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
           {{ kpiPct(stats.byStatus?.trialing) }}%
         </span>
       </div>
-      <div class="nx-kpi__value">{{ stats.byStatus?.trialing || 0 }}</div>
-      <div class="nx-kpi__bar" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
-        <div class="nx-kpi__bar-fill" [style.width.%]="kpiPct(stats.byStatus?.trialing)"></div>
-      </div>
-      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.trialing) === null">del total</div>
+      <div class="nx-kpi__hint">del total</div>
     </div>
   </div>
 </div>
 
 <!-- Filters -->
-<div class="nx-filters card mb-3">
+<div class="nx-filters">
   <div class="nx-filters__row">
     <div class="nx-filters__field nx-filters__field--search">
       <label class="nx-filters__label">Búsqueda</label>
-      <span class="p-input-icon-left w-full">
-        <i class="pi pi-search"></i>
+      <div class="nx-search">
+        <i class="pi pi-search nx-search__icon"></i>
         <input pInputText type="text" placeholder="Nombre, slug o email…"
-               [ngModel]="searchInput" (ngModelChange)="onSearchChange($event)" class="w-full">
-      </span>
+               [ngModel]="searchInput" (ngModelChange)="onSearchChange($event)" class="nx-search__input">
+      </div>
     </div>
     <div class="nx-filters__field">
       <label class="nx-filters__label">Estado</label>
       <p-dropdown [options]="statusOptions" [(ngModel)]="filters.status" optionLabel="label" optionValue="value"
-                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true"
+                  appendTo="body" styleClass="nx-dd"></p-dropdown>
     </div>
     <div class="nx-filters__field">
       <label class="nx-filters__label">Plan</label>
       <p-dropdown [options]="plans" [(ngModel)]="filters.planId" optionLabel="label" optionValue="value"
-                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true"
+                  appendTo="body" styleClass="nx-dd"></p-dropdown>
     </div>
     <div class="nx-filters__field nx-filters__field--narrow">
       <label class="nx-filters__label">Vence en (días)</label>
       <p-inputNumber [(ngModel)]="filters.expiringInDays" (ngModelChange)="applyFilters()"
-                     [min]="0" [showButtons]="false" [style]="{width:'100%'}"></p-inputNumber>
+                     [min]="0" [showButtons]="false" styleClass="nx-num"></p-inputNumber>
     </div>
     <div class="nx-filters__field">
       <label class="nx-filters__label">MP status</label>
       <p-dropdown [options]="mpStatusOptions" [(ngModel)]="filters.mpStatus" optionLabel="label" optionValue="value"
-                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true" [style]="{width:'100%'}"></p-dropdown>
+                  (onChange)="applyFilters()" placeholder="Todos" [showClear]="true"
+                  appendTo="body" styleClass="nx-dd"></p-dropdown>
     </div>
   </div>
 
@@ -121,31 +117,25 @@
 </div>
 
 <!-- Bulk failures banner -->
-<div *ngIf="bulkFailures.length > 0" class="card mb-3 p-3"
-     style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid var(--yellow-500, #f59e0b);">
-  <div class="flex align-items-center gap-2">
-    <i class="pi pi-exclamation-triangle" style="color: var(--yellow-500);"></i>
-    <span class="font-medium">{{ bulkFailures.length }} suscripciones no se procesaron en la última acción masiva</span>
-    <span class="flex-1"></span>
-    <button pButton label="Ver detalle" icon="pi pi-eye" class="p-button-sm p-button-text" (click)="openBulkFailures()"></button>
-    <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm" (click)="bulkFailures = []" pTooltip="Descartar"></button>
-  </div>
+<div *ngIf="bulkFailures.length > 0" class="nx-banner nx-banner--warning">
+  <i class="pi pi-exclamation-triangle nx-banner__icon"></i>
+  <span class="nx-banner__text">{{ bulkFailures.length }} suscripciones no se procesaron en la última acción masiva</span>
+  <button pButton label="Ver detalle" icon="pi pi-eye" class="p-button-sm p-button-text" (click)="openBulkFailures()"></button>
+  <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm" (click)="bulkFailures = []" pTooltip="Descartar"></button>
 </div>
 
 <!-- Bulk actions bar -->
-<div *ngIf="selected.length > 0" class="card mb-3 p-3 nx-bulk-bar" style="background: var(--nx-surface-hover, #f8fafc);">
-  <div class="flex flex-wrap gap-2 align-items-center">
-    <span class="font-medium">{{ selected.length }} seleccionada(s)</span>
-    <span class="flex-1"></span>
-    <button pButton label="Regalar meses" icon="pi pi-gift" class="p-button-sm" (click)="openBulkComp()"></button>
-    <button pButton label="Cambiar estado" icon="pi pi-sync" class="p-button-sm p-button-secondary" (click)="openBulkStatus()"></button>
-    <button pButton label="Notificar" icon="pi pi-send" class="p-button-sm p-button-secondary" (click)="openBulkNotify()"></button>
-    <button pButton label="Limpiar" icon="pi pi-times" class="p-button-sm p-button-text" (click)="selected = []"></button>
-  </div>
+<div *ngIf="selected.length > 0" class="nx-bulk-bar">
+  <span class="nx-bulk-bar__count">{{ selected.length }} seleccionada(s)</span>
+  <span class="flex-1"></span>
+  <button pButton label="Regalar meses" icon="pi pi-gift" class="p-button-sm" (click)="openBulkComp()"></button>
+  <button pButton label="Cambiar estado" icon="pi pi-sync" class="p-button-sm p-button-secondary" (click)="openBulkStatus()"></button>
+  <button pButton label="Notificar" icon="pi pi-send" class="p-button-sm p-button-secondary" (click)="openBulkNotify()"></button>
+  <button pButton label="Limpiar" icon="pi pi-times" class="p-button-sm p-button-text" (click)="selected = []"></button>
 </div>
 
 <!-- Bulk failures dialog -->
-<p-dialog [(visible)]="bulkFailuresDialog" header="Acciones que fallaron" [modal]="true" [style]="{width: '600px'}">
+<p-dialog [(visible)]="bulkFailuresDialog" header="Acciones que fallaron" [modal]="true" [style]="{width: '600px'}" styleClass="nx-dialog">
   <div class="text-sm text-color-secondary mb-2">{{ bulkFailures.length }} suscripciones no se procesaron:</div>
   <div class="p-0" style="max-height: 400px; overflow-y: auto;">
     <div *ngFor="let f of bulkFailures" class="p-2 border-bottom-1 border-200">
@@ -159,7 +149,7 @@
 </p-dialog>
 
 <!-- Table -->
-<div class="card nx-subs-table">
+<div class="nx-subs-table">
   <p-table [value]="subscriptions" [loading]="loading" [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords"
            [lazy]="true" (onLazyLoad)="onPageChange($event)" [rowsPerPageOptions]="[20, 50, 100]"
            [rowHover]="true" dataKey="id" [(selection)]="selected" styleClass="nx-table">
@@ -200,23 +190,28 @@
           </span>
         </td>
         <td class="text-right font-medium">{{ formatCurrency(sub.currentPrice) }}</td>
-        <td class="text-center"><p-tag [value]="sub.status" [severity]="getStatusSeverity(sub.status)" /></td>
+        <td class="text-center">
+          <span class="nx-badge" [ngClass]="'nx-badge--' + sub.status">
+            {{ statusLabelEs(sub.status) }}
+          </span>
+        </td>
         <td class="text-center">
           <ng-container *ngIf="sub.currentPeriodEnd">
-            <p-tag [value]="daysUntil(sub.currentPeriodEnd) + 'd'"
-                   [severity]="daysBadgeSeverity(daysUntil(sub.currentPeriodEnd))" [rounded]="true"
-                   [pTooltip]="'Vence el ' + (sub.currentPeriodEnd | date:'dd/MM/yy')"></p-tag>
+            <span class="nx-badge nx-badge--days" [ngClass]="'nx-badge--days-' + daysBadgeSeverity(daysUntil(sub.currentPeriodEnd))"
+                  [pTooltip]="'Vence el ' + (sub.currentPeriodEnd | date:'dd/MM/yy')">
+              {{ daysUntil(sub.currentPeriodEnd) }}d
+            </span>
           </ng-container>
         </td>
         <td class="text-sm text-color-secondary">{{ sub.currentPeriodStart | date:'dd/MM/yy' }} — {{ sub.currentPeriodEnd | date:'dd/MM/yy' }}</td>
         <td>
           <div class="nx-actions">
             <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm"
-                    (click)="goToDetail(sub); $event.stopPropagation()" pTooltip="Ver detalle"></button>
+                    (click)="goToDetail(sub); $event.stopPropagation()" pTooltip="Ver detalle" tooltipPosition="top"></button>
             <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
-                    (click)="openEdit(sub, $event)" pTooltip="Editar plan/ciclo"></button>
+                    (click)="openEdit(sub, $event)" pTooltip="Editar plan/ciclo" tooltipPosition="top"></button>
             <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                    (click)="openCancel(sub, $event)" pTooltip="Cancelar"></button>
+                    (click)="openCancel(sub, $event)" pTooltip="Cancelar" tooltipPosition="top"></button>
           </div>
         </td>
       </tr>
@@ -240,15 +235,30 @@
 </div>
 
 <!-- Edit dialog -->
-<p-dialog [(visible)]="editDialog" header="Editar suscripción" [modal]="true" [style]="{width: '450px'}">
+<p-dialog [(visible)]="editDialog" header="Editar suscripción" [modal]="true"
+          [style]="{width: '480px', maxWidth: '95vw'}" [draggable]="false" [resizable]="false"
+          styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2" *ngIf="editingSub">
-    <div>
-      <label class="block mb-1 font-medium">Plan</label>
-      <p-dropdown [options]="plans" [(ngModel)]="editData.planId" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    <div class="field">
+      <label class="nx-form-label">Plan</label>
+      <p-dropdown [options]="plans" [(ngModel)]="editData.planId"
+                  optionLabel="label" optionValue="value"
+                  appendTo="body" class="w-full" styleClass="nx-dd"
+                  placeholder="Seleccioná un plan"
+                  (onChange)="onEditPlanChange()"></p-dropdown>
     </div>
-    <div>
-      <label class="block mb-1 font-medium">Ciclo</label>
-      <p-dropdown [options]="billingCycleOptions" [(ngModel)]="editData.billingCycle" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    <div class="field">
+      <label class="nx-form-label">Ciclo de facturación</label>
+      <p-dropdown [options]="billingCycleOptions" [(ngModel)]="editData.billingCycle"
+                  optionLabel="label" optionValue="value"
+                  appendTo="body" class="w-full" styleClass="nx-dd"
+                  (onChange)="onEditCycleChange()"></p-dropdown>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Precio actual</label>
+      <p-inputNumber [(ngModel)]="editData.currentPrice" mode="currency" currency="ARS" locale="es-AR"
+                     class="w-full" styleClass="nx-num"></p-inputNumber>
+      <div class="nx-form-hint">Se sugiere el precio del plan según el ciclo. Podés ajustarlo si querés un precio custom.</div>
     </div>
   </div>
   <ng-template pTemplate="footer">
@@ -258,10 +268,11 @@
 </p-dialog>
 
 <!-- Cancel dialog -->
-<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true" [style]="{width: '450px'}">
+<p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true"
+          [style]="{width: '450px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">
-    <div>
-      <label class="block mb-1 font-medium">Motivo</label>
+    <div class="field">
+      <label class="nx-form-label">Motivo</label>
       <input pInputText [(ngModel)]="cancelReason" placeholder="Motivo…" class="w-full">
     </div>
     <div class="flex align-items-center gap-2">
@@ -279,15 +290,16 @@
 </p-dialog>
 
 <!-- Bulk grant comp dialog -->
-<p-dialog [(visible)]="bulkCompDialog" header="Regalar meses (masivo)" [modal]="true" [style]="{width: '450px'}">
+<p-dialog [(visible)]="bulkCompDialog" header="Regalar meses (masivo)" [modal]="true"
+          [style]="{width: '450px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">
     <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
-    <div>
-      <label class="block mb-1 font-medium">Meses</label>
-      <p-inputNumber [(ngModel)]="bulkCompMonths" [min]="1" [max]="24" [showButtons]="true" [style]="{width:'100%'}"></p-inputNumber>
+    <div class="field">
+      <label class="nx-form-label">Meses</label>
+      <p-inputNumber [(ngModel)]="bulkCompMonths" [min]="1" [max]="24" [showButtons]="true" class="w-full"></p-inputNumber>
     </div>
-    <div>
-      <label class="block mb-1 font-medium">Motivo</label>
+    <div class="field">
+      <label class="nx-form-label">Motivo</label>
       <textarea pInputTextarea [(ngModel)]="bulkCompReason" rows="3" class="w-full" placeholder="Ej: Campaña de fidelización…"></textarea>
     </div>
   </div>
@@ -300,15 +312,18 @@
 </p-dialog>
 
 <!-- Bulk change status dialog -->
-<p-dialog [(visible)]="bulkStatusDialog" header="Cambiar estado (masivo)" [modal]="true" [style]="{width: '450px'}">
+<p-dialog [(visible)]="bulkStatusDialog" header="Cambiar estado (masivo)" [modal]="true"
+          [style]="{width: '450px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">
     <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
-    <div>
-      <label class="block mb-1 font-medium">Nuevo estado</label>
-      <p-dropdown [options]="bulkStatusOptions" [(ngModel)]="bulkStatusValue" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+    <div class="field">
+      <label class="nx-form-label">Nuevo estado</label>
+      <p-dropdown [options]="bulkStatusOptions" [(ngModel)]="bulkStatusValue"
+                  optionLabel="label" optionValue="value"
+                  appendTo="body" class="w-full" styleClass="nx-dd"></p-dropdown>
     </div>
-    <div>
-      <label class="block mb-1 font-medium">Motivo</label>
+    <div class="field">
+      <label class="nx-form-label">Motivo</label>
       <textarea pInputTextarea [(ngModel)]="bulkStatusReason" rows="3" class="w-full"></textarea>
     </div>
   </div>
@@ -321,21 +336,24 @@
 </p-dialog>
 
 <!-- Bulk notify dialog -->
-<p-dialog [(visible)]="bulkNotifyDialog" header="Notificar (masivo)" [modal]="true" [style]="{width: '500px'}">
+<p-dialog [(visible)]="bulkNotifyDialog" header="Notificar (masivo)" [modal]="true"
+          [style]="{width: '500px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">
     <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
     <div class="grid">
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Canal</label>
-        <p-dropdown [options]="notifyChannelOptions" [(ngModel)]="bulkNotifyChannel" optionLabel="label" optionValue="value" [style]="{width:'100%'}"></p-dropdown>
+      <div class="col-6 field">
+        <label class="nx-form-label">Canal</label>
+        <p-dropdown [options]="notifyChannelOptions" [(ngModel)]="bulkNotifyChannel"
+                    optionLabel="label" optionValue="value"
+                    appendTo="body" class="w-full" styleClass="nx-dd"></p-dropdown>
       </div>
-      <div class="col-6">
-        <label class="block mb-1 font-medium">Plantilla</label>
+      <div class="col-6 field">
+        <label class="nx-form-label">Plantilla</label>
         <input pInputText [(ngModel)]="bulkNotifyTemplate" placeholder="reminder | overdue | trial_ending" class="w-full">
       </div>
     </div>
-    <div>
-      <label class="block mb-1 font-medium">Mensaje custom (opcional)</label>
+    <div class="field">
+      <label class="nx-form-label">Mensaje custom (opcional)</label>
       <textarea pInputTextarea [(ngModel)]="bulkNotifyMessage" rows="3" class="w-full"></textarea>
     </div>
     <div class="text-xs text-color-secondary">

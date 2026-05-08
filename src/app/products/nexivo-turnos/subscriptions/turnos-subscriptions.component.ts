@@ -36,6 +36,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   subscriptions: any[] = [];
   totalRecords = 0;
   plans: any[] = [];
+  plansRaw: any[] = [];
   stats: any = { total: 0, mrr: 0, byStatus: { active: 0, trialing: 0, past_due: 0, suspended: 0 } };
   loading = false;
 
@@ -147,6 +148,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
         this.subscriptions = list.items ?? [];
         this.totalRecords = list.total ?? 0;
         this.stats = stats;
+        this.plansRaw = plans;
         this.plans = plans.map((pl: any) => ({ label: pl.displayName, value: pl.id }));
         this.loading = false;
       },
@@ -191,6 +193,17 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
       active: 'success', trialing: 'info', past_due: 'warning', suspended: 'danger', cancelled: 'secondary'
     };
     return map[status];
+  }
+
+  statusLabelEs(status: string): string {
+    const map: Record<string, string> = {
+      active: 'Activa',
+      trialing: 'Trial',
+      past_due: 'Vencida',
+      suspended: 'Suspendida',
+      cancelled: 'Cancelada',
+    };
+    return map[status] ?? status;
   }
 
   daysUntil(date: any): number {
@@ -271,8 +284,26 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   openEdit(sub: any, $event?: Event): void {
     $event?.stopPropagation();
     this.editingSub = sub;
-    this.editData = { planId: sub.planId || sub.plan?.id, billingCycle: sub.billingCycle, currentPrice: sub.currentPrice };
+    this.editData = {
+      planId: sub.planId || sub.plan?.id,
+      billingCycle: sub.billingCycle || 'monthly',
+      currentPrice: sub.currentPrice ?? 0,
+    };
     this.editDialog = true;
+  }
+
+  onEditPlanChange(): void {
+    this.editData.currentPrice = this.suggestedPrice(this.editData.planId, this.editData.billingCycle);
+  }
+
+  onEditCycleChange(): void {
+    this.editData.currentPrice = this.suggestedPrice(this.editData.planId, this.editData.billingCycle);
+  }
+
+  private suggestedPrice(planId: string, cycle: 'monthly' | 'annual'): number {
+    const pl = this.plansRaw.find((p) => p.id === planId);
+    if (!pl) return this.editData.currentPrice ?? 0;
+    return cycle === 'annual' ? Number(pl.annualPrice ?? 0) : Number(pl.monthlyPrice ?? 0);
   }
 
   saveEdit(): void {
