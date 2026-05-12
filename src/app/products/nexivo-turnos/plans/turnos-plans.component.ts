@@ -23,6 +23,7 @@ const DEFAULT_PLAN = () => ({
   name: '', displayName: '', description: '',
   monthlyPrice: 0, annualPrice: 0, sortOrder: 0, isActive: true,
   maxProfessionals: 2, maxServices: 5, maxMonthlyAppointments: 100, maxClients: 50,
+  maxReminders: 1,
   hasWhatsappBotSequential: false, hasWhatsappBotAI: false, hasOnlineBooking: true, hasPromotions: false,
   hasCoupons: false, hasAdvancedReports: false, hasFinance: false, hasCustomBranding: false,
   hasAudioTranscription: false,
@@ -184,6 +185,9 @@ export class TurnosPlansComponent implements OnInit, OnDestroy {
     lines.push(`${fmt(p.maxServices)} servicios`);
     lines.push(`${fmt(p.maxMonthlyAppointments)} turnos por mes`);
     lines.push(`${fmt(p.maxClients)} clientes`);
+    if (p.maxReminders > 1) {
+      lines.push(`${p.maxReminders} recordatorios por turno`);
+    }
 
     if (p.hasOnlineBooking) lines.push('Reservas online');
     if (p.hasWhatsappBotSequential) lines.push('Bot WhatsApp');

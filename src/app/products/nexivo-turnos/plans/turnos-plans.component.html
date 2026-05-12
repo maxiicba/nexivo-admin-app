@@ -207,6 +207,13 @@
         <p-inputNumber [(ngModel)]="editingPlan.maxClients" [min]="1" class="w-full"></p-inputNumber>
       </div>
     </div>
+    <div class="grid">
+      <div class="col-6 field">
+        <label class="nx-form-label">Max. recordatorios por turno</label>
+        <p-inputNumber [(ngModel)]="editingPlan.maxReminders" [min]="1" [max]="3" [showButtons]="true" class="w-full"></p-inputNumber>
+        <small class="block mt-1" style="color: var(--nx-text-secondary)">1 a 3. El negocio configura hasta este valor.</small>
+      </div>
+    </div>
     <div class="grid" *ngIf="editingPlan.hasWhatsappBotSequential || editingPlan.hasWhatsappBotAI">
       <div class="col-6 field">
         <label class="nx-form-label">Max. msgs bot WA/dia por numero</label>
