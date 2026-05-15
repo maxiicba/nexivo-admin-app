@@ -282,6 +282,31 @@
 </p-dialog>
 
 <!-- Cancel dialog -->
+<p-dialog [(visible)]="impersonateDialog" header="Entrar como cliente" [modal]="true"
+          [style]="{width: '480px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="flex flex-column gap-3 py-2">
+    <div class="text-sm">
+      Vas a iniciar una sesión como <strong>{{ impersonateTargetName }}</strong>.
+      La sesión queda registrada en auditoría, expira en 1 hora y todas las acciones que hagas se loguean.
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Motivo *</label>
+      <textarea pInputTextarea [(ngModel)]="impersonateReason" rows="2"
+                placeholder="Ej: ticket #123, debug bug X, revisar reporte Y"
+                class="w-full"></textarea>
+      <small class="text-color-secondary">Mínimo 5 caracteres. Queda guardado junto a la sesión.</small>
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-checkbox [(ngModel)]="impersonateNotify" [binary]="true" inputId="imp-notify"></p-checkbox>
+      <label for="imp-notify" class="text-sm">Notificar al cliente por email</label>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="impersonateDialog = false"></button>
+    <button pButton label="Entrar" icon="pi pi-id-card" [loading]="saving" (click)="confirmImpersonate()"></button>
+  </ng-template>
+</p-dialog>
+
 <p-dialog [(visible)]="cancelDialog" header="Cancelar suscripción" [modal]="true"
           [style]="{width: '450px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">

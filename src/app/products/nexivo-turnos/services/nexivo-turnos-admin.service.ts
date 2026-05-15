@@ -179,14 +179,25 @@ export class NexivoTurnosAdminService {
 
   // ── Impersonation ─────────────────────────────────────────────────────────
 
-  startImpersonation(targetUserId: string): Observable<{
+  startImpersonation(payload: {
+    targetUserId: string;
+    reason: string;
+    notifyClient: boolean;
+  }): Observable<{
     token: string;
     sessionId: string;
     target: { id: string; email: string | null; businessName: string | null };
   }> {
     return this.http.post<any>(
       `${environment.turnosApiUrl}/auth/impersonate/start`,
-      { targetUserId },
+      payload,
+      { withCredentials: true },
+    );
+  }
+
+  listImpersonationActions(sessionId: string): Observable<{ session: any; actions: any[] }> {
+    return this.http.get<any>(
+      `${environment.turnosApiUrl}/auth/impersonate/sessions/${sessionId}/actions`,
       { withCredentials: true },
     );
   }

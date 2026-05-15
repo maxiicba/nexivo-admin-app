@@ -85,6 +85,13 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   bulkFailuresDialog = false;
   bulkFailures: { id: string; error: string }[] = [];
 
+  // Impersonation dialog
+  impersonateDialog = false;
+  impersonateTargetName = '';
+  impersonateTargetUserId = '';
+  impersonateReason = '';
+  impersonateNotify = false;
+
   saving = false;
 
   // Options
@@ -483,26 +490,41 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
       this.messageService.add({ severity: 'error', summary: 'Sin owner', detail: 'Esta suscripción no tiene un userId asociado.' });
       return;
     }
-    const targetName = sub?.business?.name || sub?.business?.slug || 'este cliente';
-    this.confirmationService.confirm({
-      header: 'Entrar como cliente',
-      message: `Vas a iniciar una sesión como "${targetName}". La sesión queda registrada en auditoría y expira en 1 hora.`,
-      icon: 'pi pi-id-card',
-      acceptLabel: 'Entrar',
-      rejectLabel: 'Cancelar',
-      accept: () => {
-        this.svc.startImpersonation(targetUserId).subscribe({
-          next: ({ token }) => {
-            const url = `${environment.turnosAppUrl}/?impersonationToken=${encodeURIComponent(token)}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
-          },
-          error: (err) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: err?.error?.message || 'No se pudo iniciar la sesión',
-            });
-          },
+    this.impersonateTargetUserId = targetUserId;
+    this.impersonateTargetName = sub?.business?.name || sub?.business?.slug || 'este cliente';
+    this.impersonateReason = '';
+    this.impersonateNotify = false;
+    this.impersonateDialog = true;
+  }
+
+  confirmImpersonate(): void {
+    const reason = (this.impersonateReason || '').trim();
+    if (reason.length < 5) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Motivo requerido',
+        detail: 'Escribí un motivo de al menos 5 caracteres (ej: ticket #123, debug bug X).',
+      });
+      return;
+    }
+    this.saving = true;
+    this.svc.startImpersonation({
+      targetUserId: this.impersonateTargetUserId,
+      reason,
+      notifyClient: this.impersonateNotify,
+    }).subscribe({
+      next: ({ token }) => {
+        this.saving = false;
+        this.impersonateDialog = false;
+        const url = `${environment.turnosAppUrl}/?impersonationToken=${encodeURIComponent(token)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      },
+      error: (err) => {
+        this.saving = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'No se pudo iniciar la sesión',
         });
       },
     });
