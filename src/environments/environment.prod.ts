@@ -6,4 +6,5 @@ export const environment = {
   wsUrl: 'https://api.nexivo.com.ar',
   localLogin: false,
   appUrl: 'https://www.admin.nexivo.com.ar',
+  turnosAppUrl: 'https://turnos.nexivo.com.ar',
 };

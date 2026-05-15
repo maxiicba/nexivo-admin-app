@@ -6,4 +6,5 @@ export const environment = {
   wsUrl: 'http://localhost:3000',   // WebSocket base URL (no /api suffix)
   localLogin: true,
   appUrl: 'http://localhost:4200',
+  turnosAppUrl: 'http://localhost:4203',
 };

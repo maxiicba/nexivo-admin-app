@@ -216,6 +216,11 @@
                     pTooltip="Editar plan/ciclo" tooltipPosition="top" aria-label="Editar">
               <i class="pi pi-pencil"></i>
             </button>
+            <button type="button" class="nx-action-btn"
+                    (click)="openImpersonate(sub, $event)"
+                    pTooltip="Entrar como cliente" tooltipPosition="top" aria-label="Entrar como cliente">
+              <i class="pi pi-id-card"></i>
+            </button>
             <button type="button" class="nx-action-btn nx-action-btn--danger"
                     (click)="openCancel(sub, $event)"
                     pTooltip="Cancelar" tooltipPosition="top" aria-label="Cancelar">

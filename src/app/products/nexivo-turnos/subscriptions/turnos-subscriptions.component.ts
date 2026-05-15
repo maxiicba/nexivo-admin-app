@@ -19,6 +19,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { forkJoin, Subject, Subscription as RxSub } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-turnos-subscriptions',
@@ -471,5 +472,39 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
 
   openBulkFailures(): void {
     this.bulkFailuresDialog = true;
+  }
+
+  // ── Impersonation ─────────────────────────────────────────────────────────
+
+  openImpersonate(sub: any, $event?: Event): void {
+    $event?.stopPropagation();
+    const targetUserId = sub?.business?.userId;
+    if (!targetUserId) {
+      this.messageService.add({ severity: 'error', summary: 'Sin owner', detail: 'Esta suscripción no tiene un userId asociado.' });
+      return;
+    }
+    const targetName = sub?.business?.name || sub?.business?.slug || 'este cliente';
+    this.confirmationService.confirm({
+      header: 'Entrar como cliente',
+      message: `Vas a iniciar una sesión como "${targetName}". La sesión queda registrada en auditoría y expira en 1 hora.`,
+      icon: 'pi pi-id-card',
+      acceptLabel: 'Entrar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        this.svc.startImpersonation(targetUserId).subscribe({
+          next: ({ token }) => {
+            const url = `${environment.turnosAppUrl}/?impersonationToken=${encodeURIComponent(token)}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err?.error?.message || 'No se pudo iniciar la sesión',
+            });
+          },
+        });
+      },
+    });
   }
 }

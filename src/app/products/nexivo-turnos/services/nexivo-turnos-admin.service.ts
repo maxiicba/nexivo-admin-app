@@ -177,6 +177,20 @@ export class NexivoTurnosAdminService {
     return this.http.delete<void>(`${this.base}/plans/${planId}/whitelist/${businessId}`, { withCredentials: true });
   }
 
+  // ── Impersonation ─────────────────────────────────────────────────────────
+
+  startImpersonation(targetUserId: string): Observable<{
+    token: string;
+    sessionId: string;
+    target: { id: string; email: string | null; businessName: string | null };
+  }> {
+    return this.http.post<any>(
+      `${environment.turnosApiUrl}/auth/impersonate/start`,
+      { targetUserId },
+      { withCredentials: true },
+    );
+  }
+
   // ── Business search ────────────────────────────────────────────────────────
 
   searchBusinesses(q: string): Observable<{ id: string; name: string; slug: string }[]> {
