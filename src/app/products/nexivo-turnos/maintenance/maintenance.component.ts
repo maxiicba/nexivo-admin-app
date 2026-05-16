@@ -67,13 +67,14 @@ export class MaintenanceComponent implements OnInit {
     if (event.checked) {
       this.doEnable();
     } else {
-      // Revert visual until confirm
-      this.isEnabled = true;
-      this.confirmationService.confirm({
-        message: '¿Desactivar el modo mantenimiento? Los usuarios podrán volver a acceder.',
-        header: 'Confirmar',
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => this.doDisable(),
+      queueMicrotask(() => {
+        this.isEnabled = true;
+        this.confirmationService.confirm({
+          message: '¿Desactivar el modo mantenimiento? Los usuarios podrán volver a acceder.',
+          header: 'Confirmar',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => this.doDisable(),
+        });
       });
     }
   }
