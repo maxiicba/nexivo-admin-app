@@ -4,8 +4,22 @@
     <i class="pi pi-bars"></i>
   </button>
 
-  <!-- App title -->
-  <span class="layout-topbar-logo-text font-semibold">Nexivo Admin</span>
+  <!-- Breadcrumbs -->
+  <nav class="topbar-crumbs topbar-desktop-only" aria-label="breadcrumb" *ngIf="breadcrumbs.length">
+    <ng-container *ngFor="let c of breadcrumbs; let last = last; let i = index">
+      <a *ngIf="!last && c.url" class="topbar-crumbs__link" [routerLink]="c.url">{{ c.label }}</a>
+      <span *ngIf="!last && !c.url" class="topbar-crumbs__link is-static">{{ c.label }}</span>
+      <span *ngIf="last" class="topbar-crumbs__current">{{ c.label }}</span>
+      <span *ngIf="!last" class="topbar-crumbs__sep">/</span>
+    </ng-container>
+  </nav>
+
+  <!-- Global search -->
+  <div class="topbar-search topbar-desktop-only">
+    <i class="pi pi-search topbar-search__icon"></i>
+    <input type="text" placeholder="Buscar negocios, planes, eventos…" class="topbar-search__input" />
+    <kbd class="topbar-search__kbd">⌘K</kbd>
+  </div>
 
   <!-- Mobile: open topbar menu -->
   <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
@@ -19,6 +33,12 @@
     <!-- ═══ Separator (desktop only) ═══ -->
     <div class="topbar-separator"></div>
 
+    <!-- ═══ Notifications ═══ -->
+    <button class="topbar-icon-btn" pTooltip="Notificaciones" tooltipPosition="bottom" aria-label="Notificaciones">
+      <i class="pi pi-bell"></i>
+      <span class="topbar-mobile-label">Notificaciones</span>
+    </button>
+
     <!-- ═══ Dark mode toggle ═══ -->
     <button class="topbar-icon-btn" (click)="toggleDarkMode()"
       [pTooltip]="isDarkMode ? 'Modo claro' : 'Modo oscuro'" tooltipPosition="bottom">
@@ -29,7 +49,7 @@
     <!-- ═══ User Menu (Desktop: overlay, Mobile: inline) ═══ -->
     <button class="topbar-user-btn topbar-desktop-only" (click)="userPanel.toggle($event)" type="button">
       <div class="topbar-avatar">
-        {{ userData?.first_name?.charAt(0) | uppercase }}
+        {{ userInitials }}
       </div>
       <i class="pi pi-chevron-down topbar-user-chevron"></i>
     </button>
@@ -37,7 +57,7 @@
     <p-overlayPanel #userPanel [styleClass]="'topbar-user-panel'">
       <div class="topbar-user-panel-header">
         <div class="topbar-user-panel-avatar">
-          {{ userData?.first_name?.charAt(0) | uppercase }}
+          {{ userInitials }}
         </div>
         <div class="topbar-user-panel-info">
           <span class="topbar-user-panel-name">{{ userData?.first_name }} {{ userData?.last_name }}</span>
@@ -73,7 +93,7 @@
       <div class="topbar-separator"></div>
       <div class="topbar-mobile-user-footer">
         <div class="topbar-avatar-sm">
-          {{ userData?.first_name?.charAt(0) | uppercase }}
+          {{ userInitials }}
         </div>
         <span class="topbar-mobile-user-label">{{ userData?.first_name }} {{ userData?.last_name }}</span>
       </div>

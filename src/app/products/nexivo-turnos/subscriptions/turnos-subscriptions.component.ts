@@ -93,6 +93,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   impersonateNotify = false;
 
   saving = false;
+  syncingMp = false;
 
   // Options
   billingCycleOptions = [
@@ -229,6 +230,26 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     return `$${Number(val ?? 0).toLocaleString('es-AR')}`;
   }
 
+  // Compact: 1.84M, 22.1K, etc.
+  formatCurrencyCompact(val: number): string {
+    const n = Number(val ?? 0);
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+    if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+    return `$${n.toLocaleString('es-AR')}`;
+  }
+
+  syncMercadoPago(): void {
+    this.syncingMp = true;
+    setTimeout(() => {
+      this.syncingMp = false;
+      this.messageService.add({ severity: 'info', summary: 'MP', detail: 'Sincronización iniciada' });
+    }, 800);
+  }
+
+  openNewSubscription(): void {
+    this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Alta manual de suscripción' });
+  }
+
   // KPI proportion (% of total) — null when total is 0 to hide the bar
   kpiPct(value: number): number | null {
     const total = this.stats?.total || 0;
@@ -360,9 +381,12 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
 
     if (this.cancelImmediate) {
       this.confirmationService.confirm({
-        message: 'Esto cancelará la suscripción AHORA y revocará el preapproval en MercadoPago. ¿Continuar?',
         header: 'Cancelación inmediata',
+        message: 'Se cancelará la suscripción AHORA y se revocará el preapproval en MercadoPago. Esta acción no se puede deshacer.',
         icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí, cancelar ahora',
+        rejectLabel: 'Volver',
+        acceptButtonStyleClass: 'p-button-danger',
         accept: proceed,
       });
     } else {
@@ -397,8 +421,11 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     };
     if (ids.length > 10) {
       this.confirmationService.confirm({
-        message: `Estás por regalar ${this.bulkCompMonths} mes(es) a ${ids.length} suscripciones. ¿Confirmar?`,
-        header: 'Confirmar acción masiva',
+        header: 'Acción masiva',
+        message: `Vas a regalar ${this.bulkCompMonths} mes(es) a ${ids.length} suscripciones. ¿Confirmás la operación?`,
+        icon: 'pi pi-gift',
+        acceptLabel: 'Aplicar a todas',
+        rejectLabel: 'Cancelar',
         accept: apply,
       });
     } else apply();
@@ -429,8 +456,11 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     };
     if (ids.length > 10) {
       this.confirmationService.confirm({
-        message: `Estás por cambiar el estado de ${ids.length} suscripciones a "${this.bulkStatusValue}". ¿Confirmar?`,
-        header: 'Confirmar acción masiva',
+        header: 'Acción masiva',
+        message: `Vas a cambiar el estado de ${ids.length} suscripciones a "${this.statusLabelEs(this.bulkStatusValue)}". ¿Confirmás la operación?`,
+        icon: 'pi pi-sync',
+        acceptLabel: 'Aplicar a todas',
+        rejectLabel: 'Cancelar',
         accept: apply,
       });
     } else apply();

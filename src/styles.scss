@@ -1,9 +1,602 @@
 @import "assets/layout/styles/layout/layout.scss";
 @import "primeicons/primeicons.css";
 @import "primeflex/primeflex.css";
+@import "assets/layout/styles/layout/nx-design-system";
 
-// Mata cualquier scroll horizontal generado por tooltips/popups/animaciones
-// que se monten en <body> y desborden por unos pocos px.
+// FIX TEMBLOR DE LA PAGINA + scroll horizontal por tooltips de PrimeNG.
+// El tooltip se monta en <body> con position: absolute y coords absolutas;
+// con overflow-x: clip Y max-width: 100vw en body, el tooltip no puede
+// ensanchar el documento. clip > hidden porque no crea contexto de scroll.
 html, body {
-  overflow-x: clip;
+  overflow-x: clip !important;
+  max-width: 100vw !important;
+}
+html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable;
+}
+body {
+  position: relative;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  .nx-dialog — estilo basado en referencia "Sosro Mobile App" / TailAdmin
+//  Card limpia, header sin borde, inputs con icono al final, footer con
+//  Cancel ghost + Save oscuro.
+// ════════════════════════════════════════════════════════════════════════════
+.p-dialog.nx-dialog {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.30);
+  border: 0;
+  background: #ffffff;
+  // ── Dialog scrollea internamente cuando el contenido pasa del viewport ──
+  max-height: 90vh;
+  display: flex !important;
+  flex-direction: column;
+
+  // ── Header limpio sin border-bottom ───────────────────────────────────────
+  .p-dialog-header {
+    padding: 1.5rem 1.6rem 1rem;
+    background: #ffffff;
+    border-bottom: 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    .p-dialog-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .p-dialog-header-icons .p-dialog-header-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: #64748b;
+      transition: background 140ms ease, color 140ms ease;
+      box-shadow: none;
+
+      &:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      &:focus { box-shadow: none; outline: none; }
+    }
+  }
+
+  // ── Content ───────────────────────────────────────────────────────────────
+  .p-dialog-content {
+    padding: 0.25rem 1.6rem 0.5rem;
+    background: #ffffff;
+    overflow-y: auto;
+    overflow-x: visible;
+    flex: 1 1 auto;
+    min-height: 0;
+
+    label,
+    label.block,
+    label.nx-form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 0.45rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    // Inputs de texto / textarea
+    .p-inputtext,
+    textarea.p-inputtextarea {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      font-size: 0.94rem;
+      color: #0f172a;
+      padding: 0 1rem;
+      box-sizing: border-box;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+      box-shadow: none;
+
+      &::placeholder { color: #94a3b8; }
+
+      &:hover:not(:disabled) { border-color: #cbd5e1; }
+
+      &:focus {
+        outline: none;
+        border-color: #465fff;
+        box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+      }
+    }
+
+    textarea.p-inputtextarea {
+      height: auto;
+      min-height: 96px;
+      padding: 0.75rem 1rem;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    // Dropdown: contenedor con altura fija y arrow integrado al final
+    .p-dropdown {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+      box-shadow: none;
+      padding: 0;
+
+      &:not(.p-disabled):hover { border-color: #cbd5e1; }
+
+      &.p-focus {
+        outline: none;
+        border-color: #465fff;
+        box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+      }
+
+      // El label hereda .p-inputtext — hay que neutralizar SU borde, focus, height
+      .p-dropdown-label,
+      .p-dropdown-label.p-inputtext {
+        flex: 1;
+        min-width: 0;
+        padding: 0 0 0 1rem;
+        display: flex;
+        align-items: center;
+        color: #0f172a;
+        font-size: 0.94rem;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
+        height: 100%;
+        line-height: 1;
+
+        &.p-placeholder { color: #94a3b8; }
+
+        &:focus,
+        &:hover { border: 0 !important; box-shadow: none !important; }
+      }
+
+      .p-dropdown-trigger {
+        width: 44px;
+        background: transparent;
+        color: #64748b;
+        border: 0;
+        flex-shrink: 0;
+
+        .p-dropdown-trigger-icon { font-size: 0.75rem; }
+      }
+
+      .p-dropdown-clear-icon {
+        right: 2.6rem;
+        color: #94a3b8;
+      }
+    }
+
+    // InputNumber wrapper
+    .p-inputnumber {
+      width: 100%;
+      display: flex;
+
+      .p-inputnumber-input {
+        width: 100%;
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 0 1rem;
+        font-size: 0.94rem;
+        color: #0f172a;
+        box-sizing: border-box;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+        box-shadow: none;
+
+        &:hover { border-color: #cbd5e1; }
+        &:focus {
+          outline: none;
+          border-color: #465fff;
+          box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+        }
+      }
+
+      // Botones up/down si showButtons=true
+      &.p-inputnumber-buttons-stacked .p-inputnumber-input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      .p-inputnumber-button-group {
+        .p-inputnumber-button {
+          background: #f8fafc;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          width: 36px;
+
+          &:hover { background: #f1f5f9; color: #0f172a; }
+          &.p-inputnumber-button-up { border-top-right-radius: 12px; border-bottom: 0; }
+          &.p-inputnumber-button-down { border-bottom-right-radius: 12px; }
+        }
+      }
+    }
+
+    .field { margin-bottom: 1.1rem; &:last-child { margin-bottom: 0; } }
+
+    // Hint text dentro del dialog
+    .nx-form-hint,
+    .text-xs.text-color-secondary {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 0.35rem;
+    }
+  }
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  .p-dialog-footer {
+    padding: 1.25rem 1.6rem 1.5rem;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.65rem;
+
+    // Cancel / Volver — ghost
+    .p-button.p-button-text {
+      background: transparent;
+      color: #64748b;
+      border: 0;
+      font-weight: 600;
+      padding: 0 1.1rem;
+      border-radius: 10px;
+      height: 44px;
+      box-shadow: none;
+
+      &:hover { background: #f1f5f9; color: #0f172a; }
+      &:focus { box-shadow: none; }
+    }
+
+    // Primario / Save / Aplicar — sólido oscuro (TailAdmin style)
+    .p-button:not(.p-button-text):not(.p-button-danger):not(.p-button-warning):not(.p-button-secondary):not(.p-button-outlined) {
+      background: #1c2434;
+      color: #ffffff;
+      border: 1px solid #1c2434;
+      font-weight: 600;
+      padding: 0 1.5rem;
+      border-radius: 10px;
+      height: 44px;
+      box-shadow: none;
+
+      &:hover:not(:disabled) { background: #0f172a; border-color: #0f172a; }
+      &:focus { box-shadow: 0 0 0 4px rgba(28, 36, 52, 0.18); }
+      &:disabled {
+        background: #cbd5e1;
+        border-color: #cbd5e1;
+        color: #ffffff;
+        opacity: 1;
+        cursor: not-allowed;
+      }
+    }
+
+    .p-button.p-button-danger {
+      background: #ef4444;
+      color: #ffffff;
+      border: 1px solid #ef4444;
+      font-weight: 600;
+      padding: 0 1.5rem;
+      border-radius: 10px;
+      height: 44px;
+      box-shadow: none;
+
+      &:hover:not(:disabled) { background: #dc2626; border-color: #dc2626; }
+    }
+
+    .p-button.p-button-warning {
+      background: #f59e0b;
+      color: #ffffff;
+      border: 1px solid #f59e0b;
+      font-weight: 600;
+      padding: 0 1.5rem;
+      border-radius: 10px;
+      height: 44px;
+      box-shadow: none;
+
+      &:hover:not(:disabled) { background: #d97706; border-color: #d97706; }
+    }
+
+    .p-button.p-button-secondary {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+      font-weight: 600;
+      padding: 0 1.2rem;
+      border-radius: 10px;
+      height: 44px;
+      box-shadow: none;
+
+      &:hover { background: #f8fafc; border-color: #cbd5e1; }
+    }
+
+    // Outlined (usado por "Cancelar" en algunos dialogs) — match al secondary
+    .p-button.p-button-outlined {
+      background: #ffffff !important;
+      color: #334155 !important;
+      border: 1px solid #e2e8f0 !important;
+      font-weight: 600 !important;
+      padding: 0 1.2rem !important;
+      border-radius: 10px !important;
+      height: 44px !important;
+      box-shadow: none !important;
+
+      .p-button-icon { color: #64748b !important; }
+
+      &:hover:not(:disabled) {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      &:focus { box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06) !important; }
+    }
+  }
+}
+
+// ── Panel del dropdown (se monta en <body> con appendTo) ─────────────────────
+.p-dropdown-panel {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22);
+  margin-top: 6px;
+  overflow: hidden;
+
+  .p-dropdown-items {
+    padding: 6px;
+
+    .p-dropdown-item {
+      padding: 0.7rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: #0f172a;
+      transition: background 100ms ease, color 100ms ease;
+      margin-bottom: 2px;
+
+      &:last-child { margin-bottom: 0; }
+
+      &:hover { background: #f1f5f9; }
+
+      &.p-highlight {
+        background: rgba(70, 95, 255, 0.10);
+        color: #465fff;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Mask
+.p-dialog-mask.p-component-overlay {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  Fix global: doble checkbox (input nativo visible al lado del p-checkbox)
+//  El theme lara-light-blue viejo no incluye reglas para .p-checkbox-input
+//  de PrimeNG 17+. Por eso el input nativo se renderiza visible al lado.
+//  Fix: ocultarlo con specificity alta y !important en todas las props clave.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Ocultar QUALQUIER input checkbox nativo dentro de .p-checkbox
+// Usamos doble selector + !important + appearance:none para ganarle a
+// cualquier user-agent style o reset global.
+p-checkbox .p-checkbox input[type="checkbox"],
+p-checkbox .p-checkbox-input,
+p-tablecheckbox .p-checkbox input[type="checkbox"],
+p-tableheadercheckbox .p-checkbox input[type="checkbox"],
+.p-checkbox > input[type="checkbox"],
+.p-checkbox .p-checkbox-input,
+.p-checkbox input.p-checkbox-input,
+.p-checkbox > input,
+.p-checkbox-input {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  accent-color: transparent !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.p-checkbox {
+  width: 20px !important;
+  height: 20px !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.p-checkbox .p-checkbox-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, border-color 120ms ease;
+  position: relative;
+  z-index: 1;
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+  color: #ffffff;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+  background: #465fff;
+  border-color: #465fff;
+}
+
+.p-checkbox .p-checkbox-box:hover {
+  border-color: #465fff;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  .nx-confirm — diálogo de confirmación con header, icono y mensaje
+// ════════════════════════════════════════════════════════════════════════════
+.p-confirm-dialog.nx-confirm,
+.p-dialog.nx-confirm {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.30);
+  border: 0;
+  background: #ffffff;
+  max-width: 95vw;
+  width: 440px;
+
+  // ── Header con titulo ──────────────────────────────────────────────────────
+  .p-dialog-header {
+    padding: 1.5rem 1.6rem 0.5rem;
+    background: #ffffff;
+    border-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .p-dialog-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    .p-dialog-header-icons .p-dialog-header-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      color: #64748b;
+      box-shadow: none;
+      &:hover { background: #f1f5f9; color: #0f172a; }
+      &:focus { box-shadow: none; outline: none; }
+    }
+  }
+
+  // ── Content: icono circular + mensaje ──────────────────────────────────────
+  .p-dialog-content {
+    background: #ffffff;
+    padding: 0.5rem 1.6rem 1rem !important;
+    display: flex !important;
+    align-items: flex-start;
+    gap: 0.9rem;
+    margin: 0 !important;
+  }
+
+  // PrimeNG inserta el icono inline antes del mensaje
+  .p-confirm-dialog-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(70, 95, 255, 0.10);
+    color: #465fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .p-confirm-dialog-message {
+    margin: 0 !important;
+    flex: 1;
+    font-size: 0.94rem;
+    color: #475569;
+    line-height: 1.5;
+    padding-top: 0.4rem;
+  }
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  .p-dialog-footer {
+    padding: 1rem 1.6rem 1.5rem;
+    background: #ffffff;
+    border-top: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+
+    .p-button {
+      height: 42px;
+      border-radius: 10px;
+      font-weight: 600;
+      padding: 0 1.2rem;
+      box-shadow: none;
+      min-width: 110px;
+      justify-content: center;
+    }
+
+    // Reject — outline gris
+    .p-confirm-dialog-reject {
+      background: #ffffff !important;
+      color: #475569 !important;
+      border: 1px solid #e2e8f0 !important;
+
+      &:hover { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+      &:focus { box-shadow: none !important; }
+    }
+
+    // Accept default — solido oscuro
+    .p-confirm-dialog-accept {
+      background: #1c2434;
+      color: #ffffff;
+      border: 1px solid #1c2434;
+
+      &:hover { background: #0f172a; border-color: #0f172a; }
+      &:focus { box-shadow: 0 0 0 4px rgba(28, 36, 52, 0.18); }
+    }
+
+    // Accept con clase danger
+    .p-confirm-dialog-accept.p-button-danger {
+      background: #ef4444;
+      border-color: #ef4444;
+      &:hover { background: #dc2626; border-color: #dc2626; }
+    }
+
+    // Accept con clase warning
+    .p-confirm-dialog-accept.p-button-warning {
+      background: #f59e0b;
+      border-color: #f59e0b;
+      &:hover { background: #d97706; border-color: #d97706; }
+    }
+  }
+
+  // Variante "danger" del icono cuando se usa pi-exclamation-triangle
+  &:has(.p-confirm-dialog-icon.pi-exclamation-triangle) .p-confirm-dialog-icon,
+  &:has(.p-confirm-dialog-icon.pi-trash) .p-confirm-dialog-icon {
+    background: rgba(239, 68, 68, 0.10);
+    color: #ef4444;
+  }
 }

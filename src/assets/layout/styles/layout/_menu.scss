@@ -582,6 +582,53 @@
     opacity: 0.5;
 }
 
+// ── Root-level expanded item (TailAdmin-style: dark pill) ───────────────────
+// When a top-level menu item with a submenu is open (active-menuitem) or its
+// route is active, give it a strong dark background so it stands out from the
+// rest of the sidebar (like the captures).
+.layout-theme-light .layout-menu > li.active-menuitem > a,
+.layout-theme-light .layout-menu > li > a.active-route {
+    background: #0f172a;
+    color: #ffffff;
+    box-shadow: none;
+    font-weight: 600;
+
+    .layout-menuitem-icon,
+    .layout-submenu-toggler {
+        color: #ffffff;
+        background: transparent;
+    }
+
+    &:hover {
+        background: #1e293b;
+        color: #ffffff;
+
+        .layout-menuitem-icon { color: #ffffff; }
+    }
+}
+
+// Sub-item active (e.g. "Suscripciones" inside expanded "Nexivo Turnos") —
+// use a soft tint with a left dot so the hierarchy reads as in the captures.
+.layout-theme-light .layout-menu > li.active-menuitem ul a.active-route {
+    background: transparent;
+    color: var(--nx-indigo-600);
+    font-weight: 600;
+    box-shadow: none;
+
+    &::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--nx-indigo-500);
+        margin-right: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    &:hover { background: var(--nx-sidebar-item-hover); }
+}
+
 // ── Collapsed state ──
 .layout-static-inactive {
     .layout-sidebar {

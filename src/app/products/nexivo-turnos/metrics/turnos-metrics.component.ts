@@ -15,6 +15,7 @@ import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.servic
   imports: [CommonModule, FormsModule, ChartModule, DropdownModule, CardModule, ButtonModule, ToastModule],
   providers: [MessageService],
   templateUrl: './turnos-metrics.component.html',
+  styleUrls: ['./turnos-metrics.component.scss'],
 })
 export class TurnosMetricsComponent implements OnInit {
   loading = false;
@@ -162,5 +163,27 @@ export class TurnosMetricsComponent implements OnInit {
       ...this.baseOptions,
       scales: { x: { stacked: true }, y: { stacked: true } },
     };
+  }
+
+  // Helpers for KPI summary cards
+  latestValue(key: 'mrrMonthly' | 'churnMonthly' | 'trialConversionMonthly'): number {
+    const series = this.metrics?.[key];
+    if (!Array.isArray(series) || series.length === 0) return 0;
+    return Number(series[series.length - 1]?.value ?? 0);
+  }
+
+  formatCompact(val: number): string {
+    const n = Number(val ?? 0);
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+    if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+    return `$${n.toLocaleString('es-AR')}`;
+  }
+
+  formatPercent(val: number): string {
+    return `${Number(val ?? 0).toFixed(1)}%`;
+  }
+
+  exportCsv(): void {
+    this.messageService.add({ severity: 'info', summary: 'Próximamente', detail: 'Exportación CSV' });
   }
 }

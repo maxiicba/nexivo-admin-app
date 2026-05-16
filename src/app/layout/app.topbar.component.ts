@@ -1,18 +1,44 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { LayoutService } from "./service/app.layout.service";
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { ConfirmPopup } from 'primeng/confirmpopup';
 import { AuthService } from '../core/services/auth.service';
 import { environment } from '../../environments/environment';
+import { Subscription, filter } from 'rxjs';
+
+interface Crumb { label: string; url: string | null; }
 
 @Component({
   selector: 'app-topbar',
   templateUrl: './app.topbar.component.html'
 })
-export class AppTopBarComponent implements OnInit {
+export class AppTopBarComponent implements OnInit, OnDestroy {
   userData: any = null;
   pswdDialogVisible: boolean = false;
+  breadcrumbs: Crumb[] = [];
+  private routerSub?: Subscription;
+  private userSub?: Subscription;
+
+  private static readonly LABELS: Record<string, string> = {
+    'products': 'Productos',
+    'nexivo-turnos': 'Nexivo Turnos',
+    'nexivo-gestion': 'Nexivo Gestión',
+    'subscriptions': 'Suscripciones',
+    'plans': 'Planes',
+    'metrics': 'Métricas',
+    'dashboard': 'Dashboard',
+    'users': 'Usuarios',
+    'billing': 'Facturación',
+    'settings': 'Configuración',
+    'arca-config': 'ARCA',
+    'whatsapp': 'WhatsApp',
+    'sales': 'Ventas',
+    'sales_point': 'Punto de venta',
+    'supplier': 'Proveedores',
+    'product-variants': 'Variantes',
+    'store-products': 'Productos tienda',
+  };
 
   currentPassword = '';
   newPassword = '';
@@ -40,7 +66,49 @@ export class AppTopBarComponent implements OnInit {
     private authService: AuthService,
   ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.userSub = this.authService.currentUser$.subscribe(u => this.userData = u);
+    if (!this.userData) this.userData = this.authService.getCurrentUser();
+    this.computeBreadcrumbs(this.router.url);
+    this.routerSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: any) => this.computeBreadcrumbs(e.urlAfterRedirects || e.url));
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
+    this.userSub?.unsubscribe();
+  }
+
+  private computeBreadcrumbs(url: string): void {
+    const clean = (url || '/').split('?')[0].split('#')[0];
+    const segs = clean.split('/').filter(Boolean);
+    const crumbs: Crumb[] = [];
+    let path = '';
+    for (let i = 0; i < segs.length; i++) {
+      const seg = segs[i];
+      path += '/' + seg;
+      // Skip UUID-like segments, fall back to label map
+      if (/^[0-9a-f-]{16,}$/i.test(seg)) {
+        crumbs.push({ label: 'Detalle', url: null });
+        continue;
+      }
+      const label = AppTopBarComponent.LABELS[seg] || this.toTitle(seg);
+      crumbs.push({ label, url: i === segs.length - 1 ? null : path });
+    }
+    this.breadcrumbs = crumbs;
+  }
+
+  private toTitle(s: string): string {
+    return s.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  get userInitials(): string {
+    const f = (this.userData?.first_name || '').charAt(0);
+    const l = (this.userData?.last_name || '').charAt(0);
+    const fb = (this.userData?.email || 'N').charAt(0);
+    return ((f + l) || fb).toUpperCase();
+  }
 
   toggleDarkMode(): void {
     const themeLink = <HTMLLinkElement>document.getElementById('app-theme');

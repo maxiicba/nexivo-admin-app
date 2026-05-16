@@ -1,0 +1,594 @@
+// ============================================================================
+//  NEXIVO — Design System v2 (Brief 2026-05)
+//  Tokens, typography, icon sizing, button/card/badge primitives.
+//  Aplicado sobre todo el shell (sidebar/topbar) y refinado en cada pantalla.
+// ============================================================================
+
+:root, .layout-theme-light {
+  // Surfaces — fondo beige cálido, NO gris frío
+  --bg:          #F5F4F1;
+  --surface:     #FFFFFF;
+  --surface-2:   #FAFAF8;
+  --border:      #E8E6E1;
+  --border-soft: #EFEDE8;
+
+  // Ink
+  --ink-900: #15171A;
+  --ink-700: #2B2F36;
+  --ink-500: #5F6470;
+  --ink-400: #8A8F9A;
+  --ink-300: #B5B9C2;
+
+  // Accent
+  --primary:     #15171A;
+  --accent:      #4F46E5;
+  --accent-soft: #EEEBFF;
+  --accent-ink:  #3B30C2;
+
+  // Semánticos
+  --success: #16A34A; --success-soft: #E3F5E8;
+  --warning: #B45309; --warning-soft: #FBEEDC;
+  --danger:  #B91C1C; --danger-soft:  #FBE6E6;
+  --info:    #1E40AF; --info-soft:    #E4ECFB;
+
+  // Radios
+  --r-card:    16px;
+  --r-control: 10px;
+  --r-pill:    999px;
+
+  // Sombras
+  --shadow-sm: 0 1px 2px rgba(15,17,21,.04), 0 1px 1px rgba(15,17,21,.02);
+  --shadow-md: 0 4px 12px rgba(15,17,21,.06), 0 1px 2px rgba(15,17,21,.04);
+
+  // ── Aliases que usan los tokens legacy --nx-* ─────────────────────────────
+  // Los volvemos a apuntar al nuevo sistema para que el shell se actualice.
+  --nx-bg-ground:   var(--bg);
+  --nx-bg-card:     var(--surface);
+  --nx-bg-elevated: var(--surface);
+
+  --nx-text-primary:   var(--ink-900);
+  --nx-text-secondary: var(--ink-500);
+  --nx-text-muted:     var(--ink-400);
+
+  --nx-border:        var(--border);
+  --nx-border-subtle: var(--border-soft);
+
+  --nx-primary:       var(--accent);
+  --nx-primary-hover: var(--accent-ink);
+  --nx-primary-soft:  var(--accent-soft);
+
+  // Tipografía
+  --nx-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nx-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+// ── Base ───────────────────────────────────────────────────────────────────
+html, body {
+  background: var(--bg);
+  color: var(--ink-900);
+  font-family: var(--nx-font);
+  font-feature-settings: 'cv02','cv03','cv04','cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// Mono utilitarios
+.mono, code, kbd, .av-tag, .nx-mini-code {
+  font-family: var(--nx-font-mono);
+  font-feature-settings: normal;
+}
+
+// Tabular nums: en métricas y columnas numéricas
+.tabular,
+.kpi-value,
+.nx-kpi__value,
+.nx-metric-card__value,
+.nx-plan-card__price-value,
+td.text-right,
+th.text-right {
+  font-variant-numeric: tabular-nums;
+}
+
+// ── Icon sizing global ─────────────────────────────────────────────────────
+// Defaults para SVG (lucide). NO afecta a PrimeIcons <i class="pi-...">.
+svg.lucide,
+.lucide-icon svg,
+[data-lucide] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  stroke-width: 1.8;
+}
+
+.hero-icon svg,
+.hero-icon .lucide-icon svg,
+.nx-page-header__icon svg { width: 22px; height: 22px; }
+
+.kpi-icon svg,
+.nx-kpi__icon svg,
+.nx-metric-card__icon svg { width: 18px; height: 18px; }
+
+.audit-icon svg,
+.nx-audit-item__icon svg { width: 16px; height: 16px; }
+
+.btn svg,
+.tab svg { width: 14px; height: 14px; }
+
+.icon-btn svg,
+.nx-action-btn svg { width: 16px; height: 16px; }
+
+.input svg,
+.select svg { width: 14px; height: 14px; color: var(--ink-400); }
+
+.pf-check svg { width: 10px; height: 10px; }
+.mc-check svg { width: 9px;  height: 9px; }
+
+// PrimeIcons size tweak global — para que ningún <i class="pi"> se vea gigante
+i[class*="pi-"] { font-size: 0.92rem; line-height: 1; }
+
+// ── Botones del sistema ────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--ink-900);
+  border: 1px solid var(--border);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+
+  &:hover:not(:disabled) { background: var(--surface-2); border-color: var(--ink-300); }
+  &:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(15,17,21,0.08); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.btn--primary {
+  background: var(--ink-900);
+  color: #fff;
+  border-color: var(--ink-900);
+  &:hover:not(:disabled) { background: #000; border-color: #000; }
+}
+
+.btn--secondary { /* alias del default */ }
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  &:hover:not(:disabled) { background: var(--surface-2); border-color: transparent; }
+}
+
+.btn--danger {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: #F5C2C2;
+  &:hover:not(:disabled) { background: var(--danger-soft); border-color: #ECA5A5; }
+}
+
+.btn--success {
+  background: var(--surface);
+  color: var(--success);
+  border-color: #B8E5C2;
+  &:hover:not(:disabled) { background: var(--success-soft); border-color: #97D7A7; }
+}
+
+.btn--sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+// ── Cards ──────────────────────────────────────────────────────────────────
+.nx-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+// ── Badges (pill + dot) ────────────────────────────────────────────────────
+.b {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+}
+
+.b--success { background: var(--success-soft); color: var(--success); }
+.b--warning { background: var(--warning-soft); color: var(--warning); }
+.b--danger  { background: var(--danger-soft);  color: var(--danger);  }
+.b--info    { background: var(--info-soft);    color: var(--info);    }
+.b--accent  { background: var(--accent-soft);  color: var(--accent-ink); }
+.b--neutral { background: var(--surface-2);    color: var(--ink-500); border: 1px solid var(--border); &::before { background: var(--ink-400); } }
+
+// ── Page eyebrow (kicker) ──────────────────────────────────────────────────
+.nx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-ink);
+
+  &::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+}
+
+// ── Inputs / Selects (cuando los marcamos con .input / .select) ────────────
+.input, .select {
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--surface);
+  color: var(--ink-900);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 0 12px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  outline: none;
+
+  &::placeholder { color: var(--ink-400); }
+  &:focus { border-color: var(--ink-900); box-shadow: 0 0 0 3px rgba(15,17,21,0.06); }
+}
+
+.nx-field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-400);
+  margin-bottom: 6px;
+}
+
+// ── Tab count chips (used in tabview) ──────────────────────────────────────
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--ink-500);
+  border: 1px solid var(--border);
+  margin-left: 6px;
+
+  &.is-active {
+    background: var(--ink-900);
+    color: #fff;
+    border-color: var(--ink-900);
+  }
+}
+
+// ── Sidebar overrides hacia el nuevo sistema ───────────────────────────────
+// El sidebar ya tiene su scss con tokens --nx-sidebar-*. Re-bind a brief.
+:root, .layout-theme-light {
+  --nx-sidebar-bg:                var(--surface);
+  --nx-sidebar-text:              var(--ink-500);
+  --nx-sidebar-text-muted:        var(--ink-400);
+  --nx-sidebar-brand-text:        var(--ink-900);
+  --nx-sidebar-item-hover:        var(--surface-2);
+  --nx-sidebar-item-active-bg:    var(--ink-900);
+  --nx-sidebar-item-active-text:  #FFFFFF;
+  --nx-sidebar-item-active-icon:  #FFFFFF;
+  --nx-sidebar-item-active-shadow: none;
+  --nx-sidebar-section-text:      var(--ink-400);
+  --nx-sidebar-divider:           var(--border);
+}
+
+// FIX: El _menu.scss legacy usa `--nx-sidebar-item-active-text` (#fff) también
+// para el HOVER de items NO activos, lo que deja el texto blanco invisible.
+// Sobrescribimos el hover de items no-activos para usar tinta oscura.
+.layout-theme-light .layout-menu a:not(.active-route):not(.active-menuitem):hover,
+.layout-theme-light .layout-menu li:not(.active-menuitem) > a:hover {
+  color: var(--ink-900) !important;
+  background: var(--surface-2) !important;
+
+  .layout-menuitem-icon {
+    color: var(--ink-700) !important;
+    background: transparent !important;
+  }
+}
+
+// Sidebar layout fondo página
+.layout-wrapper, .layout-main { background: var(--bg); }
+
+// ── Sidebar profile card ───────────────────────────────────────────────────
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  position: relative;
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ink-900);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+    flex: 1;
+  }
+
+  &__name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__email {
+    font-size: 11.5px;
+    color: var(--ink-400);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__collapse {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-500);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 140ms ease, border-color 140ms ease;
+    flex-shrink: 0;
+
+    .pi { font-size: 0.65rem; }
+    &:hover { background: var(--surface-2); border-color: var(--ink-300); }
+  }
+}
+
+// ── Fix: tooltips/popups no generan scroll horizontal en hover ─────────────
+// PrimeNG monta tooltips en <body> con position: absolute y coords calculadas;
+// si el tooltip queda parcialmente fuera del viewport, el documento se
+// ensancha y aparece scroll horizontal. Forzamos position: fixed para que
+// los coords sean relativos al viewport y NUNCA crezca el body.
+.p-tooltip {
+  position: fixed !important;
+  z-index: 12000;
+  pointer-events: none;
+  max-width: 280px;
+}
+
+.p-tooltip .p-tooltip-text {
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+}
+
+.layout-wrapper, .layout-main, .layout-main-container {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+// Tabla: el contenedor de la fila no debe permitir overflow X por hovers
+.nx-subs-table {
+  overflow-x: clip;
+
+  .p-datatable-tbody > tr,
+  .p-datatable-wrapper {
+    overflow-x: clip;
+  }
+}
+
+// ── Topbar breadcrumbs ─────────────────────────────────────────────────────
+.topbar-crumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 0;
+  margin-right: 24px;
+  font-size: 13px;
+
+  &__link {
+    color: var(--ink-500);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 140ms ease;
+
+    &:hover { color: var(--ink-900); }
+    &.is-static { cursor: default; }
+  }
+
+  &__current {
+    color: var(--ink-900);
+    font-weight: 600;
+  }
+
+  &__sep {
+    color: var(--ink-300);
+    font-weight: 400;
+  }
+}
+
+// Topbar user avatar with gradient (override del existente)
+.topbar-user-btn {
+  border-radius: 999px;
+
+  .topbar-avatar {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%) !important;
+    color: #fff;
+    font-weight: 700;
+  }
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 12px;
+}
+
+// Sidebar footer (Operativo · v2.4.1)
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--ink-500);
+
+  &__dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14);
+
+    &.is-down {
+      background: var(--danger);
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.14);
+    }
+  }
+
+  &__label { font-weight: 600; color: var(--ink-700); }
+  &__dot-sep { color: var(--ink-300); }
+  &__version { color: var(--ink-400); font-variant-numeric: tabular-nums; }
+}
+
+// Section labels (uppercase). Override sobre las clases que ya usa el menu.
+.layout-menu .menuitem-root-text,
+.layout-menu .layout-menuitem-root-text {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-400) !important;
+}
+
+// Sub-items (inside expanded parent): indent + dot when active
+.layout-theme-light .layout-menu > li.active-menuitem > ul {
+  position: relative;
+  padding-left: 14px;
+  margin-left: 22px;
+  border-left: 1px solid var(--border-soft);
+
+  li > a,
+  li > a.active-route,
+  li > a:hover,
+  li > a.active-route:hover {
+    padding-left: 12px !important;
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--ink-500);
+    background: transparent;
+    box-shadow: none;
+    font-weight: 500;
+
+    .layout-menuitem-icon {
+      color: var(--ink-400);
+      background: transparent !important;
+      width: auto;
+      height: auto;
+    }
+  }
+
+  li > a:hover {
+    background: var(--surface-2) !important;
+    color: var(--ink-900) !important;
+
+    .layout-menuitem-icon { color: var(--ink-700) !important; }
+  }
+
+  li > a.active-route {
+    background: transparent !important;
+    color: var(--ink-900) !important;
+    font-weight: 600;
+
+    .layout-menuitem-icon { color: var(--accent) !important; }
+  }
+
+  li > a.active-route:hover {
+    background: var(--surface-2) !important;
+  }
+}
+
+// Root active item — pill negro (TailAdmin)
+.layout-theme-light .layout-menu > li.active-menuitem > a,
+.layout-theme-light .layout-menu > li > a.active-route {
+  background: var(--ink-900);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: none;
+
+  .layout-menuitem-icon,
+  .layout-submenu-toggler {
+    color: #ffffff;
+    background: transparent;
+  }
+
+  &:hover {
+    background: #000;
+    color: #fff;
+    .layout-menuitem-icon { color: #fff; }
+  }
+}
+
+// PrimeNG button overrides — primario negro (no azul)
+.p-button {
+  font-family: inherit;
+}
+.p-button:not(.p-button-text):not(.p-button-link):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger) {
+  background: var(--ink-900);
+  border-color: var(--ink-900);
+  color: #fff;
+  border-radius: var(--r-control);
+  font-weight: 600;
+  font-size: 13px;
+
+  &:enabled:hover { background: #000; border-color: #000; }
+  &:enabled:focus { box-shadow: 0 0 0 3px rgba(15,17,21,0.18); }
+}

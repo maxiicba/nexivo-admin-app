@@ -1,20 +1,20 @@
-// ── Tokens ───────────────────────────────────────────────────────────────────
+// ── Tokens — apunta al design system v2 ─────────────────────────────────────
 :host {
   display: block;
-  overflow-x: clip; // evita scroll horizontal por hovers/transforms en bordes
-  --nx-radius: 12px;
-  --nx-radius-lg: 14px;
-  --nx-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --nx-shadow-hover: 0 8px 24px -8px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06);
-  --nx-surface: #ffffff;
-  --nx-surface-soft: #f9fafb;
-  --nx-surface-softer: #f3f4f6;
-  --nx-border: #e5e7eb;
-  --nx-border-soft: #f1f5f9;
-  --nx-text: #0f172a;
-  --nx-text-secondary: #64748b;
-  --nx-text-muted: #94a3b8;
-  --nx-primary: #465fff; // TailAdmin blue
+  overflow-x: clip;
+  --nx-radius:        var(--r-control);
+  --nx-radius-lg:     var(--r-card);
+  --nx-shadow-card:   var(--shadow-sm);
+  --nx-shadow-hover:  var(--shadow-md);
+  --nx-surface:       var(--surface);
+  --nx-surface-soft:  var(--surface-2);
+  --nx-surface-softer: var(--surface-2);
+  --nx-border:        var(--border);
+  --nx-border-soft:   var(--border-soft);
+  --nx-text:          var(--ink-900);
+  --nx-text-secondary: var(--ink-500);
+  --nx-text-muted:    var(--ink-400);
+  --nx-primary:       var(--ink-900);
 }
 
 // ── KPI cards (estilo TailAdmin: icono cuadrado tintado a la izquierda) ─────
@@ -24,8 +24,30 @@
   gap: 1rem;
   margin-bottom: 1.25rem;
 
-  @media (max-width: 992px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 600px) { grid-template-columns: 1fr; }
+  @media (max-width: 1280px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 540px)  { grid-template-columns: 1fr; }
+}
+
+.nx-kpi__body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nx-kpi__value {
+  font-size: 1.6rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nx-kpi__hint {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nx-kpi {
@@ -102,11 +124,86 @@
     color: var(--nx-text-muted);
   }
 
-  // Color variants
-  &--blue   { --nx-kpi-accent: #3b82f6; }
-  &--green  { --nx-kpi-accent: #10b981; }
-  &--cyan   { --nx-kpi-accent: #06b6d4; }
-  &--orange { --nx-kpi-accent: #f59e0b; }
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+
+    .pi { font-size: 0.65rem; }
+    span { white-space: nowrap; }
+
+    &--up   { color: #047857; }
+    &--down { color: #b91c1c; }
+  }
+
+  // Color variants — soft pastel backgrounds like TailAdmin
+  &--blue   {
+    --nx-kpi-accent: #3b82f6;
+    .nx-kpi__icon { background: #e0e7ff; color: #4f46e5; }
+  }
+  &--green  {
+    --nx-kpi-accent: #10b981;
+    .nx-kpi__icon { background: #d1fae5; color: #047857; }
+  }
+  &--cyan   {
+    --nx-kpi-accent: #06b6d4;
+    .nx-kpi__icon { background: #ccfbf1; color: #0891b2; }
+  }
+  &--orange {
+    --nx-kpi-accent: #f59e0b;
+    .nx-kpi__icon { background: #fef3c7; color: #b45309; }
+  }
+}
+
+// ── Hero actions (buttons in page header) ────────────────────────────────────
+.nx-page-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+// "Sincronizar MP" — light pill button
+::ng-deep .nx-btn-ghost.p-button {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: background 140ms ease, border-color 140ms ease;
+
+  .p-button-icon { color: #64748b; font-size: 0.8rem; }
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+}
+
+// "Nueva suscripción" — dark solid button
+::ng-deep .nx-btn-dark.p-button {
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: background 140ms ease;
+
+  .p-button-icon { font-size: 0.8rem; }
+
+  &:hover:not(:disabled) { background: #1e293b; border-color: #1e293b; }
 }
 
 // ── Filters ──────────────────────────────────────────────────────────────────
@@ -330,7 +427,7 @@
   }
 }
 
-// ── Table (estilo TailAdmin: header gris claro, filas separadas con border-bottom suave) ─
+// ── Table (TailAdmin: header gris claro, filas con borde suave, layout estable) ─
 .nx-subs-table {
   background: var(--nx-surface);
   border: 1px solid var(--nx-border);
@@ -339,9 +436,53 @@
   box-shadow: var(--nx-shadow-card);
   position: relative;
   isolation: isolate;
-  contain: paint;
+  min-height: 280px;
 
-  ::ng-deep .p-datatable-wrapper { overflow-x: clip; }
+  // ── PrimeNG loading overlay (centrado, fondo blanco semi) ────────────────
+  ::ng-deep .p-datatable-loading-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: color-mix(in srgb, var(--nx-surface) 70%, transparent) !important;
+    backdrop-filter: blur(2px);
+    z-index: 5;
+    border-radius: inherit;
+  }
+
+  // Loader: spinner indigo limpio, ~32px (PrimeNG renderiza un <svg.p-icon>)
+  ::ng-deep .p-datatable-loading-icon,
+  ::ng-deep .p-datatable-loading-overlay .pi-spinner,
+  ::ng-deep .p-datatable-loading-overlay .p-icon,
+  ::ng-deep .p-datatable-loading-overlay svg {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 32px !important;
+    color: var(--accent, #4F46E5) !important;
+    stroke: currentColor;
+    animation: nx-spin 0.9s linear infinite;
+    display: block;
+  }
+
+  // Algunas versiones de PrimeNG ponen el icono dentro de un span — neutralizamos
+  ::ng-deep .p-datatable-loading-overlay > * {
+    background: transparent !important;
+  }
+
+  ::ng-deep .p-datatable-wrapper {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  ::ng-deep .p-datatable .p-datatable-table {
+    table-layout: auto;
+    width: 100%;
+  }
 
   ::ng-deep .p-datatable .p-datatable-thead > tr > th {
     font-size: 0.72rem;
@@ -353,6 +494,7 @@
     border-top: 0;
     border-bottom: 1px solid var(--nx-border);
     padding: 0.85rem 1rem;
+    white-space: nowrap;
   }
 
   ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
@@ -361,12 +503,15 @@
     vertical-align: middle;
     font-size: 0.92rem;
     color: var(--nx-text);
+    height: 64px; // altura fija para que la fila no cambie al hover
+    box-sizing: border-box;
   }
 
   ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
     border-bottom: 0;
   }
 
+  // Hover SIN transform — solo color. Asi nada cambia el layout.
   ::ng-deep .p-datatable .p-datatable-tbody > tr.nx-row-clickable {
     cursor: pointer;
     transition: background-color 120ms ease;
@@ -518,17 +663,21 @@
   &--days-danger  { background: #fee2e2; color: #b91c1c; }
 }
 
-// ── Actions ──────────────────────────────────────────────────────────────────
+// ── Actions (layout estable: border siempre presente transparente) ──────────
 .nx-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 4px;
   justify-content: center;
+  flex-wrap: nowrap;
+  min-height: 36px;
 }
 
 .nx-action-btn {
-  width: 32px;
-  height: 32px;
+  // Tamano fijo. Border y bg siempre presentes (no aparecen al hover, solo cambian color).
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -537,26 +686,34 @@
   background: transparent;
   color: var(--nx-text-secondary);
   cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
   padding: 0;
+  margin: 0;
   line-height: 1;
+  flex-shrink: 0;
+  // Solo transition de colores — NO transform, NO width, NO box-shadow grande.
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
 
   .pi { font-size: 0.95rem; line-height: 1; }
 
   &:hover {
-    background: var(--nx-surface-soft);
+    background-color: var(--nx-surface-soft);
     border-color: var(--nx-border);
   }
 
   &:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--nx-primary) 35%, transparent);
+    border-color: var(--nx-primary);
   }
 
   &--view:hover   { color: var(--nx-primary); }
   &--edit:hover   { color: #6366f1; }
-  &--danger       { color: #ef4444; }
-  &--danger:hover { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+
+  &--danger { color: #ef4444; }
+  &--danger:hover {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+  }
 }
 
 // ── Empty state ──────────────────────────────────────────────────────────────
@@ -637,3 +794,7 @@
 }
 
 .field { margin-bottom: 0; }
+
+@keyframes nx-spin {
+  to { transform: rotate(360deg); }
+}

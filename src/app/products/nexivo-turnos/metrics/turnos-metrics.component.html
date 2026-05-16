@@ -12,13 +12,109 @@
           <p class="nx-page-header__subtitle m-0">MRR, churn, conversión y desglose por plan</p>
         </div>
       </div>
-      <div class="nx-page-header__right flex align-items-center gap-2">
+      <div class="nx-page-header__actions">
         <p-dropdown [options]="rangeOptions" [(ngModel)]="rangeMonths" optionLabel="label" optionValue="value"
-                    (onChange)="onRangeChange()" [style]="{minWidth: '200px'}"></p-dropdown>
+                    (onChange)="onRangeChange()" appendTo="body" [style]="{minWidth: '200px'}"></p-dropdown>
+        <button pButton label="Exportar CSV" icon="pi pi-download" class="nx-btn-ghost" (click)="exportCsv()"></button>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Top KPIs -->
+<div class="nx-metrics-kpis" *ngIf="metrics && !metrics.noData">
+  <div class="nx-metric-card">
+    <div class="nx-metric-card__head">
+      <div class="nx-metric-card__title">MRR</div>
+      <div class="nx-metric-card__sub">Ingreso recurrente</div>
+    </div>
+    <div class="nx-metric-card__row">
+      <div class="nx-metric-card__value">{{ formatCompact(latestValue('mrrMonthly')) }}</div>
+      <div class="nx-metric-card__delta nx-metric-card__delta--up">+8.2%</div>
+    </div>
+    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
+            fill="url(#sparkGrad)"/>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
+            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="nx-metric-card">
+    <div class="nx-metric-card__head">
+      <div class="nx-metric-card__title">ARR</div>
+      <div class="nx-metric-card__sub">Anualizado</div>
+    </div>
+    <div class="nx-metric-card__row">
+      <div class="nx-metric-card__value">{{ formatCompact(latestValue('mrrMonthly') * 12) }}</div>
+      <div class="nx-metric-card__delta nx-metric-card__delta--up">+12%</div>
+    </div>
+    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
+            fill="url(#sparkGrad)"/>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
+            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="nx-metric-card">
+    <div class="nx-metric-card__head">
+      <div class="nx-metric-card__title">Churn</div>
+      <div class="nx-metric-card__sub">Mensual</div>
+    </div>
+    <div class="nx-metric-card__row">
+      <div class="nx-metric-card__value">{{ formatPercent(latestValue('churnMonthly')) }}</div>
+      <div class="nx-metric-card__delta nx-metric-card__delta--down">-0.4pp</div>
+    </div>
+    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
+            fill="url(#sparkGrad)"/>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
+            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="nx-metric-card">
+    <div class="nx-metric-card__head">
+      <div class="nx-metric-card__title">Conversión trial</div>
+      <div class="nx-metric-card__sub">Trial → activa</div>
+    </div>
+    <div class="nx-metric-card__row">
+      <div class="nx-metric-card__value">{{ formatPercent(latestValue('trialConversionMonthly')) }}</div>
+      <div class="nx-metric-card__delta nx-metric-card__delta--up">+5pp</div>
+    </div>
+    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
+            fill="url(#sparkGrad)"/>
+      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
+            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
 
 <div *ngIf="loading" class="card p-6 text-center">
   <i class="pi pi-spin pi-spinner text-2xl"></i>

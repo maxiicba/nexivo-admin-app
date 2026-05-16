@@ -67,6 +67,7 @@ const ACTION_ICONS: Record<string, string> = {
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './subscription-detail.component.html',
+  styleUrls: ['./subscription-detail.component.scss'],
 })
 export class SubscriptionDetailComponent implements OnInit, OnDestroy {
   id!: string;
@@ -196,11 +197,63 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
     return `$${Number(v ?? 0).toLocaleString('es-AR')}`;
   }
 
+  daysUntilEnd(): number | null {
+    const end = this.detail?.subscription?.currentPeriodEnd;
+    if (!end) return null;
+    const diff = Math.ceil((new Date(end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : null;
+  }
+
+  timeAgo(dateStr: string): string {
+    if (!dateStr) return '';
+    const ms = Date.now() - new Date(dateStr).getTime();
+    const sec = Math.floor(ms / 1000);
+    if (sec < 60) return `hace ${sec}s`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `hace ${h} h`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `hace ${d} d`;
+    const mo = Math.floor(d / 30);
+    return `hace ${mo} mes${mo > 1 ? 'es' : ''}`;
+  }
+
+  auditTone(action: string): 'success' | 'warning' | 'danger' | 'info' | 'neutral' {
+    const map: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'neutral'> = {
+      reactivated: 'success',
+      comp_granted: 'success',
+      coupon_applied: 'success',
+      plan_changed: 'info',
+      payment_retried: 'info',
+      mp_webhook_received: 'info',
+      note_added: 'neutral',
+      cron_billing_run: 'neutral',
+      suspended: 'warning',
+      trial_expired: 'warning',
+      cancelled: 'danger',
+      auto_suspended_past_due: 'danger',
+      payment_refunded: 'danger',
+    };
+    return map[action] || 'neutral';
+  }
+
   getStatusSeverity(status: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
     const map: Record<string, any> = {
       active: 'success', trialing: 'info', past_due: 'warning', suspended: 'danger', cancelled: 'secondary',
     };
     return map[status];
+  }
+
+  statusLabelEs(status: string): string {
+    const map: Record<string, string> = {
+      active: 'Activa',
+      trialing: 'Prueba',
+      past_due: 'Vencida',
+      suspended: 'Suspendida',
+      cancelled: 'Cancelada',
+    };
+    return map[status] || status;
   }
 
   getPaymentTypeSeverity(type: string): 'success' | 'info' | 'warning' | 'secondary' {
@@ -337,7 +390,12 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
 
   deleteCredit(credit: any): void {
     this.confirmationService.confirm({
-      message: '¿Eliminar este crédito pendiente?',
+      header: 'Eliminar crédito',
+      message: 'Se eliminará este crédito pendiente y no se podrá recuperar. ¿Continuar?',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.svc.deleteCredit(credit.id).subscribe({
           next: () => {
@@ -378,7 +436,11 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
 
   reactivate(): void {
     this.confirmationService.confirm({
-      message: '¿Reactivar la suscripción?',
+      header: 'Reactivar suscripción',
+      message: 'La suscripción volverá al estado activo y el cliente recuperará el acceso. ¿Continuar?',
+      icon: 'pi pi-refresh',
+      acceptLabel: 'Sí, reactivar',
+      rejectLabel: 'Cancelar',
       accept: () => {
         this.svc.reactivate(this.id).subscribe({
           next: () => {
@@ -417,7 +479,12 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
     };
     if (this.cancelImmediate) {
       this.confirmationService.confirm({
-        message: 'Esto cancelará la suscripción AHORA y revocará el preapproval en MercadoPago. ¿Continuar?',
+        header: 'Cancelación inmediata',
+        message: 'Se cancelará la suscripción AHORA y se revocará el preapproval en MercadoPago. Esta acción no se puede deshacer.',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí, cancelar ahora',
+        rejectLabel: 'Volver',
+        acceptButtonStyleClass: 'p-button-danger',
         accept: proceed,
       });
     } else proceed();
@@ -427,7 +494,11 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
 
   reconcilePayments(): void {
     this.confirmationService.confirm({
-      message: '¿Buscar pagos en MercadoPago que no llegaron por webhook?',
+      header: 'Reconciliar pagos',
+      message: 'Se consultará MercadoPago para recuperar pagos que no llegaron por webhook. Puede tardar unos segundos.',
+      icon: 'pi pi-sync',
+      acceptLabel: 'Reconciliar',
+      rejectLabel: 'Cancelar',
       accept: () => {
         this.svc.reconcilePayments(this.id).subscribe({
           next: (res) => {
@@ -468,7 +539,12 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
   confirmMarkRefunded(): void {
     if (!this.refundingPayment || !this.refundReason.trim()) return;
     this.confirmationService.confirm({
-      message: 'Esto marcará el pago como REEMBOLSADO en el sistema. El refund real debe hacerse en la consola de MercadoPago. ¿Continuar?',
+      header: 'Marcar como reembolsado',
+      message: 'El pago se marcará como REEMBOLSADO en el sistema. Recordá que el refund real debe hacerse desde la consola de MercadoPago.',
+      icon: 'pi pi-undo',
+      acceptLabel: 'Confirmar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-warning',
       accept: () => {
         this.saving = true;
         this.svc.markRefunded(this.refundingPayment.id, this.refundReason).subscribe({
@@ -527,7 +603,12 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
 
   deleteNote(note: any): void {
     this.confirmationService.confirm({
-      message: '¿Eliminar esta nota?',
+      header: 'Eliminar nota',
+      message: 'Esta nota se eliminará permanentemente. ¿Continuar?',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.svc.deleteNote(note.id).subscribe({
           next: () => this.refreshOne('notes'),

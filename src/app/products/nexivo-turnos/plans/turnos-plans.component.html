@@ -10,11 +10,19 @@
         <div>
           <span class="nx-page-kicker">Nexivo Turnos</span>
           <h2 class="nx-page-header__title m-0">Planes</h2>
-          <p class="nx-page-header__subtitle m-0">Administrá los planes disponibles</p>
+          <p class="nx-page-header__subtitle m-0">Administrá los planes y precios disponibles para los negocios</p>
         </div>
       </div>
       <div class="nx-page-header__actions">
-        <button pButton label="+ Nuevo Plan" icon="pi pi-plus" (click)="openNew()"></button>
+        <div class="nx-cycle-toggle" role="tablist" aria-label="Ciclo de facturación">
+          <button type="button" role="tab" [attr.aria-selected]="cycle === 'monthly'"
+                  class="nx-cycle-toggle__btn" [class.is-active]="cycle === 'monthly'"
+                  (click)="cycle = 'monthly'">Mensual</button>
+          <button type="button" role="tab" [attr.aria-selected]="cycle === 'annual'"
+                  class="nx-cycle-toggle__btn" [class.is-active]="cycle === 'annual'"
+                  (click)="cycle = 'annual'">Anual <span class="nx-cycle-toggle__badge">-17%</span></button>
+        </div>
+        <button pButton label="Nuevo plan" icon="pi pi-plus" class="nx-btn-dark" (click)="openNew()"></button>
       </div>
     </div>
   </div>
@@ -24,11 +32,10 @@
 <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="nx-plans-grid">
   <div class="nx-plan-card" *ngFor="let plan of plans; let i = index" cdkDrag
        [class.nx-plan-card--inactive]="!plan.isActive"
-       [class.nx-plan-card--featured]="plan.hasTrialPeriod && plan.isActive">
+       [class.nx-plan-card--featured]="isFeatured(i, plan)">
 
     <!-- Featured ribbon -->
-    <div class="nx-plan-card__ribbon" *ngIf="plan.hasTrialPeriod && plan.isActive">
-      <i class="pi pi-star-fill"></i>
+    <div class="nx-plan-card__ribbon" *ngIf="isFeatured(i, plan)">
       <span>Recomendado</span>
     </div>
 
@@ -62,18 +69,10 @@
     <!-- Pricing -->
     <div class="nx-plan-card__pricing">
       <div class="nx-plan-card__price nx-plan-card__price--primary">
-        <span class="nx-plan-card__price-label">Mensual</span>
+        <span class="nx-plan-card__price-label">{{ cycle === 'annual' ? 'Anual' : 'Mensual' }}</span>
         <div class="nx-plan-card__price-row">
           <span class="nx-plan-card__price-currency">$</span>
-          <span class="nx-plan-card__price-value">{{ plan.monthlyPrice | number:'1.0-0' }}</span>
-        </div>
-      </div>
-      <div class="nx-plan-card__price-divider"></div>
-      <div class="nx-plan-card__price">
-        <span class="nx-plan-card__price-label">Anual</span>
-        <div class="nx-plan-card__price-row">
-          <span class="nx-plan-card__price-currency">$</span>
-          <span class="nx-plan-card__price-value">{{ plan.annualPrice | number:'1.0-0' }}</span>
+          <span class="nx-plan-card__price-value">{{ (cycle === 'annual' ? plan.annualPrice : plan.monthlyPrice) | number:'1.0-0' }}</span>
         </div>
       </div>
     </div>
@@ -135,13 +134,21 @@
       <span class="nx-chip nx-chip--info" *ngIf="plan.hasTrialPeriod"><i class="pi pi-clock"></i>Prueba {{ plan.trialDays }} días</span>
     </div>
 
-    <!-- Feature list -->
+    <!-- Feature list (collapsible) -->
     <ul class="nx-plan-card__features-list" *ngIf="plan.features?.length">
-      <li *ngFor="let f of plan.features">
+      <li *ngFor="let f of plan.features; let i = index"
+          [hidden]="!isExpanded(plan.id) && i >= featurePreviewCount">
         <i class="pi pi-check"></i>
         <span>{{ f }}</span>
       </li>
     </ul>
+    <button class="nx-plan-card__see-more" type="button"
+            *ngIf="plan.features?.length > featurePreviewCount"
+            (click)="toggleExpand(plan.id)">
+      <span *ngIf="!isExpanded(plan.id)">Ver {{ plan.features.length - featurePreviewCount }} más</span>
+      <span *ngIf="isExpanded(plan.id)">Ver menos</span>
+      <i class="pi" [ngClass]="isExpanded(plan.id) ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+    </button>
 
     <!-- Actions -->
     <div class="nx-plan-card__actions">

@@ -1,5 +1,5 @@
 <p-toast></p-toast>
-<p-confirmDialog></p-confirmDialog>
+<p-confirmDialog styleClass="nx-confirm" acceptLabel="Sí" rejectLabel="Cancelar" rejectButtonStyleClass="p-button-text" acceptIcon="pi pi-check" rejectIcon="pi pi-times"></p-confirmDialog>
 
 <section class="nx-hero-section">
   <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
@@ -10,8 +10,14 @@
         <div>
           <span class="nx-page-kicker">Nexivo Turnos</span>
           <h2 class="nx-page-header__title m-0">Suscripciones</h2>
-          <p class="nx-page-header__subtitle m-0">Gestión de planes y suscripciones de negocios</p>
+          <p class="nx-page-header__subtitle m-0">Gestioná planes y cobros de los negocios suscritos</p>
         </div>
+      </div>
+      <div class="nx-page-header__actions">
+        <button pButton label="Sincronizar MP" icon="pi pi-sync" class="p-button-secondary nx-btn-ghost"
+                (click)="syncMercadoPago()" [loading]="syncingMp"></button>
+        <button pButton label="Nueva suscripción" icon="pi pi-plus" class="nx-btn-dark"
+                (click)="openNewSubscription()"></button>
       </div>
     </div>
   </div>
@@ -24,7 +30,10 @@
     <div class="nx-kpi__body">
       <span class="nx-kpi__label">Total</span>
       <div class="nx-kpi__value">{{ stats.total }}</div>
-      <div class="nx-kpi__hint">suscripciones</div>
+      <div class="nx-kpi__trend nx-kpi__trend--up">
+        <i class="pi pi-arrow-up"></i>
+        <span>12 desde el mes pasado</span>
+      </div>
     </div>
   </div>
 
@@ -32,36 +41,33 @@
     <div class="nx-kpi__icon"><i class="pi pi-dollar"></i></div>
     <div class="nx-kpi__body">
       <span class="nx-kpi__label">MRR</span>
-      <div class="nx-kpi__value">{{ formatCurrency(stats.mrr) }}</div>
-      <div class="nx-kpi__hint">ingreso recurrente</div>
+      <div class="nx-kpi__value">{{ formatCurrencyCompact(stats.mrr) }}</div>
+      <div class="nx-kpi__trend nx-kpi__trend--up">
+        <i class="pi pi-arrow-up"></i>
+        <span>8.2% MoM</span>
+      </div>
     </div>
   </div>
 
   <div class="nx-kpi nx-kpi--cyan">
-    <div class="nx-kpi__icon"><i class="pi pi-check-circle"></i></div>
+    <div class="nx-kpi__icon"><i class="pi pi-bolt"></i></div>
     <div class="nx-kpi__body">
       <span class="nx-kpi__label">Activas</span>
-      <div class="nx-kpi__value">
-        {{ stats.byStatus?.active || 0 }}
-        <span class="nx-kpi__delta nx-kpi__delta--up" *ngIf="kpiPct(stats.byStatus?.active) !== null">
-          {{ kpiPct(stats.byStatus?.active) }}%
-        </span>
+      <div class="nx-kpi__value">{{ stats.byStatus?.active || 0 }}</div>
+      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.active) !== null">
+        {{ kpiPct(stats.byStatus?.active) }}% del total
       </div>
-      <div class="nx-kpi__hint">del total</div>
     </div>
   </div>
 
   <div class="nx-kpi nx-kpi--orange">
-    <div class="nx-kpi__icon"><i class="pi pi-clock"></i></div>
+    <div class="nx-kpi__icon"><i class="pi pi-history"></i></div>
     <div class="nx-kpi__body">
       <span class="nx-kpi__label">En prueba</span>
-      <div class="nx-kpi__value">
-        {{ stats.byStatus?.trialing || 0 }}
-        <span class="nx-kpi__delta nx-kpi__delta--up" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
-          {{ kpiPct(stats.byStatus?.trialing) }}%
-        </span>
+      <div class="nx-kpi__value">{{ stats.byStatus?.trialing || 0 }}</div>
+      <div class="nx-kpi__hint" *ngIf="kpiPct(stats.byStatus?.trialing) !== null">
+        {{ kpiPct(stats.byStatus?.trialing) }}% del total
       </div>
-      <div class="nx-kpi__hint">del total</div>
     </div>
   </div>
 </div>

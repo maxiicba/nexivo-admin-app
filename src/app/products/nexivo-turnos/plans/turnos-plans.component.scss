@@ -1,0 +1,428 @@
+:host {
+  display: block;
+  --nx-primary:        var(--ink-900);
+  --nx-text:           var(--ink-900);
+  --nx-text-secondary: var(--ink-500);
+  --nx-text-muted:     var(--ink-400);
+  --nx-border:         var(--border);
+}
+
+.nx-page-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+// ── Cycle toggle (Mensual / Anual -17%) ──────────────────────────────────────
+.nx-cycle-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  gap: 2px;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: 0;
+    background: transparent;
+    color: var(--nx-text-secondary);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+    letter-spacing: -0.005em;
+
+    &:hover { color: var(--nx-text); }
+
+    &.is-active {
+      background: #ffffff;
+      color: var(--nx-text);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+  }
+
+  &__badge {
+    font-size: 0.7rem;
+    color: #047857;
+    font-weight: 700;
+  }
+}
+
+// Dark/primary "Nuevo plan" pill button
+::ng-deep .nx-btn-dark.p-button {
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: background 140ms ease;
+
+  .p-button-icon { font-size: 0.8rem; }
+  &:hover:not(:disabled) { background: #1e293b; border-color: #1e293b; }
+}
+
+// ── Plan cards grid (refinements) ────────────────────────────────────────────
+.nx-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.nx-plan-card {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 16px !important;
+  padding: 18px 18px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  position: relative;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  overflow: visible !important;
+
+  // Kill el accent strip legacy
+  &::before { display: none !important; }
+
+  &:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.12) !important;
+    transform: none !important;
+  }
+
+  &--featured {
+    border-color: var(--ink-900);
+    border-width: 1.5px;
+    box-shadow: 0 0 0 3px rgba(15, 17, 21, 0.06), var(--shadow-md);
+  }
+
+  &--inactive { opacity: 0.65; }
+
+  &__ribbon,
+  .nx-plan-card__ribbon {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    left: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: var(--accent-soft) !important;
+    color: var(--accent-ink) !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    line-height: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    z-index: 2;
+    pointer-events: none;
+
+    i { display: none !important; }
+    span { line-height: 1; }
+
+    &::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+  }
+}
+
+.nx-plan-card__header {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.nx-plan-card__chips { display: none !important; }
+.nx-plan-card__pricing { padding: 0.65rem 0 0 !important; }
+.nx-plan-card__limits { padding: 0 !important; }
+.nx-plan-card__actions { padding: 0 !important; margin-top: auto !important; }
+
+.nx-plan-card__drag {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  color: var(--nx-text-muted);
+  cursor: grab;
+  &:hover { background: #f1f5f9; color: var(--nx-text-secondary); }
+}
+
+.nx-plan-card__heading { flex: 1; min-width: 0; }
+
+.nx-plan-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--nx-text);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.nx-plan-card__desc {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--nx-text-secondary);
+  line-height: 1.35;
+}
+
+.nx-plan-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &--active   { background: #d1fae5; color: #047857; }
+  &--inactive { background: #f1f5f9; color: #64748b; }
+  &--private  { background: #fef3c7; color: #b45309; }
+  &--restricted { background: #ede9fe; color: #6d28d9; }
+}
+
+// ── Pricing ─────────────────────────────────────────────────────────────────
+.nx-plan-card__pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.65rem;
+}
+
+.nx-plan-card__price-label {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--nx-text-muted);
+  margin-bottom: 2px;
+}
+
+.nx-plan-card__price-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.nx-plan-card__price-currency {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--nx-text);
+}
+
+.nx-plan-card__price-value {
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
+  color: var(--nx-text) !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1 !important;
+}
+
+.nx-plan-card__price-currency {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  color: var(--nx-text) !important;
+}
+
+// ── Limits ──────────────────────────────────────────────────────────────────
+.nx-plan-card__limits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem 0.65rem;
+}
+
+.nx-plan-card__limit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  &--full { grid-column: 1 / -1; }
+}
+
+.nx-plan-card__limit-icon {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 7px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  font-size: 0.68rem !important;
+
+  .pi, i { font-size: 0.68rem !important; }
+}
+
+.nx-plan-card__limit-value {
+  display: block !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  color: var(--nx-text) !important;
+  line-height: 1.1 !important;
+}
+
+.nx-plan-card__limit-label {
+  display: block !important;
+  font-size: 0.66rem !important;
+  color: var(--nx-text-muted) !important;
+  line-height: 1.1 !important;
+}
+
+// ── See more button ─────────────────────────────────────────────────────────
+.nx-plan-card__see-more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  margin-top: -2px;
+  cursor: pointer;
+  color: var(--accent-ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: color 140ms ease;
+
+  .pi { font-size: 0.6rem; transition: transform 140ms ease; }
+
+  &:hover { color: var(--ink-900); }
+}
+
+// ── Features list (checks) ──────────────────────────────────────────────────
+.nx-plan-card__features-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+
+  li {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.8rem !important;
+    color: var(--nx-text) !important;
+    line-height: 1.2 !important;
+
+    // [hidden] de Angular debe pisar el display:flex
+    &[hidden] { display: none !important; }
+
+    .pi, i {
+      width: 16px !important;
+      height: 16px !important;
+      border-radius: 50% !important;
+      background: #d1fae5 !important;
+      color: #047857 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 0.55rem !important;
+      flex-shrink: 0;
+      margin-top: 0 !important;
+    }
+  }
+}
+
+// Hide chips (the new design uses only the features list)
+.nx-plan-card__chips { display: none; }
+
+// ── Actions ─────────────────────────────────────────────────────────────────
+.nx-plan-card__actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: auto !important;
+  padding: 0 !important;
+  align-items: stretch;
+}
+
+.nx-plan-card__btn {
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  color: var(--ink-900) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  padding: 0 12px !important;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+
+  i { font-size: 0.75rem; color: var(--ink-500); }
+
+  &:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--ink-300) !important;
+    color: var(--ink-900) !important;
+  }
+
+  &--edit {
+    background: var(--ink-900) !important;
+    border-color: var(--ink-900) !important;
+    color: #ffffff !important;
+
+    i { color: #ffffff; }
+
+    &:hover {
+      background: #000 !important;
+      border-color: #000 !important;
+      color: #ffffff !important;
+    }
+  }
+
+  &--delete {
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    padding: 0 !important;
+    color: var(--danger) !important;
+    border-color: var(--border) !important;
+    background: var(--surface) !important;
+
+    i { color: var(--danger); }
+
+    &:hover {
+      background: var(--danger-soft) !important;
+      border-color: #F5C2C2 !important;
+      color: var(--danger) !important;
+    }
+  }
+}

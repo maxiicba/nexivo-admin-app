@@ -47,10 +47,34 @@ const DEFAULT_PLAN = () => ({
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './turnos-plans.component.html',
+  styleUrls: ['./turnos-plans.component.scss'],
 })
 export class TurnosPlansComponent implements OnInit, OnDestroy {
   plans: any[] = [];
   loading = false;
+  cycle: 'monthly' | 'annual' = 'monthly';
+
+  // Feature list: cuántas features mostrar antes del "Ver más"
+  featurePreviewCount = 3;
+  private expanded = new Set<string>();
+
+  isExpanded(planId: string): boolean { return this.expanded.has(planId); }
+  toggleExpand(planId: string): void {
+    if (this.expanded.has(planId)) this.expanded.delete(planId);
+    else this.expanded.add(planId);
+  }
+
+  // The "featured" plan is the middle one (in price order) — used for the
+  // RECOMENDADO ribbon. If only one plan exists, no ribbon shown.
+  isFeatured(index: number, plan: any): boolean {
+    if (!Array.isArray(this.plans) || this.plans.length < 2) return false;
+    if (plan?.isFeatured === true || plan?.isPopular === true) return true;
+    const visible = this.plans.filter(p => p.isActive);
+    if (visible.length < 2) return false;
+    const sorted = [...visible].sort((a, b) => (a.monthlyPrice || 0) - (b.monthlyPrice || 0));
+    const mid = sorted[Math.floor(sorted.length / 2)];
+    return mid && mid.id === plan?.id;
+  }
   planDialog = false;
   isNewPlan = true;
   editingPlan: any = DEFAULT_PLAN();
