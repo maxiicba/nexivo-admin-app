@@ -1,0 +1,87 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero"><i class="pi pi-wrench"></i></div>
+        <div>
+          <span class="nx-page-kicker">Nexivo Turnos</span>
+          <h2 class="nx-page-header__title m-0">Modo Mantenimiento</h2>
+          <p class="nx-page-header__subtitle m-0">Activá o desactivá el modo mantenimiento para Nexivo Turnos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="loading" class="card p-6 text-center">
+  <i class="pi pi-spin pi-spinner text-2xl"></i>
+</div>
+
+<ng-container *ngIf="!loading && config">
+  <div class="card mb-3">
+    <div class="nx-mt-toggle">
+      <div class="nx-mt-toggle__info">
+        <div class="nx-mt-toggle__title">Modo Mantenimiento — Nexivo Turnos</div>
+        <div class="nx-mt-toggle__sub">
+          <ng-container *ngIf="isEnabled; else inactiveTpl">
+            <span class="nx-mt-badge nx-mt-badge--on">
+              <i class="pi pi-circle-fill"></i> Activo
+            </span>
+          </ng-container>
+          <ng-template #inactiveTpl>
+            <span class="nx-mt-badge nx-mt-badge--off">
+              <i class="pi pi-circle"></i> Inactivo
+            </span>
+          </ng-template>
+        </div>
+      </div>
+      <p-inputSwitch
+        [ngModel]="isEnabled"
+        (onChange)="onSwitchChange($event)"
+        [disabled]="saving">
+      </p-inputSwitch>
+    </div>
+  </div>
+
+  <div *ngIf="isEnabled" class="card mb-3">
+    <h4 class="mt-0 mb-3">Código de bypass</h4>
+    <div class="nx-mt-code">
+      <div class="nx-mt-code__value">{{ config.bypassCode || '—' }}</div>
+      <div class="nx-mt-code__actions">
+        <button pButton type="button" icon="pi pi-copy" label="Copiar"
+                class="p-button-outlined" (click)="copyCode()"
+                [disabled]="!config.bypassCode"></button>
+        <button pButton type="button" icon="pi pi-refresh" label="Regenerar código"
+                class="p-button-outlined p-button-warning"
+                (click)="regenerateCode()" [disabled]="saving"></button>
+      </div>
+    </div>
+    <div class="nx-mt-meta">
+      <div class="nx-mt-meta__item">
+        <i class="pi pi-clock"></i>
+        <span class="nx-mt-meta__label">Activo desde</span>
+        <span class="nx-mt-meta__value">{{ config.enabledAt ? (config.enabledAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+      </div>
+      <div class="nx-mt-meta__item">
+        <i class="pi pi-user"></i>
+        <span class="nx-mt-meta__label">Activado por</span>
+        <span class="nx-mt-meta__value">{{ config.enabledBy || '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4 class="mt-0 mb-3">Mensaje para usuarios</h4>
+    <textarea pInputTextarea [(ngModel)]="message" rows="4"
+              placeholder="Mensaje que verán los usuarios durante el mantenimiento..."
+              class="w-full"></textarea>
+    <div class="nx-mt-save">
+      <button pButton type="button" icon="pi pi-save" label="Guardar mensaje"
+              (click)="saveMessage()" [disabled]="saving"></button>
+    </div>
+  </div>
+</ng-container>

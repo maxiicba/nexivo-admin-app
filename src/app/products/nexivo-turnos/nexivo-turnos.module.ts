@@ -25,6 +25,10 @@ import { RouterModule } from '@angular/router';
         path: 'metrics',
         loadComponent: () => import('./metrics/turnos-metrics.component').then(m => m.TurnosMetricsComponent),
       },
+      {
+        path: 'maintenance',
+        loadComponent: () => import('./maintenance/maintenance.component').then(m => m.MaintenanceComponent),
+      },
     ]),
   ],
 })

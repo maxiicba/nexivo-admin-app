@@ -1,0 +1,119 @@
+:host {
+  display: block;
+  --nx-surface:        var(--surface);
+  --nx-border:         var(--border);
+  --nx-text:           var(--ink-900);
+  --nx-text-secondary: var(--ink-500);
+  --nx-text-muted:     var(--ink-400);
+  --nx-radius:         var(--r-card);
+  --nx-shadow-card:    var(--shadow-sm);
+}
+
+::ng-deep .card {
+  background: var(--nx-surface);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius);
+  box-shadow: var(--nx-shadow-card);
+  padding: 1.25rem 1.4rem;
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--nx-text);
+    letter-spacing: -0.005em;
+  }
+}
+
+.nx-mt-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  &__info { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  &__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--nx-text);
+  }
+}
+
+.nx-mt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  line-height: 1;
+
+  i { font-size: 0.55rem; }
+
+  &--on  { color: #047857; background: #d1fae5; }
+  &--off { color: #475569; background: #e2e8f0; }
+}
+
+::ng-deep p-inputSwitch .p-inputswitch {
+  width: 3.5rem;
+  height: 1.9rem;
+}
+
+.nx-mt-code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  margin-bottom: 1rem;
+
+  &__value {
+    font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--nx-text);
+  }
+
+  &__actions {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+.nx-mt-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--nx-text-secondary);
+
+    i { color: var(--nx-text-muted); }
+  }
+
+  &__label { color: var(--nx-text-muted); }
+
+  &__value {
+    color: var(--nx-text);
+    font-weight: 600;
+  }
+}
+
+.nx-mt-save {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
+}
