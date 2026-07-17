@@ -80,6 +80,8 @@ export class PanelAdminComponent implements OnInit {
     controller: null as string | null,
     dateRange: [] as Date[],
   };
+  selectedActivityLog: ActivityLogEntry | null = null;
+  showActivityDetail = false;
   controllerOptions: DropdownOption[] = [];
   accountOptions: DropdownOption[] = [];
 
@@ -307,6 +309,20 @@ export class PanelAdminComponent implements OnInit {
     this.activityFilters = { accountId: null, controller: null, dateRange: [] };
     this.activityPage = 1;
     this.loadActivity();
+  }
+
+  openActivityDetail(log: ActivityLogEntry): void {
+    this.selectedActivityLog = log;
+    this.showActivityDetail = true;
+  }
+
+  formatJson(value: any): string {
+    if (value === null || value === undefined) return 'Sin datos';
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
   }
 
   // ─── Support ───

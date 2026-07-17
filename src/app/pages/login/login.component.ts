@@ -35,7 +35,13 @@ import { AuthService } from '../../core/services/auth.service';
           {{ errorMsg }}
         </div>
 
-        <form class="nx-login-form" (ngSubmit)="login()">
+        <div *ngIf="infoMsg" class="nx-login-info">
+          <i class="pi pi-check-circle"></i>
+          {{ infoMsg }}
+        </div>
+
+        <!-- Paso 1: credenciales -->
+        <form *ngIf="step === 'credentials'" class="nx-login-form" (ngSubmit)="login()">
           <div class="nx-login-field">
             <label class="nx-login-label" for="email">Correo electrónico</label>
             <input
@@ -75,7 +81,69 @@ import { AuthService } from '../../core/services/auth.service';
           </button>
         </form>
 
-        <p class="nx-login-note">
+        <!-- Paso 2: segundo factor -->
+        <form *ngIf="step === 'twofactor'" class="nx-login-form" (ngSubmit)="verifyCode()">
+          <div class="nx-login-2fa-head">
+            <div class="nx-login-2fa-icon">
+              <i class="pi" [ngClass]="twoFactorMethod === 'email' ? 'pi-envelope' : 'pi-mobile'"></i>
+            </div>
+            <div class="nx-login-2fa-title">Verificación en dos pasos</div>
+            <div class="nx-login-2fa-desc">
+              <span *ngIf="twoFactorMethod === 'email'">Ingresá el código que enviamos a tu correo.</span>
+              <span *ngIf="twoFactorMethod !== 'email'">Ingresá el código de tu app de autenticación.</span>
+            </div>
+          </div>
+
+          <div class="nx-login-field">
+            <label class="nx-login-label" for="code">Código de verificación</label>
+            <input
+              class="nx-login-input nx-login-input--code"
+              id="code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="8"
+              [(ngModel)]="code"
+              name="code"
+              placeholder="123456"
+              (keyup.enter)="verifyCode()"
+            />
+          </div>
+
+          <label class="nx-login-check">
+            <input type="checkbox" [(ngModel)]="trustDevice" name="trustDevice" />
+            <span>Confiar en este dispositivo por 30 días</span>
+          </label>
+
+          <button
+            type="submit"
+            class="nx-login-btn"
+            [class.nx-login-btn--loading]="loading"
+            [disabled]="loading"
+          >
+            <span *ngIf="!loading">Verificar</span>
+            <span *ngIf="loading">
+              <i class="pi pi-spin pi-spinner"></i> Verificando...
+            </span>
+          </button>
+
+          <div class="nx-login-2fa-actions">
+            <button type="button" class="nx-login-link" (click)="backToCredentials()">
+              <i class="pi pi-arrow-left"></i> Volver
+            </button>
+            <button
+              *ngIf="twoFactorMethod === 'email'"
+              type="button"
+              class="nx-login-link"
+              [disabled]="resending"
+              (click)="resendCode()"
+            >
+              <i class="pi pi-refresh" [class.pi-spin]="resending"></i> Reenviar código
+            </button>
+          </div>
+        </form>
+
+        <p class="nx-login-note" *ngIf="step === 'credentials'">
           Requiere permisos de Super Administrador.<br>
           En producción el acceso es vía SSO.
         </p>
@@ -203,10 +271,116 @@ import { AuthService } from '../../core/services/auth.service';
       margin-bottom: 1.25rem;
     }
 
+    .nx-login-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 10px;
+      color: #059669;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
     .nx-login-form {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+    }
+
+    .nx-login-2fa-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.4rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .nx-login-2fa-icon {
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.1);
+      color: #4f46e5;
+      font-size: 1.3rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .nx-login-2fa-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .nx-login-2fa-desc {
+      font-size: 0.82rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .nx-login-input--code {
+      text-align: center;
+      letter-spacing: 0.5em;
+      font-size: 1.15rem;
+      font-weight: 600;
+      padding-left: 0.5em;
+    }
+
+    .nx-login-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #475569;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nx-login-check input {
+      width: 16px;
+      height: 16px;
+      accent-color: #5B5FF7;
+      cursor: pointer;
+    }
+
+    .nx-login-2fa-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .nx-login-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: none;
+      border: none;
+      padding: 0.25rem;
+      color: #4f46e5;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity 150ms ease;
+    }
+
+    .nx-login-link:hover:not(:disabled) {
+      opacity: 0.75;
+    }
+
+    .nx-login-link:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .nx-login-field {
@@ -289,6 +463,15 @@ export class LoginComponent {
   password = '';
   loading = false;
   errorMsg = '';
+  infoMsg = '';
+
+  // Estado del segundo factor
+  step: 'credentials' | 'twofactor' = 'credentials';
+  twoFactorMethod: 'totp' | 'email' | null = null;
+  challengeToken = '';
+  code = '';
+  trustDevice = false;
+  resending = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -299,20 +482,90 @@ export class LoginComponent {
     }
     this.loading = true;
     this.errorMsg = '';
+    this.infoMsg = '';
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        const user = res.user ?? res;
         this.loading = false;
-        if (!user.isSuperAdmin) {
-          this.errorMsg = 'Tu usuario no tiene permisos de Super Administrador.';
+        // El backend pide segundo factor: pasamos al paso de verificación.
+        if (res?.twoFactorRequired) {
+          this.step = 'twofactor';
+          this.twoFactorMethod = res.method ?? null;
+          this.challengeToken = res.challengeToken;
+          this.code = '';
+          this.trustDevice = false;
+          if (this.twoFactorMethod === 'email') {
+            this.infoMsg = 'Te enviamos un código de verificación a tu correo.';
+          }
           return;
         }
-        this.router.navigate(['/']);
+        this.finishLogin(res);
       },
       error: (err) => {
         this.loading = false;
         this.errorMsg = err?.error?.message || 'Credenciales inválidas.';
       },
     });
+  }
+
+  verifyCode(): void {
+    if (!this.code?.trim()) {
+      this.errorMsg = 'Ingresá el código de verificación.';
+      return;
+    }
+    this.loading = true;
+    this.errorMsg = '';
+    this.infoMsg = '';
+    this.authService
+      .verifyTwoFactor({
+        challengeToken: this.challengeToken,
+        code: this.code.trim(),
+        trustDevice: this.trustDevice,
+      })
+      .subscribe({
+        next: (res) => {
+          this.loading = false;
+          this.finishLogin(res);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.errorMsg = err?.error?.message || 'El código de verificación no es válido.';
+        },
+      });
+  }
+
+  resendCode(): void {
+    if (!this.challengeToken) return;
+    this.resending = true;
+    this.errorMsg = '';
+    this.infoMsg = '';
+    this.authService.resendTwoFactorCode(this.challengeToken).subscribe({
+      next: () => {
+        this.resending = false;
+        this.infoMsg = 'Te reenviamos el código a tu correo.';
+      },
+      error: (err) => {
+        this.resending = false;
+        this.errorMsg = err?.error?.message || 'No pudimos reenviar el código. Intentá nuevamente.';
+      },
+    });
+  }
+
+  backToCredentials(): void {
+    this.step = 'credentials';
+    this.twoFactorMethod = null;
+    this.challengeToken = '';
+    this.code = '';
+    this.trustDevice = false;
+    this.errorMsg = '';
+    this.infoMsg = '';
+  }
+
+  private finishLogin(res: any): void {
+    const user = res?.user ?? res;
+    if (!user?.isSuperAdmin) {
+      this.errorMsg = 'Tu usuario no tiene permisos de Super Administrador.';
+      return;
+    }
+    this.router.navigate(['/']);
   }
 }

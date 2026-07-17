@@ -41,12 +41,34 @@ export class AuthService {
   login(credentials: { email: string; password: string }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/auth/login`, credentials, { withCredentials: true }).pipe(
       map((res: any) => {
+        // Si el backend exige segundo factor todavía no hay sesión: devolvemos el
+        // challenge tal cual, sin marcar al usuario como autenticado.
+        if (res?.twoFactorRequired) {
+          return res;
+        }
         const user = res.user ?? res;
         this.currentUserSubject.next(user);
         this.isAuthenticatedSubject.next(!!user);
         return res;
       }),
     );
+  }
+
+  /** Completa el login con el segundo factor (código TOTP o enviado por email). */
+  verifyTwoFactor(payload: { challengeToken: string; code: string; trustDevice?: boolean }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/2fa/verify`, payload, { withCredentials: true }).pipe(
+      map((res: any) => {
+        const user = res.user ?? res;
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(!!user);
+        return res;
+      }),
+    );
+  }
+
+  /** Reenvía el código de verificación por email (solo aplica al método 'email'). */
+  resendTwoFactorCode(challengeToken: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/2fa/resend`, { challengeToken }, { withCredentials: true });
   }
 
   logout(): Observable<any> {

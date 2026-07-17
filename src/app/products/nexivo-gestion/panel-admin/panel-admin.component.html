@@ -396,6 +396,7 @@
               <th style="width: 80px">Método</th>
               <th>Path</th>
               <th style="width: 120px">IP</th>
+              <th style="width: 70px">Detalle</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-log>
@@ -408,10 +409,14 @@
               <td><p-tag [value]="log.method" [severity]="getMethodSeverity(log.method)"></p-tag></td>
               <td style="font-size: 0.85rem; color: var(--nx-text-muted);">{{ log.path }}</td>
               <td style="font-size: 0.85rem;">{{ log.ip || '-' }}</td>
+              <td class="text-center">
+                <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-sm"
+                        pTooltip="Ver body y respuesta" (click)="openActivityDetail(log)"></button>
+              </td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
-            <tr><td colspan="8" class="text-center py-5" style="color: var(--nx-text-muted);">
+            <tr><td colspan="9" class="text-center py-5" style="color: var(--nx-text-muted);">
               <i class="pi pi-inbox text-3xl mb-2 block"></i>Sin actividad registrada
             </td></tr>
           </ng-template>
@@ -420,6 +425,35 @@
                      [rowsPerPageOptions]="[20, 50, 100]"
                      (onPageChange)="onActivityPageChange($event)"></p-paginator>
       </div>
+
+      <!-- Detalle de actividad: body y respuesta -->
+      <p-dialog header="Detalle de actividad" [(visible)]="showActivityDetail" [modal]="true"
+                [dismissableMask]="true" [style]="{ width: '750px', maxWidth: '95vw' }">
+        <ng-container *ngIf="selectedActivityLog as log">
+          <div class="flex flex-wrap gap-3 mb-3 align-items-center">
+            <p-tag [value]="log.method" [severity]="getMethodSeverity(log.method)"></p-tag>
+            <span style="font-family: monospace; font-size: 0.85rem;">{{ log.path }}</span>
+            <p-tag [value]="'HTTP ' + (log.statusCode || '-')"
+                   [severity]="log.statusCode && log.statusCode < 400 ? 'success' : 'danger'"></p-tag>
+          </div>
+          <div class="mb-2 text-sm" style="color: var(--nx-text-muted);">
+            {{ formatDateTime(log.createdAt) }} · {{ log.user?.username || '-' }} ·
+            {{ log.account?.name || '-' }} · IP {{ log.ip || '-' }}
+          </div>
+
+          <h5 class="mt-3 mb-2">Body de la solicitud</h5>
+          <pre style="background: var(--surface-ground); border: 1px solid var(--surface-border); border-radius: 6px; padding: 0.75rem; max-height: 260px; overflow: auto; font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; margin: 0;">{{ formatJson(log.requestBody) }}</pre>
+
+          <h5 class="mt-3 mb-2">Respuesta</h5>
+          <pre style="background: var(--surface-ground); border: 1px solid var(--surface-border); border-radius: 6px; padding: 0.75rem; max-height: 260px; overflow: auto; font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; margin: 0;">{{ formatJson(log.responseBody) }}</pre>
+
+          <p class="text-sm mt-2" style="color: var(--nx-text-muted);">
+            <i class="pi pi-shield mr-1"></i>
+            Los datos sensibles (contraseñas, tokens, tarjetas) se redactan antes de guardarse
+            y los payloads grandes se truncan.
+          </p>
+        </ng-container>
+      </p-dialog>
     </p-tabPanel>
 
     <!-- ═══ TAB 5: Soporte ═══ -->
