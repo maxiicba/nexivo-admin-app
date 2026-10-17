@@ -352,6 +352,15 @@ export class NexivoTurnosAdminService {
     );
   }
 
+  // ── Business (baja de cuenta) ─────────────────────────────────────────────
+
+  deleteBusinessAccount(businessId: string, reason: string): Observable<{ deletedAt: string }> {
+    return this.http.delete<{ deletedAt: string }>(`${this.businessesBase}/admin/${businessId}`, {
+      body: { reason },
+      withCredentials: true,
+    });
+  }
+
   // ── Business search ────────────────────────────────────────────────────────
 
   searchBusinesses(q: string): Observable<{ id: string; name: string; slug: string }[]> {

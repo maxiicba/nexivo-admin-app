@@ -232,6 +232,11 @@
                     pTooltip="Cancelar" tooltipPosition="top" aria-label="Cancelar">
               <i class="pi pi-ban"></i>
             </button>
+            <button type="button" class="nx-action-btn nx-action-btn--danger"
+                    (click)="openDeleteAccount(sub, $event)"
+                    pTooltip="Eliminar cuenta" tooltipPosition="top" aria-label="Eliminar cuenta">
+              <i class="pi pi-trash"></i>
+            </button>
           </div>
         </td>
       </tr>
@@ -331,6 +336,32 @@
   <ng-template pTemplate="footer">
     <button pButton label="Volver" class="p-button-text" (click)="cancelDialog = false"></button>
     <button pButton label="Confirmar" class="p-button-danger" [loading]="saving" (click)="confirmCancel()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete account dialog -->
+<p-dialog [(visible)]="deleteDialog" header="Eliminar cuenta" [modal]="true"
+          [style]="{width: '480px', maxWidth: '95vw'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="flex flex-column gap-3 py-2" *ngIf="deletingSub">
+    <div class="text-sm">
+      Vas a eliminar <strong>{{ deletingSub.business?.name }}</strong>. Se cancela la suscripción en el acto
+      (se revoca el débito de MercadoPago y se anula el cargo abierto), se desconecta WhatsApp,
+      la página pública deja de funcionar y el dueño ya no puede iniciar sesión.
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Motivo *</label>
+      <input pInputText [(ngModel)]="deleteReason" placeholder="Ej: pedido del cliente, cuenta de prueba…" class="w-full">
+      <small class="text-color-secondary">Mínimo 5 caracteres. Queda en la auditoría de la suscripción.</small>
+    </div>
+    <div class="field">
+      <label class="nx-form-label">Escribí <strong>{{ deletingSub.business?.slug }}</strong> para confirmar</label>
+      <input pInputText [(ngModel)]="deleteConfirmText" [placeholder]="deletingSub.business?.slug" class="w-full" autocomplete="off">
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Volver" class="p-button-text" (click)="deleteDialog = false"></button>
+    <button pButton label="Eliminar cuenta" icon="pi pi-trash" class="p-button-danger" [loading]="saving"
+            [disabled]="!canConfirmDelete" (click)="confirmDeleteAccount()"></button>
   </ng-template>
 </p-dialog>
 

@@ -67,6 +67,12 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   cancelReason = '';
   cancelImmediate = false;
 
+  // Delete account dialog
+  deleteDialog = false;
+  deletingSub: any = null;
+  deleteReason = '';
+  deleteConfirmText = '';
+
   // Bulk dialogs
   bulkCompDialog = false;
   bulkCompMonths = 1;
@@ -391,6 +397,43 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     } else {
       proceed();
     }
+  }
+
+  // ── Delete account ─────────────────────────────────────────────────────────
+
+  openDeleteAccount(sub: any, $event?: Event): void {
+    $event?.stopPropagation();
+    if (!sub?.business?.id) {
+      this.messageService.add({ severity: 'error', summary: 'Sin negocio', detail: 'Esta suscripción no tiene un negocio asociado.' });
+      return;
+    }
+    this.deletingSub = sub;
+    this.deleteReason = '';
+    this.deleteConfirmText = '';
+    this.deleteDialog = true;
+  }
+
+  get canConfirmDelete(): boolean {
+    const slug = this.deletingSub?.business?.slug;
+    return this.deleteReason.trim().length >= 5 && !!slug && this.deleteConfirmText.trim() === slug;
+  }
+
+  confirmDeleteAccount(): void {
+    if (!this.canConfirmDelete) return;
+    this.saving = true;
+    this.svc.deleteBusinessAccount(this.deletingSub.business.id, this.deleteReason.trim()).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Eliminada', detail: `${this.deletingSub.business.name} fue dada de baja` });
+        this.deleteDialog = false;
+        this.saving = false;
+        this.selected = this.selected.filter((s) => s.id !== this.deletingSub.id);
+        this.load();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'No se pudo eliminar la cuenta' });
+        this.saving = false;
+      },
+    });
   }
 
   // ── Bulk ───────────────────────────────────────────────────────────────────
