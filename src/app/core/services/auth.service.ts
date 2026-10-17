@@ -76,6 +76,18 @@ export class AuthService {
     );
   }
 
+  /** Completa el login con el segundo factor (código TOTP o enviado por email). */
+  verifyTwoFactor(payload: { challengeToken: string; code: string; trustDevice?: boolean }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/2fa/verify`, payload, { withCredentials: true }).pipe(
+      map((res: any) => this.applyLoginResponse(res)),
+    );
+  }
+
+  /** Reenvía el código de verificación por email (solo aplica al método 'email'). */
+  resendTwoFactorCode(challengeToken: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/2fa/resend`, { challengeToken }, { withCredentials: true });
+  }
+
   /**
    * Confirma el cierre de la sesión abierta en otro dispositivo y completa el
    * login frenado. No repite credenciales: el `takeoverToken` ya prueba un
@@ -93,10 +105,11 @@ export class AuthService {
 
   /**
    * Hidrata la sesión SOLO si el backend realmente la emitió. Un login frenado
-   * (sesión abierta en otro dispositivo) llega sin `user` y sin cookie.
+   * (sesión abierta en otro dispositivo) o que todavía exige segundo factor
+   * llega sin `user` y sin cookie.
    */
   private applyLoginResponse(res: any): any {
-    if (isSessionConflict(res)) {
+    if (isSessionConflict(res) || res?.twoFactorRequired) {
       this.isAuthenticatedSubject.next(false);
       this.currentUserSubject.next(null);
       return res;

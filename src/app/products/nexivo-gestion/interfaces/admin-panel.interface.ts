@@ -76,6 +76,8 @@ export interface ActivityLogEntry {
   statusCode: number;
   ip: string;
   metadata: any;
+  requestBody?: any;
+  responseBody?: any;
   createdAt: string;
   user?: { username: string; email: string };
   account?: { name: string; email: string };
