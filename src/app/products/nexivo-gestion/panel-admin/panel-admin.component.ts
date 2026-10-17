@@ -51,6 +51,7 @@ interface DropdownOption {
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './panel-admin.component.html',
+  styleUrl: './panel-admin.component.scss',
 })
 export class PanelAdminComponent implements OnInit {
   // Dashboard
@@ -706,6 +707,22 @@ export class PanelAdminComponent implements OnInit {
 
   formatControllerName(name: string): string {
     return name.replace('Controller', '');
+  }
+
+  /** Suscripciones contadas en la distribución por estado (sin canceladas). */
+  get subsTotal(): number {
+    const s = this.stats?.subscriptions;
+    return s ? s.active + s.trialing + s.pastDue + s.suspended : 0;
+  }
+
+  get usersPerAccount(): string {
+    const total = this.stats?.accounts.total ?? 0;
+    if (!total) return '0';
+    return ((this.stats!.users.total) / total).toLocaleString('es-AR', { maximumFractionDigits: 1 });
+  }
+
+  pct(value: number, total: number): number {
+    return total ? Math.round((value / total) * 100) : 0;
   }
 
   formatCurrency(amount: number): string {

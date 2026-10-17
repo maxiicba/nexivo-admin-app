@@ -1,0 +1,1301 @@
+// ============================================================================
+// NEXIVO — Base compartido de pantalla ("ct")
+// ============================================================================
+// Portado TAL CUAL desde management-app (mismo vocabulario en los dos paneles).
+// Los colores del admin NO se tocan acá: los pisa `_nx-palette-admin.scss`.
+// ============================================================================
+// Este archivo ES el `ct.css` del panel: los tokens y el vocabulario de clases
+// que TODA pantalla del sistema comparte. Nació de extraer el bloque `--c-*`
+// que estaba copiado a mano en products-stale, bulk-price-update,
+// catalog-analytics, my-receipts, nexia-sidebar y nx-select.
+//
+// REGLA: una pantalla usa este base + un SCSS propio delgado que lo extiende.
+// Ninguna pantalla vuelve a declarar tokens de color, botones ni tipografía.
+//
+// Por qué los tokens se llaman `--c-*` y no `--nx-*`: los `--nx-*` son la capa
+// cruda del design system (paletas, escalas, chrome del layout). Los `--c-*` son
+// la capa SEMANTICA de la pantalla y se mapean a los `--nx-*`, así el modo
+// día/noche sigue saliendo solo y no hay dos fuentes de verdad.
+//
+// Por qué el prefijo de clase es `ct-` y no `.card` / `.toolbar` pelados: `.card`
+// ya existe global desde la plantilla Sakai (`_utils.scss`) y la usan 45
+// templates. Redefinirla rompería pantallas que no estamos tocando.
+// ============================================================================
+
+:root {
+  // ── Superficies y tinta ───────────────────────────────────────────────────
+  --c-bg: var(--nx-bg-ground);
+  --c-surface: var(--nx-bg-card);
+  --c-surface-2: var(--nx-bg-ground);
+  --c-border: var(--nx-border);
+  --c-border-strong: color-mix(in srgb, var(--nx-text-primary) 14%, transparent);
+  --c-ink: var(--nx-text-primary);
+  --c-ink-2: var(--nx-text-secondary);
+  --c-ink-3: var(--nx-text-muted);
+
+  // ── Acento: NEGRO/NEUTRO. Nunca morado, nunca violeta, nunca indigo. ──────
+  --c-accent: #16161a;
+  --c-accent-ink: #0f0f12;
+  --c-accent-soft: #f2f2f3;
+  --c-accent-on: #ffffff;
+  --ring-accent: 0 0 0 3px rgba(15, 23, 42, 0.09);
+
+  // ── Semánticos: SOLO significado, nunca color de marca ────────────────────
+  // rojo = urgente/vencido/negativo · naranja = atención/parcial/faltante
+  // verde = hecho/recibido/cumplido · celeste = informativo/en tránsito
+  --c-danger: #b91c1c;
+  --c-danger-soft: #fdecec;
+  --c-warn: #b45309;
+  --c-warn-soft: #fff4e0;
+  --c-success: #15803d;
+  --c-success-soft: #e7f7ee;
+  --c-sky: #0284c7;
+  --c-sky-soft: #e0f2fe;
+  // Alias histórico: products-stale y bulk-price-update lo llaman `--c-ok`.
+  --c-ok: var(--c-success);
+  --c-ok-soft: var(--c-success-soft);
+
+  // ── Tipografía ────────────────────────────────────────────────────────────
+  // Una sola familia en todo el panel: Geist.
+  //
+  // `--c-mono` ya NO es monoespaciada. Sigue siendo el token del DATO —importes,
+  // cantidades, códigos, SKU, fechas, porcentajes y labels de sección en
+  // mayúsculas— pero apunta a la misma Geist del texto. Lo que mantiene las
+  // columnas de números alineadas nunca fue la monoespaciada sino
+  // `font-variant-numeric: tabular-nums`, que viaja en `.ct-num` / `.ct-mono` y
+  // queda intacto.
+  //
+  // El token se conserva para que "esto es un dato" siga siendo una decisión de
+  // una sola línea: cambiar esta declaración devuelve la mono a todo el panel.
+  // Lo único que sigue realmente monoespaciado es la salida física —ticket
+  // térmico, dígitos de la etiqueta de código de barras, PDF de cierre— y lo que
+  // elige el comerciante (cartelería y tienda pública), que no pasan por acá.
+  --c-font: 'Geist', 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --c-mono: var(--c-font);
+
+  // ── Forma ─────────────────────────────────────────────────────────────────
+  --r-card: 16px;
+  --r-ctl: 10px;
+  --gap: 16px;
+  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.05);
+  --shadow-md: 0 8px 24px -8px rgba(16, 16, 20, 0.16), 0 2px 6px -2px rgba(16, 16, 20, 0.08);
+  --shadow-lg: 0 24px 48px -12px rgba(16, 16, 20, 0.28);
+
+  // ── Shell + Inicio (handoff design_handoff_inicio_layout) ─────────────────
+  // Radios de la escala grande. El panel del shell y las cards del Inicio son
+  // más redondas que una card de tabla: 24px una card grande, 20px una fila de
+  // ayuda, 18px un popover. La escala chica (--r-card/--r-ctl) NO se toca: la
+  // usan las 45 pantallas de CRUD y achatarlas les cambiaría el aire.
+  --r-card-lg: 24px;
+  --r-card-sm: 20px;
+  --r-pop: 18px;
+  --r-notch: 22px;
+
+  // Borde marcado: hover de card y divisores que tienen que pesar más que el
+  // hairline por defecto. Es el `--bd2` del handoff.
+  --c-border-2: #e0e0e4;
+
+  // Sombras de la escala del handoff. Distintas de --shadow-sm/md/lg: la card en
+  // reposo es casi plana y todo el peso aparece en el hover, que es lo que le da
+  // al panel la sensación de papel.
+  --shadow-card: 0 1px 2px rgba(16, 16, 20, 0.03);
+  --shadow-card-hover: 0 1px 2px rgba(16, 16, 20, 0.05), 0 22px 40px -24px rgba(16, 16, 20, 0.34);
+  --shadow-pop: 0 1px 2px rgba(16, 16, 20, 0.05), 0 28px 56px -22px rgba(16, 16, 20, 0.42);
+  --shadow-ctl: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 20px -14px rgba(16, 16, 20, 0.16);
+  --shadow-flyout: 0 30px 60px -24px rgba(0, 0, 0, 0.7);
+
+  // Curva de entrada compartida por el shell y el Inicio.
+  --ease-rise: cubic-bezier(0.2, 0.8, 0.25, 1);
+  --ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+// El acento se INVIERTE en modo noche: ahí el "negro" es la tinta clara. Un
+// acento #16161a sobre canvas negro no se ve, y --nx-primary ya es blanco.
+.layout-theme-dark {
+  // Los alias base se REDECLARAN acá. En `:root` el `var()` se resuelve sobre el
+  // `<html>`, donde rigen los valores de día, y el resultado baja congelado: las
+  // pantallas que no los redeclaraban en su `:host` (Reportes, Inteligencia
+  // financiera, facturas…) salían con cards blancas y tinta negra de noche.
+  // Las clases de tema viven en `<body>`, así que acá sí se resuelven de noche.
+  --c-bg: var(--nx-bg-ground);
+  --c-surface: var(--nx-bg-card);
+  --c-border: var(--nx-border);
+  --c-ink: var(--nx-text-primary);
+  --c-ink-2: var(--nx-text-secondary);
+  --c-ink-3: var(--nx-text-muted);
+
+  --c-surface-2: color-mix(in srgb, var(--nx-text-primary) 6%, var(--nx-bg-card));
+  --c-border-strong: color-mix(in srgb, var(--nx-text-primary) 24%, transparent);
+
+  --c-accent: #f4f4f5;
+  --c-accent-ink: #ffffff;
+  --c-accent-soft: rgba(255, 255, 255, 0.1);
+  --c-accent-on: #16161a;
+  --ring-accent: 0 0 0 3px rgba(255, 255, 255, 0.12);
+
+  // Los semánticos suben de luminancia: los tonos 700 no llegan a 4.5:1 sobre negro.
+  --c-danger: #f87171;
+  --c-danger-soft: rgba(248, 113, 113, 0.14);
+  --c-warn: #fbbf24;
+  --c-warn-soft: rgba(251, 191, 36, 0.14);
+  --c-success: #4ade80;
+  --c-success-soft: rgba(74, 222, 128, 0.14);
+  --c-sky: #38bdf8;
+  --c-sky-soft: rgba(56, 189, 248, 0.14);
+
+  // Los hairlines del shell tienen que INVERTIRSE o desaparecen sobre el canvas
+  // negro: #e0e0e4 sobre #000 es una línea blanca, no un divisor. Las sombras
+  // bajan de opacidad por el mismo motivo — una sombra negra sobre negro no
+  // separa nada, así que el relieve pasa a apoyarse en el borde.
+  --c-border-2: rgba(255, 255, 255, 0.16);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 22px 40px -24px rgba(0, 0, 0, 0.8);
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 28px 56px -22px rgba(0, 0, 0, 0.85);
+  --shadow-ctl: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+// ── Raíz de pantalla ────────────────────────────────────────────────────────
+// La tipografía y la densidad se ponen ACA y no en `:host`: `:host` también
+// alcanza al `<p-toast>` y al `<p-confirmDialog>`, y un `color` heredado los deja
+// con texto del color equivocado sobre su propio fondo (en noche, blanco sobre
+// blanco: el toast se ve vacío).
+.ct {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  font-family: var(--c-font);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink);
+}
+
+// Todo dato va en mono.
+.ct-num,
+.ct-mono {
+  font-family: var(--c-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.ct-num { text-align: right; }
+
+// Label de sección en mayúsculas: mono, chico, tracking abierto.
+.ct-kicker {
+  display: block;
+  font-family: var(--c-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--c-ink-3);
+}
+
+// ── 1. Card ─────────────────────────────────────────────────────────────────
+.ct-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.ct-card__pad { padding: 18px 20px; }
+
+// ── 2. Banda negra de acción ────────────────────────────────────────────────
+// La UNICA superficie oscura de la pantalla. Un solo bloque: la cifra que manda,
+// la razón por la que es urgente y qué hacer. Al costado, cifras de apoyo
+// separadas por un borde vertical translúcido.
+.ct-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  background: #16161a;
+  color: #ffffff;
+  border-radius: var(--r-card);
+  overflow: hidden;
+
+  &__main {
+    min-width: 0;
+    padding: 22px 24px;
+  }
+
+  &__label {
+    display: block;
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  &__figure {
+    margin-top: 6px;
+    font-family: var(--c-mono);
+    font-size: 28px;
+    font-weight: 650;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // La línea que explica POR QUE eso es urgente y qué pasa si no se actúa.
+  // Sin esta línea la banda es un KPI decorativo: no va sin ella.
+  &__why {
+    margin: 8px 0 0;
+    max-width: 62ch;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
+
+    strong { color: #ffffff; font-weight: 600; }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  &__side {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 22px 24px;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  // El label y el valor van APILADOS, y el apilado tiene que ser del layout.
+  //
+  // Antes esto era un `<span>` seguido de un `<b>`, los dos INLINE: el
+  // `margin-top` de `__statv` no hacía nada (un margen vertical no aplica a un
+  // inline) y encima Angular borra el espacio entre etiquetas, así que el valor
+  // salía pegado al label —"Locales del grupo2"—. Con una etiqueta corta y un
+  // número de una cifra casi no se notaba; con un label largo es ilegible.
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    .ct-band__label { color: rgba(255, 255, 255, 0.45); }
+  }
+
+  &__statv {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--c-mono);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    // Un nombre largo no puede empujar la banda: se corta con puntos suspensivos.
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    // Cuando la cifra de apoyo NO es un número sino un nombre (una sucursal, una
+    // persona). El mono es para DATOS; un nombre propio en mono se lee como un
+    // código y ocupa de más.
+    &--text {
+      font-family: var(--c-font);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+  }
+}
+
+// Botones DENTRO de la banda: el primario es blanco sobre negro. La banda es
+// oscura en los DOS temas, así que estos colores van literales y no por token.
+.ct-band .ct-btn--primary {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #16161a;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+.ct-band .ct-btn--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.45);
+    // OJO, el `color` va SI O SI acá aunque la regla de arriba ya lo puso en
+    // blanco: `.ct-band .ct-btn--ghost` son dos clases (0,2,0) y el ghost
+    // genérico `.ct-btn--ghost:hover:not(:disabled)` es una clase + DOS
+    // pseudo-clases (0,3,0), así que al pasar el mouse GANA él y le mete
+    // `color: var(--c-ink)`. Medido en Tesorería: la etiqueta pasaba de
+    // #ffffff a #071c17 sobre la banda petróleo (#04302a) — el botón se leía
+    // como si estuviera deshabilitado. Sacar esta línea = volver a eso, en
+    // TODAS las bandas de la app, no sólo en la que se vio rota.
+    color: #ffffff;
+  }
+}
+
+// ── 3. Tira de stats ────────────────────────────────────────────────────────
+// UNA sola card con divisores verticales. Nunca tarjetas sueltas: sueltas se leen
+// como cuatro objetos distintos y son cuatro lecturas del mismo hecho.
+.ct-stats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  &__cell {
+    min-width: 0;
+    padding: 14px 18px;
+    border-left: 1px solid var(--c-border);
+
+    &:first-child { border-left: 0; }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--c-ink-3);
+  }
+
+  &__label {
+    min-width: 0;
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--c-ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__value {
+    margin-top: 6px;
+    font-family: var(--c-mono);
+    font-size: 21px;
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-ink);
+  }
+
+  // El pie APORTA contexto, no repite el número. "de 2 pedidos" sirve; "1 pedido" no.
+  &__foot {
+    margin-top: 3px;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--c-ink-2);
+  }
+
+  // Tonos del punto. Son SEMANTICOS: el tono dice qué significa, no decora.
+  &__cell--danger  { .ct-stats__dot { background: var(--c-danger); }  .ct-stats__value { color: var(--c-danger); } }
+  &__cell--warn    { .ct-stats__dot { background: var(--c-warn); } }
+  &__cell--success { .ct-stats__dot { background: var(--c-success); } }
+  &__cell--sky     { .ct-stats__dot { background: var(--c-sky); } }
+}
+
+// ── 4. Toolbar ──────────────────────────────────────────────────────────────
+.ct-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-border);
+
+  // Cuando la toolbar NO encabeza una card sino que va suelta sobre el fondo de la
+  // página (listados que son varias cards, no una tabla), el divisor de abajo queda
+  // colgando en el aire y el padding la desalinea del contenido.
+  &--bare {
+    padding: 0;
+    border-bottom: 0;
+  }
+}
+
+// El buscador crece; el resto se apoya a la derecha.
+.ct-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 340px;
+
+  nx-icon,
+  i,
+  .ct-search__icon {
+    position: absolute;
+    left: 10px;
+    font-size: 13px;
+    color: var(--c-ink-3);
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px 0 30px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-ctl);
+    background: var(--c-surface);
+    font-family: var(--c-font);
+    font-size: 12.5px;
+    color: var(--c-ink);
+
+    &::placeholder { color: var(--c-ink-3); }
+
+    &:focus {
+      outline: none;
+      border-color: var(--c-border-strong);
+      box-shadow: var(--ring-accent);
+    }
+  }
+}
+
+// Segmentos con contador. El activo va con el acento negro, no con un color.
+.ct-segs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ct-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  background: var(--c-surface);
+  font-family: var(--c-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--c-ink-2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(.ct-seg--on) {
+    background: var(--c-surface-2);
+    border-color: var(--c-border-strong);
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--c-accent-soft);
+    font-family: var(--c-mono);
+    font-size: 10.5px;
+    font-weight: 650;
+    color: var(--c-ink-2);
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-danger);
+  }
+
+  &--on {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: var(--c-accent-on);
+    font-weight: 600;
+
+    .ct-seg__count { background: rgba(127, 127, 127, 0.35); color: var(--c-accent-on); }
+  }
+}
+
+// Control genérico (select, fecha, cualquier input de la toolbar).
+.ct-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  min-width: 0;
+  padding: 0 8px 0 11px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-ctl);
+  background: var(--c-surface);
+  font-size: 12.5px;
+  color: var(--c-ink);
+
+  &__label {
+    font-size: 11.5px;
+    color: var(--c-ink-3);
+    white-space: nowrap;
+  }
+
+  &:focus-within { border-color: var(--c-border-strong); }
+}
+
+// ── 5. Botones ──────────────────────────────────────────────────────────────
+.ct-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
+  font-family: var(--c-font);
+  font-size: 12.5px;
+  font-weight: 550;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:focus-visible { outline: none; box-shadow: var(--ring-accent); }
+
+  &--primary {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: var(--c-accent-on);
+
+    &:hover:not(:disabled) { background: var(--c-accent-ink); border-color: var(--c-accent-ink); }
+  }
+
+  &--ghost {
+    background: var(--c-surface);
+    border-color: var(--c-border);
+    color: var(--c-ink-2);
+
+    &:hover:not(:disabled) {
+      background: var(--c-surface-2);
+      border-color: var(--c-border-strong);
+      color: var(--c-ink);
+    }
+  }
+
+  &--danger {
+    background: var(--c-surface);
+    border-color: color-mix(in srgb, var(--c-danger) 40%, transparent);
+    color: var(--c-danger);
+
+    &:hover:not(:disabled) { background: var(--c-danger-soft); }
+  }
+
+  &--sm { height: 28px; padding: 0 10px; font-size: 11.5px; }
+}
+
+// ── 6. Badges ───────────────────────────────────────────────────────────────
+// El badge dice QUE FALTA HACER, no el nombre técnico del estado.
+.ct-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--c-accent-soft);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1;
+  color: var(--c-ink-2);
+  white-space: nowrap;
+
+  &--danger  { background: var(--c-danger-soft);  color: var(--c-danger); }
+  &--warn    { background: var(--c-warn-soft);    color: var(--c-warn); }
+  &--success { background: var(--c-success-soft); color: var(--c-success); }
+  &--sky     { background: var(--c-sky-soft);     color: var(--c-sky); }
+}
+
+// ── 7. Filas densas ─────────────────────────────────────────────────────────
+// Densidad de panel de escritorio: ~12px de padding vertical, tile de 32-36px,
+// número en mono a la derecha, acciones al final.
+.ct-tbl { display: block; }
+
+.ct-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--c-border);
+
+  &:first-child { border-top: 0; }
+  &:hover { background: var(--c-surface-2); }
+
+  &__tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-ctl);
+    background: var(--c-accent-soft);
+    font-family: var(--c-mono);
+    font-size: 11.5px;
+    font-weight: 650;
+    color: var(--c-ink-2);
+  }
+
+  &__main { min-width: 0; }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--c-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // La razón del número. Es el texto que el usuario no puede calcular de memoria.
+  &__why {
+    margin-top: 2px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--c-ink-2);
+
+    strong { color: var(--c-ink); font-weight: 600; }
+  }
+
+  &__amount {
+    font-family: var(--c-mono);
+    font-size: 13.5px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--c-ink);
+  }
+}
+
+// Encabezado de grupo: label mono + descripción de una línea + total a la derecha.
+.ct-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  border-top: 1px solid var(--c-border);
+  background: var(--c-surface-2);
+
+  &:first-child { border-top: 0; }
+
+  // El label y la descripción suelen venir envueltos en un `<div>` para que el
+  // total quede a la derecha. La separación entre ellos va por CSS y no por un
+  // espacio en el markup: Angular borra el texto que hay entre dos etiquetas y
+  // "JULIO 2026" y "5 pagos" salen pegados.
+  > div {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--c-ink);
+    white-space: nowrap;
+  }
+
+  &__hint {
+    min-width: 0;
+    font-size: 11.5px;
+    color: var(--c-ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__total {
+    margin-left: auto;
+    font-family: var(--c-mono);
+    font-size: 12px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-ink-2);
+  }
+}
+
+// Acción al final de la fila.
+.ct-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-ctl);
+  background: var(--c-surface);
+  font-family: var(--c-font);
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--c-ink-2);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--c-surface-2);
+    border-color: var(--c-border-strong);
+    color: var(--c-ink);
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── 8. Paginación ───────────────────────────────────────────────────────────
+.ct-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--c-border);
+  font-size: 11.5px;
+  color: var(--c-ink-3);
+
+  &__count {
+    margin-right: auto;
+    font-family: var(--c-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ── 9. Drawer lateral (detalle) ─────────────────────────────────────────────
+//
+// ⚠️ Los overlays de PrimeNG NO conocen estos z-index. Un `p-dropdown appendTo="body"`
+// dentro de un `.ct-drawer` o un `.ct-mo` abre su panel con z-index ~1001 (ZIndexUtils lo
+// escribe inline en el wrapper `<p-overlay>`), o sea POR DEBAJO del drawer (1201) y del modal
+// (1300): el panel se abre y no se ve, y el síntoma que reporta el usuario es "no me deja
+// elegir". Un `p-dialog` de PrimeNG no sufre esto porque participa de su propia pila de
+// z-index; estas capas son CSS estático y no.
+//
+// La pantalla que monte un drawer/modal `ct` con overlays adentro tiene que poner
+// `ct-layer-open` en el `<body>` mientras la capa está abierta (y sacarla al cerrar Y en
+// `ngOnDestroy`, o queda pegada afectando al resto de la app). Mismo patrón que
+// `body.blocked-scroll` del bottom-sheet mobile en `_responsive.scss`.
+body.ct-layer-open {
+  // `.p-overlay` es el que manda: en PrimeNG 17 dropdown/multiselect/autocomplete/cascadeselect
+  // envuelven el panel en `<p-overlay>`, que abre stacking context — elevar sólo el
+  // `.p-dropdown-panel` de adentro no sirve, un hijo no escapa del contexto de su padre.
+  // Calendar (`.p-datepicker`) y OverlayPanel (`.p-overlaypanel`) no usan `p-overlay`: ahí el
+  // z-index va en el elemento visible.
+  .p-overlay,
+  .p-dropdown-panel,
+  .p-multiselect-panel,
+  .p-autocomplete-panel,
+  .p-datepicker,
+  .p-overlaypanel {
+    z-index: 1400 !important;
+  }
+}
+
+.ct-drawer-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(16, 16, 20, 0.42);
+}
+
+.ct-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1201;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100vw);
+  background: var(--c-surface);
+  border-left: 1px solid var(--c-border);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--c-font);
+  color: var(--c-ink);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  &__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 20px;
+  }
+
+  &__foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid var(--c-border);
+  }
+}
+
+// ── 10. Modal centrado (confirmar) ──────────────────────────────────────────
+.ct-mo-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 16, 20, 0.42);
+}
+
+.ct-mo {
+  width: min(460px, 100%);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--c-font);
+  color: var(--c-ink);
+
+  &__body { padding: 20px 22px; }
+
+  &__title {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--c-ink-2);
+  }
+
+  &__foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 14px 22px;
+    border-top: 1px solid var(--c-border);
+  }
+}
+
+// ── 11. Estado vacío ────────────────────────────────────────────────────────
+.ct-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 20px;
+  text-align: center;
+
+  &__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+  }
+
+  &__text {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--c-ink-2);
+  }
+}
+
+// ── 12. Pestañas ────────────────────────────────────────────────────────────
+// La activa se marca con un SUBRAYADO negro, no con un fondo de color: el color
+// de relleno ya lo usa la banda y competirían. El contador va en mono porque es
+// un dato, y el punto naranja avisa "acá adentro falta algo" sin decir qué.
+.ct-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 6px;
+  overflow-x: auto;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  scrollbar-width: thin;
+}
+
+.ct-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  font-family: var(--c-font);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--c-ink-2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  nx-icon, i, svg { font-size: 13px; color: var(--c-ink-3); }
+
+  // El subrayado es un pseudo-elemento y no un border: así no mueve el texto
+  // 2px cuando la pestaña se activa.
+  &::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    left: 10px;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: transparent;
+  }
+
+  &:hover:not(.ct-tab--on) { color: var(--c-ink); }
+  &:focus-visible { outline: none; box-shadow: var(--ring-accent); border-radius: var(--r-ctl); }
+
+  &--on {
+    color: var(--c-ink);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+
+    nx-icon, i, svg { color: var(--c-ink); }
+    &::after { background: var(--c-accent); }
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--c-accent-soft);
+    font-family: var(--c-mono);
+    font-size: 10.5px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-ink-2);
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--c-warn);
+  }
+}
+
+// ── 13. Encabezado de sección ───────────────────────────────────────────────
+// Label mono + UNA frase que dice para qué sirve la sección + acciones a la
+// derecha. La frase no es decoración: es lo que evita que la sección sea un
+// título suelto que nadie sabe por qué está ahí.
+.ct-sec {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--c-border);
+
+  &--bare { border-bottom: 0; }
+
+  &__label {
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--c-ink);
+    white-space: nowrap;
+  }
+
+  &__hint {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--c-ink-3);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+}
+
+// ── 14. Ficha: label a la izquierda, dato mono a la derecha ─────────────────
+.ct-facts { display: block; }
+
+.ct-fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--c-border);
+
+  &:first-child { border-top: 0; }
+
+  &__label {
+    min-width: 0;
+    font-size: 12.5px;
+    color: var(--c-ink-2);
+  }
+
+  &__value {
+    min-width: 0;
+    font-family: var(--c-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--c-ink);
+    overflow-wrap: anywhere;
+  }
+
+  // Lo que falta se dice en naranja y con la razón, nunca con un guión mudo.
+  &--missing .ct-fact__value {
+    font-weight: 550;
+    color: var(--c-warn);
+  }
+}
+
+// Columnas de ficha DENTRO de una sola card, separadas por divisores.
+.ct-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  &--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  &__col {
+    min-width: 0;
+    padding: 14px 18px 16px;
+    border-left: 1px solid var(--c-border);
+
+    &:first-child { border-left: 0; }
+  }
+
+  &__title {
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--c-ink-3);
+  }
+}
+
+// ── 15. Franja de aviso ─────────────────────────────────────────────────────
+// Fondo suave y texto oscuro: el semántico dice QUE PASA, no pinta un bloque.
+.ct-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--c-warn-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--c-warn) 26%, var(--c-border));
+
+  &--last { border-bottom: 0; }
+
+  nx-icon, > i { flex: 0 0 auto; color: var(--c-warn); }
+
+  &__label {
+    font-family: var(--c-mono);
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--c-warn);
+    white-space: nowrap;
+  }
+
+  &__text {
+    flex: 1 1 240px;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--c-ink-2);
+
+    strong { color: var(--c-ink); font-weight: 600; }
+  }
+
+  &__actions { margin-left: auto; }
+
+  &--sky {
+    background: var(--c-sky-soft);
+    border-bottom-color: color-mix(in srgb, var(--c-sky) 26%, var(--c-border));
+
+    nx-icon, .ct-alert__label { color: var(--c-sky); }
+  }
+}
+
+// ── 16. Pie de card ─────────────────────────────────────────────────────────
+// La aclaración que evita la pregunta siguiente. Va abajo de todo y en chico.
+.ct-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--c-border);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+
+  nx-icon, > i { flex: 0 0 auto; margin-top: 1px; color: var(--c-ink-3); }
+  strong { color: var(--c-ink); font-weight: 600; }
+}
+
+// ── 17. Barra de proporción ─────────────────────────────────────────────────
+// Para comparar filas entre sí (semanas, meses). No lleva color semántico: sólo
+// dice "esta es más grande que aquella".
+.ct-bar {
+  position: relative;
+  height: 6px;
+  min-width: 0;
+  border-radius: 999px;
+  background: var(--c-accent-soft);
+  overflow: hidden;
+
+  &__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: var(--c-accent);
+  }
+}
+
+// ── Responsive ──────────────────────────────────────────────────────────────
+// Las pantallas chicas usan el MISMO vocabulario dentro del ancho reducido: no
+// hay un lenguaje aparte para el teléfono. Lo único que cambia es cómo se apila.
+@media (max-width: 1080px) {
+  .ct-band {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__side {
+      flex-wrap: wrap;
+      gap: 20px;
+      border-left: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+  }
+
+  .ct-stats {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    &__cell {
+      border-left: 1px solid var(--c-border);
+      border-top: 1px solid var(--c-border);
+
+      &:nth-child(odd) { border-left: 0; }
+      &:nth-child(-n + 2) { border-top: 0; }
+    }
+  }
+
+  .ct-cols {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__col {
+      border-left: 0;
+      border-top: 1px solid var(--c-border);
+
+      &:first-child { border-top: 0; }
+    }
+  }
+}
+
+// En el teléfono la tira apilada (una celda por fila) ocupaba la pantalla
+// entera. Pasa a tarjetas compactas como las de Productos (.nxm-stat): de a 2
+// por fila, y con más de 2 una tira horizontal que se arrastra con el dedo, a
+// sangre como los chips. ~2,3 tarjetas a la vista: la que asoma avisa que hay
+// más. Gemela de .nx-statband en _nx-pages. El Inicio la desactiva mientras
+// se reordenan las cifras (el arrastre de cdk necesita la grilla).
+@media (max-width: 767.98px) {
+  .ct-stats {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+
+    > .ct-stats__cell:only-child { grid-column: 1 / -1; }
+
+    &__cell {
+      padding: 13px 14px;
+      border: 0;
+      border-radius: var(--r-card-lg);
+      background: var(--c-surface);
+    }
+
+    &__label { font-size: 10px; }
+    &__value { font-size: 24px; }
+
+    &:has(> .ct-stats__cell:nth-child(3)) {
+      display: flex;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: 1rem;
+      // Cancela el gutter de .layout-main-container y lo devuelve como padding.
+      margin-inline: -1rem;
+      padding-inline: 1rem;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar { height: 0; width: 0; }
+
+      > .ct-stats__cell {
+        flex: 0 0 42%;
+        scroll-snap-align: start;
+      }
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .ct-search { max-width: none; flex-basis: 100%; }
+  .ct-row { grid-template-columns: 34px minmax(0, 1fr) auto; }
+}

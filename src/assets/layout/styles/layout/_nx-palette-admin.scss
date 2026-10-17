@@ -1,0 +1,372 @@
+// ============================================================================
+// NEXIVO ADMIN — paleta "azul noche / ámbar"
+// ============================================================================
+// Mismo sistema que management-app (tokens --c-* + vocabulario .ct-*), con una
+// paleta PROPIA para que el panel interno no se confunda con el del comerciante:
+//
+//   management-app → petróleo #04302a + lima #a9e861
+//   admin          → azul noche #0f2a47 + ámbar #ffb547
+//
+// Reglas (las mismas que la paleta lima):
+//   · ACCION = azul noche con texto blanco. El ámbar es HIGHLIGHT (ítem activo
+//     del menú, foco, kicker y botón dentro de la banda), nunca fondo de texto
+//     blanco: blanco sobre ámbar da 1.8:1.
+//   · Sobre ámbar / amarillo / hielo / cian / coral el texto va SIEMPRE en tinta.
+//   · Nada de morado/violeta/índigo.
+//   · Semánticos sólo para significado: coral = vencido/negativo, amarillo =
+//     atención, verde = cumplido, cian = informativo.
+//
+// Va ÚLTIMA (styles.scss): pisa por ORDEN los tokens de _nexivo-tokens,
+// _nx-design-system y _nx-ct sin tocarlos.
+// ============================================================================
+
+:root {
+  // ── Capa 0: la paleta cruda ───────────────────────────────────────────────
+  --nxa-ink: #0a1628;
+  --nxa-t2: #45546a;
+  --nxa-t3: #7f8ca0;
+
+  --nxa-bg: #edf0f5;
+  --nxa-navy: #0f2a47;
+  --nxa-navy-2: #17395e; // un escalón más claro: flyout, banda en modo noche
+  --nxa-navy-3: #21497a;
+
+  --nxa-amber: #ffb547;
+  --nxa-amber-d: #f2a12a;
+  --nxa-ice: #dde7f3;
+
+  --nxa-yellow: #f2c94c;
+  --nxa-cyan: #5cc8f2;
+  --nxa-coral: #f08a6c;
+  --nxa-green: #5fd394;
+
+  // Variantes LEGIBLES (texto o texto encima). Las planas no pasan 4.5:1.
+  --nxa-yellow-ink: #7a5800;
+  --nxa-cyan-ink: #0b5f8a;
+  --nxa-coral-ink: #a8361f;
+  --nxa-green-ink: #0f7a4f;
+
+  --nxa-yellow-soft: #fcf3d6;
+  --nxa-cyan-soft: #dcf0fa;
+  --nxa-coral-soft: #fbe7e1;
+  --nxa-green-soft: #dcf1e5;
+
+  // Bordes de tinta translúcida: la card se define por su línea.
+  --nxa-line: rgba(10, 22, 40, 0.14);
+  --nxa-line-2: rgba(10, 22, 40, 0.26);
+
+  // ── Forma ─────────────────────────────────────────────────────────────────
+  --r-card-lg: 16px;
+  --r-card: 14px;
+  --r-card-sm: 14px;
+  --r-pop: 14px;
+  --nx-radius-xl: 16px;
+  --nx-card-radius: 14px;
+}
+
+// ── Capa 1 + 2: los --nx-* y los alias del design system v2 ─────────────────
+
+:root,
+.layout-theme-light {
+  --nx-bg-ground: var(--nxa-bg);
+  --nx-bg-card: #ffffff;
+  --nx-bg-card-rgb: 255, 255, 255;
+  --nx-bg-elevated: #ffffff;
+
+  --nx-text-primary: var(--nxa-ink);
+  --nx-text-secondary: var(--nxa-t2);
+  --nx-text-muted: var(--nxa-t3);
+
+  --nx-border: var(--nxa-line);
+  --nx-border-rgb: 214, 219, 227;
+  --nx-border-subtle: rgba(10, 22, 40, 0.07);
+  --nx-card-border: var(--nxa-line);
+  --nx-table-border: var(--nxa-line);
+  --nx-table-header-bg: #f6f8fb;
+  --nx-table-row-hover: rgba(10, 22, 40, 0.03);
+
+  --nx-primary: var(--nxa-navy);
+  --nx-primary-hover: var(--nxa-ink);
+  --nx-primary-text: #ffffff;
+  --nx-primary-soft: var(--nxa-ice);
+
+  --nx-success: var(--nxa-green-ink);
+  --nx-success-soft: var(--nxa-green-soft);
+  --nx-warning: var(--nxa-yellow-ink);
+  --nx-warning-soft: var(--nxa-yellow-soft);
+  --nx-error: var(--nxa-coral-ink);
+  --nx-error-soft: var(--nxa-coral-soft);
+  --nx-info: var(--nxa-cyan-ink);
+  --nx-info-soft: var(--nxa-cyan-soft);
+
+  --nx-hover: rgba(10, 22, 40, 0.04);
+  --nx-active: rgba(10, 22, 40, 0.06);
+  --nx-focus: var(--nxa-navy);
+  --nx-focus-ring: 0 0 0 3px rgba(255, 181, 71, 0.55);
+
+  --nx-icon: var(--nxa-t2);
+  --nx-icon-hover: var(--nxa-ink);
+  --nx-icon-active: var(--nxa-ink);
+
+  --nx-card-shadow: 0 0 0 0 transparent;
+  --nx-shadow-card: 0 0 0 0 transparent;
+  --nx-shadow-sm: 0 1px 2px rgba(10, 22, 40, 0.06);
+  --nx-shadow-md: 0 4px 6px -1px rgba(10, 22, 40, 0.1), 0 2px 4px -2px rgba(10, 22, 40, 0.1);
+  --nx-shadow-lg: 0 10px 15px -3px rgba(10, 22, 40, 0.12), 0 4px 6px -4px rgba(10, 22, 40, 0.12);
+
+  // Acentos sueltos que consumen chips/íconos ya escritos: se reparten entre
+  // los semánticos y el azul noche. El "purple" deja de ser morado.
+  --nx-accent-blue: var(--nxa-navy);
+  --nx-accent-blue-soft: var(--nxa-ice);
+  --nx-accent-green: var(--nxa-green-ink);
+  --nx-accent-green-soft: var(--nxa-green-soft);
+  --nx-accent-orange: var(--nxa-yellow-ink);
+  --nx-accent-orange-soft: var(--nxa-yellow-soft);
+  --nx-accent-red: var(--nxa-coral-ink);
+  --nx-accent-red-soft: var(--nxa-coral-soft);
+  --nx-accent-purple: var(--nxa-navy-3);
+  --nx-accent-purple-soft: var(--nxa-ice);
+  --nx-accent-cyan: var(--nxa-cyan-ink);
+  --nx-accent-cyan-soft: var(--nxa-cyan-soft);
+  --nx-accent-pink: var(--nxa-coral-ink);
+  --nx-accent-pink-soft: var(--nxa-coral-soft);
+
+  // Índigo legacy: queda declarado porque lo leen reglas viejas, pero apunta
+  // al azul noche. Así ningún `var(--nx-indigo-*)` vuelve a pintar morado.
+  --nx-indigo-50: #f3f6fa;
+  --nx-indigo-100: var(--nxa-ice);
+  --nx-indigo-200: #b9cde2;
+  --nx-indigo-300: #8eaccb;
+  --nx-indigo-400: #5b84ad;
+  --nx-indigo-500: var(--nxa-navy);
+  --nx-indigo-600: var(--nxa-navy);
+  --nx-indigo-700: var(--nxa-ink);
+
+  // Alias del design system v2 (_nx-design-system.scss)
+  --bg: var(--nxa-bg);
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --border: var(--nxa-line);
+  --border-soft: rgba(10, 22, 40, 0.08);
+  --ink-900: var(--nxa-ink);
+  --ink-700: #23324a;
+  --ink-500: var(--nxa-t2);
+  --ink-400: var(--nxa-t3);
+  --ink-300: #b4bdca;
+  --primary: var(--nxa-navy);
+  --accent: var(--nxa-navy);
+  --accent-soft: var(--nxa-ice);
+  --accent-ink: var(--nxa-ink);
+  --success: var(--nxa-green-ink);
+  --success-soft: var(--nxa-green-soft);
+  --warning: var(--nxa-yellow-ink);
+  --warning-soft: var(--nxa-yellow-soft);
+  --danger: var(--nxa-coral-ink);
+  --danger-soft: var(--nxa-coral-soft);
+  --info: var(--nxa-cyan-ink);
+  --info-soft: var(--nxa-cyan-soft);
+
+  // Tipografía: una sola familia (Geist), igual que management-app.
+  --nx-font: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nx-font-mono: var(--c-mono);
+  --nx-font-feature: normal;
+}
+
+// ── Sidebar: la banda de marca. Azul noche en los DOS temas ─────────────────
+:root,
+.layout-theme-light,
+.layout-theme-dark {
+  --nx-sidebar-bg: var(--nxa-navy);
+  --nx-sidebar-flyout-bg: var(--nxa-navy-2);
+  --nx-sidebar-text: #b7c5d8;
+  --nx-sidebar-text-muted: #7f93ad;
+  --nx-sidebar-brand-text: #ffffff;
+  --nx-sidebar-item-hover: rgba(221, 231, 243, 0.08);
+  --nx-sidebar-item-active-bg: var(--nxa-amber);
+  --nx-sidebar-item-active-text: var(--nxa-ink);
+  --nx-sidebar-item-active-icon: var(--nxa-ink);
+  --nx-sidebar-item-active-shadow: none;
+  --nx-sidebar-active-icon-bg: transparent;
+  --nx-sidebar-section-text: #6f84a0;
+  --nx-sidebar-divider: rgba(221, 231, 243, 0.12);
+  --nx-sidebar-scrollbar-thumb: rgba(221, 231, 243, 0.18);
+  --nx-sidebar-scrollbar-hover: rgba(221, 231, 243, 0.3);
+}
+
+// ── Capa semántica de pantalla: los --c-* de _nx-ct.scss ────────────────────
+:root {
+  --c-font: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --c-surface-2: #f6f8fb;
+
+  --c-accent: var(--nxa-navy);
+  --c-accent-ink: var(--nxa-ink);
+  --c-accent-soft: var(--nxa-ice);
+  --c-accent-on: #ffffff;
+  --c-highlight: var(--nxa-amber);
+  --c-highlight-on: var(--nxa-ink);
+  --ring-accent: 0 0 0 3px rgba(255, 181, 71, 0.55);
+
+  --c-danger: var(--nxa-coral-ink);
+  --c-danger-soft: var(--nxa-coral-soft);
+  --c-warn: var(--nxa-yellow-ink);
+  --c-warn-soft: var(--nxa-yellow-soft);
+  --c-success: var(--nxa-green-ink);
+  --c-success-soft: var(--nxa-green-soft);
+  --c-sky: var(--nxa-cyan-ink);
+  --c-sky-soft: var(--nxa-cyan-soft);
+
+  --c-border-strong: rgba(10, 22, 40, 0.28);
+  --c-border-2: var(--nxa-line-2);
+
+  // Serie de gráficos: azul noche manda, el resto acompaña sin competir.
+  --c-chart-1: var(--nxa-navy);
+  --c-chart-2: var(--nxa-amber);
+  --c-chart-3: #5b84ad;
+  --c-chart-4: var(--nxa-green-ink);
+  --c-chart-5: var(--nxa-coral-ink);
+  --c-chart-6: var(--nxa-cyan-ink);
+  --c-chart-grid: rgba(10, 22, 40, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(10, 22, 40, 0.05);
+  --shadow-md: 0 8px 24px -8px rgba(10, 22, 40, 0.16), 0 2px 6px -2px rgba(10, 22, 40, 0.08);
+  --shadow-lg: 0 24px 48px -12px rgba(10, 22, 40, 0.28);
+  --shadow-card: 0 0 0 0 transparent;
+  --shadow-card-hover: 0 1px 2px rgba(10, 22, 40, 0.06), 0 40px 90px -50px rgba(10, 22, 40, 0.5);
+  --shadow-pop: 0 1px 2px rgba(10, 22, 40, 0.06), 0 28px 56px -22px rgba(10, 22, 40, 0.42);
+}
+
+// ── Banda de acción: azul noche, kicker ámbar ───────────────────────────────
+.ct-band { background: var(--nxa-navy); }
+.ct-band__label { color: var(--nxa-amber); }
+.ct-band__stat .ct-band__label { color: rgba(221, 231, 243, 0.6); }
+.ct-band__why { color: rgba(255, 255, 255, 0.68); }
+
+.ct-band .ct-btn--primary {
+  background: var(--nxa-amber);
+  border-color: var(--nxa-amber);
+  color: var(--nxa-ink);
+
+  &:hover:not(:disabled) {
+    background: var(--nxa-amber-d);
+    border-color: var(--nxa-amber-d);
+  }
+}
+
+.ct-band .ct-btn--ghost {
+  border-color: rgba(221, 231, 243, 0.3);
+
+  &:hover:not(:disabled) {
+    background: rgba(221, 231, 243, 0.12);
+    border-color: rgba(221, 231, 243, 0.5);
+  }
+}
+
+// ── Modo noche ──────────────────────────────────────────────────────────────
+// El acento se INVIERTE: de noche el ámbar es la acción y todo lo que va encima
+// va en tinta.
+.layout-theme-dark {
+  --nx-bg-ground: #070f1c;
+  --nx-bg-card: #0d1a2d;
+  --nx-bg-card-rgb: 13, 26, 45;
+  --nx-bg-elevated: #132540;
+
+  --nx-text-primary: #ffffff;
+  --nx-text-secondary: #a3b2c7;
+  --nx-text-muted: #6c7d95;
+
+  --nx-border: rgba(221, 231, 243, 0.12);
+  --nx-border-rgb: 32, 48, 72;
+  --nx-border-subtle: rgba(221, 231, 243, 0.07);
+  --nx-card-border: rgba(221, 231, 243, 0.12);
+  --nx-table-border: rgba(221, 231, 243, 0.1);
+  --nx-table-header-bg: #102038;
+  --nx-table-row-hover: rgba(221, 231, 243, 0.04);
+
+  --nx-primary: var(--nxa-amber);
+  --nx-primary-hover: var(--nxa-amber-d);
+  --nx-primary-text: var(--nxa-ink);
+  --nx-primary-soft: rgba(255, 181, 71, 0.14);
+
+  --nx-success: var(--nxa-green);
+  --nx-success-soft: rgba(95, 211, 148, 0.16);
+  --nx-warning: var(--nxa-yellow);
+  --nx-warning-soft: rgba(242, 201, 76, 0.16);
+  --nx-error: var(--nxa-coral);
+  --nx-error-soft: rgba(240, 138, 108, 0.16);
+  --nx-info: var(--nxa-cyan);
+  --nx-info-soft: rgba(92, 200, 242, 0.16);
+
+  --nx-hover: rgba(221, 231, 243, 0.06);
+  --nx-active: rgba(221, 231, 243, 0.09);
+  --nx-icon: #a3b2c7;
+  --nx-input-bg: #132540;
+  --nx-input-border: rgba(221, 231, 243, 0.2);
+
+  --nx-accent-blue: #8eaccb;
+  --nx-accent-blue-soft: rgba(142, 172, 203, 0.16);
+  --nx-accent-green: var(--nxa-green);
+  --nx-accent-green-soft: rgba(95, 211, 148, 0.16);
+  --nx-accent-orange: var(--nxa-yellow);
+  --nx-accent-orange-soft: rgba(242, 201, 76, 0.16);
+  --nx-accent-red: var(--nxa-coral);
+  --nx-accent-red-soft: rgba(240, 138, 108, 0.16);
+  --nx-accent-purple: #8eaccb;
+  --nx-accent-purple-soft: rgba(142, 172, 203, 0.16);
+  --nx-accent-cyan: var(--nxa-cyan);
+  --nx-accent-cyan-soft: rgba(92, 200, 242, 0.16);
+  --nx-accent-pink: var(--nxa-coral);
+  --nx-accent-pink-soft: rgba(240, 138, 108, 0.16);
+
+  --bg: #070f1c;
+  --surface: #0d1a2d;
+  --surface-2: #132540;
+  --border: rgba(221, 231, 243, 0.12);
+  --border-soft: rgba(221, 231, 243, 0.07);
+  --ink-900: #ffffff;
+  --ink-700: #d5deea;
+  --ink-500: #a3b2c7;
+  --ink-400: #6c7d95;
+  --ink-300: #46566e;
+  --primary: var(--nxa-amber);
+  --accent: var(--nxa-amber);
+  --accent-soft: rgba(255, 181, 71, 0.14);
+  --accent-ink: var(--nxa-amber);
+
+  // --c-*
+  --c-bg: var(--nx-bg-ground);
+  --c-surface: var(--nx-bg-card);
+  --c-surface-2: #132540;
+  --c-border: var(--nx-border);
+  --c-border-strong: rgba(221, 231, 243, 0.24);
+  --c-border-2: rgba(221, 231, 243, 0.18);
+  --c-ink: var(--nx-text-primary);
+  --c-ink-2: var(--nx-text-secondary);
+  --c-ink-3: var(--nx-text-muted);
+
+  --c-accent: var(--nxa-amber);
+  --c-accent-ink: var(--nxa-amber-d);
+  --c-accent-soft: rgba(255, 181, 71, 0.14);
+  --c-accent-on: var(--nxa-ink);
+  --ring-accent: 0 0 0 3px rgba(255, 181, 71, 0.5);
+
+  --c-danger: var(--nxa-coral);
+  --c-danger-soft: rgba(240, 138, 108, 0.16);
+  --c-warn: var(--nxa-yellow);
+  --c-warn-soft: rgba(242, 201, 76, 0.16);
+  --c-success: var(--nxa-green);
+  --c-success-soft: rgba(95, 211, 148, 0.16);
+  --c-sky: var(--nxa-cyan);
+  --c-sky-soft: rgba(92, 200, 242, 0.16);
+
+  --c-chart-1: #8eaccb;
+  --c-chart-2: var(--nxa-amber);
+  --c-chart-3: var(--nxa-cyan);
+  --c-chart-4: var(--nxa-green);
+  --c-chart-5: var(--nxa-coral);
+  --c-chart-6: #d5deea;
+  --c-chart-grid: rgba(221, 231, 243, 0.08);
+}
+
+// De noche el azul de la banda se pega al canvas: sube un escalón.
+.layout-theme-dark .ct-band { background: var(--nxa-navy-2); }

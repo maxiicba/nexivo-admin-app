@@ -1,200 +1,116 @@
 <p-toast></p-toast>
 
-<section class="nx-hero-section">
-  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
-  <div class="nx-hero-section__content">
-    <div class="nx-page-header nx-page-header--hero">
-      <div class="nx-page-header__left">
-        <div class="nx-page-header__icon nx-page-header__icon--hero"><i class="pi pi-chart-line"></i></div>
-        <div>
-          <span class="nx-page-kicker">Nexivo Turnos</span>
-          <h2 class="nx-page-header__title m-0">Métricas</h2>
-          <p class="nx-page-header__subtitle m-0">MRR, churn, conversión y desglose por plan</p>
+<div class="ct">
+  <!-- 1. Header de una línea -->
+  <header class="nx-page-header">
+    <div class="nx-page-header__left">
+      <div class="nx-page-header__icon"><i class="pi pi-chart-line"></i></div>
+      <div>
+        <h1 class="nx-page-header__title">Métricas</h1>
+        <p class="nx-page-header__subtitle">Nexivo Turnos · MRR, churn, conversión y desglose por plan</p>
+      </div>
+    </div>
+    <div class="nx-page-header__actions">
+      <p-dropdown [options]="rangeOptions" [(ngModel)]="rangeMonths" optionLabel="label" optionValue="value"
+                  (onChange)="onRangeChange()" appendTo="body" styleClass="tm-range"></p-dropdown>
+      <button pButton label="Exportar CSV" icon="pi pi-download" class="p-button-outlined" (click)="exportCsv()"></button>
+    </div>
+  </header>
+
+  <ng-container *ngIf="loading">
+    <p-skeleton height="118px" borderRadius="14px"></p-skeleton>
+    <p-skeleton height="104px" borderRadius="14px"></p-skeleton>
+  </ng-container>
+
+  <div *ngIf="!loading && metrics?.noData" class="ct-card">
+    <div class="ct-empty">
+      <p class="ct-empty__title">Sin datos suficientes en este rango</p>
+      <p class="ct-empty__text">Probá con un rango más largo: las métricas necesitan al menos un mes con suscripciones cobradas.</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!loading && metrics && !metrics.noData">
+    <!-- 2. Banda de acción -->
+    <section class="ct-band">
+      <div class="ct-band__main">
+        <span class="ct-band__label">MRR del último mes</span>
+        <div class="ct-band__figure">{{ formatCompact(latestValue('mrrMonthly')) }}</div>
+        <p class="ct-band__why">{{ bandWhy }}</p>
+      </div>
+      <div class="ct-band__side">
+        <div class="ct-band__stat">
+          <span class="ct-band__label">ARR</span>
+          <b class="ct-band__statv">{{ formatCompact(latestValue('mrrMonthly') * 12) }}</b>
+        </div>
+        <div class="ct-band__stat">
+          <span class="ct-band__label">Churn</span>
+          <b class="ct-band__statv">{{ formatPercent(latestValue('churnMonthly')) }}</b>
+        </div>
+        <div class="ct-band__stat">
+          <span class="ct-band__label">Rango</span>
+          <b class="ct-band__statv">{{ rangeMonths }} meses</b>
         </div>
       </div>
-      <div class="nx-page-header__actions">
-        <p-dropdown [options]="rangeOptions" [(ngModel)]="rangeMonths" optionLabel="label" optionValue="value"
-                    (onChange)="onRangeChange()" appendTo="body" [style]="{minWidth: '200px'}"></p-dropdown>
-        <button pButton label="Exportar CSV" icon="pi pi-download" class="nx-btn-ghost" (click)="exportCsv()"></button>
+    </section>
+
+    <!-- 3. Tira de KPIs con variación real y sparkline -->
+    <section class="ct-stats">
+      <div class="ct-stats__cell" *ngFor="let k of kpis"
+           [class.ct-stats__cell--success]="k.good === true"
+           [class.tm-cell--bad]="k.good === false">
+        <div class="ct-stats__head">
+          <span class="ct-stats__dot"></span>
+          <span class="ct-stats__label">{{ k.label }}</span>
+          <span class="tm-delta" *ngIf="k.delta"
+                [class.tm-delta--good]="k.good"
+                [class.tm-delta--bad]="k.good === false">{{ k.delta }}</span>
+        </div>
+        <div class="ct-stats__value">{{ k.value }}</div>
+        <div class="ct-stats__foot">{{ k.delta ? 'vs. mes anterior · ' : '' }}{{ k.foot }}</div>
+        <svg *ngIf="k.spark" class="tm-spark" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+          <path [attr.d]="k.spark" />
+        </svg>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- Top KPIs -->
-<div class="nx-metrics-kpis" *ngIf="metrics && !metrics.noData">
-  <div class="nx-metric-card">
-    <div class="nx-metric-card__head">
-      <div class="nx-metric-card__title">MRR</div>
-      <div class="nx-metric-card__sub">Ingreso recurrente</div>
-    </div>
-    <div class="nx-metric-card__row">
-      <div class="nx-metric-card__value">{{ formatCompact(latestValue('mrrMonthly')) }}</div>
-      <div class="nx-metric-card__delta nx-metric-card__delta--up">+8.2%</div>
-    </div>
-    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
-          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
-            fill="url(#sparkGrad)"/>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
-            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-    </svg>
-  </div>
+    <!-- 4. Gráficos -->
+    <div class="tm-grid">
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">MRR mensual</span><span class="ct-sec__hint">Ingreso recurrente cobrado cada mes, en ARS</span></div>
+        <div class="tm-chart"><p-chart type="line" [data]="mrrChart" [options]="baseOptions"></p-chart></div>
+      </section>
 
-  <div class="nx-metric-card">
-    <div class="nx-metric-card__head">
-      <div class="nx-metric-card__title">ARR</div>
-      <div class="nx-metric-card__sub">Anualizado</div>
-    </div>
-    <div class="nx-metric-card__row">
-      <div class="nx-metric-card__value">{{ formatCompact(latestValue('mrrMonthly') * 12) }}</div>
-      <div class="nx-metric-card__delta nx-metric-card__delta--up">+12%</div>
-    </div>
-    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
-          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
-            fill="url(#sparkGrad)"/>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
-            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-    </svg>
-  </div>
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">Nuevas suscripciones</span><span class="ct-sec__hint">Altas por mes, antes de descontar bajas</span></div>
+        <div class="tm-chart"><p-chart type="bar" [data]="newSubsChart" [options]="barOptions"></p-chart></div>
+      </section>
 
-  <div class="nx-metric-card">
-    <div class="nx-metric-card__head">
-      <div class="nx-metric-card__title">Churn</div>
-      <div class="nx-metric-card__sub">Mensual</div>
-    </div>
-    <div class="nx-metric-card__row">
-      <div class="nx-metric-card__value">{{ formatPercent(latestValue('churnMonthly')) }}</div>
-      <div class="nx-metric-card__delta nx-metric-card__delta--down">-0.4pp</div>
-    </div>
-    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
-          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
-            fill="url(#sparkGrad)"/>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
-            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-    </svg>
-  </div>
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">Churn mensual</span><span class="ct-sec__hint">Porcentaje de suscripciones que se dieron de baja</span></div>
+        <div class="tm-chart"><p-chart type="line" [data]="churnChart" [options]="baseOptions"></p-chart></div>
+      </section>
 
-  <div class="nx-metric-card">
-    <div class="nx-metric-card__head">
-      <div class="nx-metric-card__title">Conversión trial</div>
-      <div class="nx-metric-card__sub">Trial → activa</div>
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">Conversión trial → activa</span><span class="ct-sec__hint">Pruebas que terminaron pagando</span></div>
+        <div class="tm-chart"><p-chart type="bar" [data]="conversionChart" [options]="barOptions"></p-chart></div>
+      </section>
     </div>
-    <div class="nx-metric-card__row">
-      <div class="nx-metric-card__value">{{ formatPercent(latestValue('trialConversionMonthly')) }}</div>
-      <div class="nx-metric-card__delta nx-metric-card__delta--up">+5pp</div>
+
+    <div class="tm-grid tm-grid--1-2">
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">Distribución por plan</span><span class="ct-sec__hint">Suscripciones vigentes</span></div>
+        <div class="tm-chart tm-chart--tall"><p-chart type="doughnut" [data]="planDistChart" [options]="pieOptions"></p-chart></div>
+      </section>
+
+      <section class="ct-card">
+        <div class="ct-sec"><span class="ct-sec__label">MRR por plan</span><span class="ct-sec__hint">Qué plan sostiene el ingreso de cada mes</span></div>
+        <div class="tm-chart tm-chart--tall"><p-chart type="bar" [data]="mrrByPlanChart" [options]="stackedBarOptions"></p-chart></div>
+      </section>
     </div>
-    <svg class="nx-metric-card__spark-svg" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.32"/>
-          <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12 L200,40 L0,40 Z"
-            fill="url(#sparkGrad)"/>
-      <path d="M0,32 L20,26 L40,28 L60,18 L80,22 L100,14 L120,18 L140,10 L160,14 L180,8 L200,12"
-            fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-    </svg>
-  </div>
+
+    <section class="ct-card">
+      <div class="ct-sec"><span class="ct-sec__label">LTV por plan</span><span class="ct-sec__hint">Lo que deja en promedio una suscripción de cada plan en toda su vida, en ARS</span></div>
+      <div class="tm-chart"><p-chart type="bar" [data]="ltvByPlanChart" [options]="barOptions"></p-chart></div>
+    </section>
+  </ng-container>
 </div>
-
-<div *ngIf="loading" class="card p-6 text-center">
-  <i class="pi pi-spin pi-spinner text-2xl"></i>
-</div>
-
-<div *ngIf="!loading && metrics?.noData" class="card p-6 text-center text-color-secondary">
-  <i class="pi pi-info-circle text-2xl mb-2 block"></i>
-  Sin datos suficientes en este rango.
-</div>
-
-<ng-container *ngIf="!loading && metrics && !metrics.noData">
-  <div class="grid">
-    <!-- MRR -->
-    <div class="col-12 lg:col-6">
-      <div class="card h-full">
-        <h4 class="mt-0">MRR mensual</h4>
-        <div style="height: 280px;">
-          <p-chart type="line" [data]="mrrChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- Nuevas subs -->
-    <div class="col-12 lg:col-6">
-      <div class="card h-full">
-        <h4 class="mt-0">Nuevas suscripciones</h4>
-        <div style="height: 280px;">
-          <p-chart type="bar" [data]="newSubsChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- Churn -->
-    <div class="col-12 lg:col-6">
-      <div class="card h-full">
-        <h4 class="mt-0">Churn % mensual</h4>
-        <div style="height: 280px;">
-          <p-chart type="line" [data]="churnChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- Conversion -->
-    <div class="col-12 lg:col-6">
-      <div class="card h-full">
-        <h4 class="mt-0">Conversión trial → active</h4>
-        <div style="height: 280px;">
-          <p-chart type="bar" [data]="conversionChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- Plan distribution -->
-    <div class="col-12 lg:col-4">
-      <div class="card h-full">
-        <h4 class="mt-0">Distribución por plan</h4>
-        <div style="height: 320px;">
-          <p-chart type="pie" [data]="planDistChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- MRR por plan stacked -->
-    <div class="col-12 lg:col-8">
-      <div class="card h-full">
-        <h4 class="mt-0">MRR por plan</h4>
-        <div style="height: 320px;">
-          <p-chart type="bar" [data]="mrrByPlanChart" [options]="stackedBarOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-
-    <!-- LTV por plan -->
-    <div class="col-12">
-      <div class="card">
-        <h4 class="mt-0">LTV por plan (ARS)</h4>
-        <div style="height: 280px;">
-          <p-chart type="bar" [data]="ltvByPlanChart" [options]="baseOptions"></p-chart>
-        </div>
-      </div>
-    </div>
-  </div>
-</ng-container>

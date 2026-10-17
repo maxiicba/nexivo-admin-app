@@ -21,7 +21,7 @@
 
   // Accent
   --primary:     #15171A;
-  --accent:      #4F46E5;
+  --accent:      var(--c-accent);
   --accent-soft: #EEEBFF;
   --accent-ink:  #3B30C2;
 
@@ -460,7 +460,7 @@ i[class*="pi-"] { font-size: 0.92rem; line-height: 1; }
   border-radius: 999px;
 
   .topbar-avatar {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%) !important;
+    background: linear-gradient(135deg, var(--c-accent) 0%, var(--nxa-navy-3) 50%, var(--nxa-coral-ink) 100%) !important;
     color: #fff;
     font-weight: 700;
   }

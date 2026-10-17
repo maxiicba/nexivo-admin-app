@@ -239,7 +239,7 @@
         </textarea>
         <button pButton icon="pi pi-send" class="p-button-rounded" [disabled]="!newMessage.trim()" (click)="sendMessage()"></button>
         <span class="char-counter" *ngIf="newMessage.trim().length > 1500"
-          [style.color]="newMessage.trim().length > 1800 ? '#ef4444' : '#94a3b8'"
+          [style.color]="newMessage.trim().length > 1800 ? 'var(--c-danger)' : 'var(--c-ink-3)'"
           [style.font-size]="'0.75rem'">
           {{ newMessage.trim().length }}/2000
         </span>

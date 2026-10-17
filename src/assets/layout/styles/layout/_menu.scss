@@ -52,7 +52,7 @@
     min-height: $topbarHeight;
     border-bottom: 1px solid var(--nx-sidebar-divider);
     flex-shrink: 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), transparent 60%);
+    background: linear-gradient(135deg, rgba(15, 42, 71, 0.06), transparent 60%);
 
     .sidebar-logo {
         width: 32px;
@@ -64,7 +64,7 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        box-shadow: 0 4px 12px rgba(15, 42, 71, 0.25);
 
         svg {
             width: 32px;
@@ -243,8 +243,8 @@
         font-size: 10px;
         padding: 2px 6px;
         border-radius: 4px;
-        background: rgba(139, 92, 246, 0.15);
-        color: #a78bfa;
+        background: rgba(15, 42, 71, 0.15);
+        color: #8eaccb;
         white-space: nowrap;
 
         &--simple {
@@ -302,7 +302,7 @@
     gap: 0.5rem;
     background: none;
     border: none;
-    color: var(--nx-accent-purple, #6366f1);
+    color: var(--nx-accent-purple, var(--c-accent));
     cursor: pointer;
     font-size: 0.8rem;
     font-family: inherit;
@@ -312,7 +312,7 @@
     transition: background 0.2s;
 
     &:hover {
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(15, 42, 71, 0.1);
     }
 
     .reactivate-nexia-icon {

@@ -1,0 +1,50 @@
+// Panel Admin: extensión delgada del base .ct-* (no declara colores propios).
+
+// Barra apilada de estados: cada tramo es un semántico.
+.pa-dist {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin: 8px 0 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--c-accent-soft);
+
+  &__seg {
+    flex: 0 0 0;
+    min-width: 0;
+
+    &--success { background: var(--c-success); }
+    &--sky     { background: var(--c-sky); }
+    &--warn    { background: var(--c-warn); }
+    &--danger  { background: var(--c-danger); }
+    &--muted   { background: var(--c-ink-3); }
+  }
+}
+
+.pa-dash .ct-fact__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pa-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+
+  &--success { background: var(--c-success); }
+  &--sky     { background: var(--c-sky); }
+  &--warn    { background: var(--c-warn); }
+  &--danger  { background: var(--c-danger); }
+  &--muted   { background: var(--c-ink-3); }
+}
+
+.pa-pct {
+  display: inline-block;
+  min-width: 38px;
+  margin-left: 8px;
+  font-weight: 500;
+  color: var(--c-ink-3);
+}

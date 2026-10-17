@@ -3,10 +3,10 @@
   --nx-surface:       var(--surface);
   --nx-border:        var(--border);
   --nx-border-soft:   var(--border-soft);
-  --nx-text:          var(--ink-900);
+  --nx-text:          var(--c-ink);
   --nx-text-secondary: var(--ink-500);
   --nx-text-muted:    var(--ink-400);
-  --nx-primary:       var(--ink-900);
+  --nx-primary:       var(--c-ink);
   --nx-radius:        var(--r-card);
   --nx-shadow-card:   var(--shadow-sm);
 }
@@ -32,7 +32,7 @@
     height: 36px;
     border-radius: 10px;
     border: 1px solid var(--nx-border);
-    background: #ffffff;
+    background: var(--c-surface);
     color: var(--nx-text);
     display: inline-flex;
     align-items: center;
@@ -42,7 +42,7 @@
     flex-shrink: 0;
 
     .pi { font-size: 0.9rem; }
-    &:hover { background: #f8fafc; border-color: #cbd5e1; }
+    &:hover { background: var(--c-surface-2); border-color: var(--c-border-strong); }
   }
 
   &__info {
@@ -108,18 +108,18 @@
     flex-shrink: 0;
   }
 
-  &--active     { background: #d1fae5; color: #047857; }
-  &--trialing   { background: #dbeafe; color: #1d4ed8; }
-  &--past_due   { background: #ffedd5; color: #c2410c; }
-  &--suspended  { background: #fee2e2; color: #b91c1c; }
-  &--cancelled  { background: #f1f5f9; color: #475569; }
+  &--active     { background: var(--c-success-soft); color: var(--c-success); }
+  &--trialing   { background: var(--c-sky-soft); color: var(--c-sky); }
+  &--past_due   { background: var(--c-warn-soft); color: var(--c-warn); }
+  &--suspended  { background: var(--c-danger-soft); color: var(--c-danger); }
+  &--cancelled  { background: var(--c-surface-2); color: var(--c-ink-2); }
 }
 
 // ── Ghost / Pill buttons reused ──────────────────────────────────────────────
 ::ng-deep .nx-btn-ghost.p-button {
-  background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
+  background: var(--c-surface);
+  color: var(--c-accent);
+  border: 1px solid var(--c-border);
   border-radius: 10px;
   height: 38px;
   padding: 0 0.95rem;
@@ -128,25 +128,25 @@
   box-shadow: none;
   transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
 
-  .p-button-icon { color: #64748b; font-size: 0.78rem; }
+  .p-button-icon { color: var(--c-ink-3); font-size: 0.78rem; }
 
-  &:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
+  &:hover:not(:disabled) { background: var(--c-surface-2); border-color: var(--c-border-strong); }
 }
 
 ::ng-deep .nx-btn-ghost--success.p-button {
-  color: #047857;
-  border-color: #a7f3d0;
-  background: #ecfdf5;
-  .p-button-icon { color: #047857; }
-  &:hover:not(:disabled) { background: #d1fae5; border-color: #6ee7b7; }
+  color: var(--c-success);
+  border-color: var(--c-success);
+  background: var(--c-success-soft);
+  .p-button-icon { color: var(--c-success); }
+  &:hover:not(:disabled) { background: var(--c-success-soft); border-color: var(--c-success); }
 }
 
 ::ng-deep .nx-btn-ghost--danger.p-button {
-  color: #b91c1c;
-  border-color: #fecaca;
-  background: #fef2f2;
-  .p-button-icon { color: #b91c1c; }
-  &:hover:not(:disabled) { background: #fee2e2; border-color: #fca5a5; }
+  color: var(--c-danger);
+  border-color: var(--c-danger);
+  background: var(--c-danger-soft);
+  .p-button-icon { color: var(--c-danger); }
+  &:hover:not(:disabled) { background: var(--c-danger-soft); border-color: var(--c-danger); }
 }
 
 // ── TabView underline style ──────────────────────────────────────────────────
@@ -175,7 +175,7 @@
   .p-tabview-nav li.p-highlight .p-tabview-nav-link {
     color: var(--nx-text);
     font-weight: 700;
-    border-bottom-color: #0f172a;
+    border-bottom-color: var(--c-accent);
   }
 
   .p-tabview-panels {
@@ -233,7 +233,7 @@
   box-shadow: var(--nx-shadow-card);
   transition: border-color 140ms ease;
 
-  &:hover { border-color: #cbd5e1; }
+  &:hover { border-color: var(--c-border-strong); }
 
   &__icon {
     width: 38px;
@@ -245,11 +245,11 @@
     flex-shrink: 0;
     font-size: 1rem;
 
-    &--success { background: #d1fae5; color: #047857; }
-    &--warning { background: #fef3c7; color: #b45309; }
-    &--danger  { background: #fee2e2; color: #b91c1c; }
-    &--info    { background: #dbeafe; color: #1d4ed8; }
-    &--neutral { background: #f1f5f9; color: #475569; }
+    &--success { background: var(--c-success-soft); color: var(--c-success); }
+    &--warning { background: var(--c-warn-soft); color: var(--c-warn); }
+    &--danger  { background: var(--c-danger-soft); color: var(--c-danger); }
+    &--info    { background: var(--c-sky-soft); color: var(--c-sky); }
+    &--neutral { background: var(--c-surface-2); color: var(--c-ink-2); }
   }
 
   &__body { flex: 1; min-width: 0; }
@@ -297,25 +297,25 @@
   gap: 5px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--c-surface-2);
+  color: var(--c-ink-2);
   font-weight: 500;
   font-size: 0.72rem;
 
   &__dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: #10b981;
+    background: var(--c-success);
   }
 }
 
 .nx-mini-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--c-mono); font-variant-numeric: tabular-nums;
   font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 4px;
-  background: #f8fafc;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: var(--c-surface-2);
+  color: var(--c-ink-2);
+  border: 1px solid var(--c-border);
 }
 
 .nx-audit-meta {
@@ -323,7 +323,7 @@
 
   summary {
     cursor: pointer;
-    color: #6366f1;
+    color: var(--c-accent);
     font-size: 0.72rem;
     font-weight: 600;
     list-style: none;
@@ -338,7 +338,7 @@
 
   pre {
     margin-top: 6px;
-    background: #f8fafc;
+    background: var(--c-surface-2);
     border: 1px solid var(--nx-border);
     border-radius: 8px;
     padding: 0.65rem 0.8rem;
@@ -351,7 +351,7 @@
 ::ng-deep .nx-dialog--credit {
   .nx-credit-head {
     display: flex; flex-direction: column; gap: 4px;
-    &__title { font-size: 17px; font-weight: 700; color: var(--ink-900); letter-spacing: -0.01em; }
+    &__title { font-size: 17px; font-weight: 700; color: var(--c-ink); letter-spacing: -0.01em; }
     &__sub   { font-size: 12.5px; color: var(--ink-500); }
   }
 
@@ -411,18 +411,18 @@
     transition: all 140ms ease;
   }
 
-  &__head { font-size: 13.5px; font-weight: 600; color: var(--ink-900); }
+  &__head { font-size: 13.5px; font-weight: 600; color: var(--c-ink); }
   &__sub  { font-size: 11.5px; color: var(--ink-500); }
 
   &:hover { border-color: var(--ink-300); background: var(--surface-2); }
 
   &.is-selected {
-    border-color: var(--ink-900);
+    border-color: var(--c-ink);
     background: var(--surface);
 
     .nx-radio-card__dot {
-      border-color: var(--ink-900);
-      background: radial-gradient(circle, var(--ink-900) 38%, var(--surface) 42%);
+      border-color: var(--c-ink);
+      background: var(--c-accent);
     }
   }
 }

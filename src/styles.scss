@@ -2,6 +2,11 @@
 @import "primeicons/primeicons.css";
 @import "primeflex/primeflex.css";
 @import "assets/layout/styles/layout/nx-design-system";
+// Estilo de management-app: base .ct-* + paleta propia del admin + skin sobre
+// el markup existente. VAN ÚLTIMOS: pisan por orden los tokens y reglas viejas.
+@import "assets/layout/styles/layout/nx-ct";
+@import "assets/layout/styles/layout/nx-palette-admin";
+@import "assets/layout/styles/layout/nx-admin-skin";
 
 // FIX TEMBLOR DE LA PAGINA + scroll horizontal por tooltips de PrimeNG.
 // El tooltip se monta en <body> con position: absolute y coords absolutas;
@@ -27,9 +32,9 @@ body {
 .p-dialog.nx-dialog {
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.30);
+  box-shadow: 0 25px 60px -15px rgba(10, 22, 40, 0.30);
   border: 0;
-  background: #ffffff;
+  background: var(--c-surface);
   // ── Dialog scrollea internamente cuando el contenido pasa del viewport ──
   max-height: 90vh;
   display: flex !important;
@@ -38,7 +43,7 @@ body {
   // ── Header limpio sin border-bottom ───────────────────────────────────────
   .p-dialog-header {
     padding: 1.5rem 1.6rem 1rem;
-    background: #ffffff;
+    background: var(--c-surface);
     border-bottom: 0;
     display: flex;
     align-items: center;
@@ -47,7 +52,7 @@ body {
     .p-dialog-title {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--c-ink);
       letter-spacing: -0.01em;
       line-height: 1.3;
     }
@@ -56,13 +61,13 @@ body {
       width: 34px;
       height: 34px;
       border-radius: 10px;
-      color: #64748b;
+      color: var(--c-ink-2);
       transition: background 140ms ease, color 140ms ease;
       box-shadow: none;
 
       &:hover {
-        background: #f1f5f9;
-        color: #0f172a;
+        background: var(--c-surface-2);
+        color: var(--c-ink);
       }
       &:focus { box-shadow: none; outline: none; }
     }
@@ -71,7 +76,7 @@ body {
   // ── Content ───────────────────────────────────────────────────────────────
   .p-dialog-content {
     padding: 0.25rem 1.6rem 0.5rem;
-    background: #ffffff;
+    background: var(--c-surface);
     overflow-y: auto;
     overflow-x: visible;
     flex: 1 1 auto;
@@ -83,7 +88,7 @@ body {
       display: block;
       font-size: 0.88rem;
       font-weight: 500;
-      color: #475569;
+      color: var(--c-ink-2);
       margin-bottom: 0.45rem;
       text-transform: none;
       letter-spacing: 0;
@@ -95,23 +100,23 @@ body {
       width: 100%;
       height: 46px;
       border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      background: #ffffff;
+      border: 1px solid var(--c-border);
+      background: var(--c-surface);
       font-size: 0.94rem;
-      color: #0f172a;
+      color: var(--c-ink);
       padding: 0 1rem;
       box-sizing: border-box;
       transition: border-color 120ms ease, box-shadow 120ms ease;
       box-shadow: none;
 
-      &::placeholder { color: #94a3b8; }
+      &::placeholder { color: var(--c-ink-3); }
 
-      &:hover:not(:disabled) { border-color: #cbd5e1; }
+      &:hover:not(:disabled) { border-color: var(--c-border-strong); }
 
       &:focus {
         outline: none;
-        border-color: #465fff;
-        box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+        border-color: var(--c-accent);
+        box-shadow: var(--ring-accent);
       }
     }
 
@@ -128,20 +133,20 @@ body {
       width: 100%;
       height: 46px;
       border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      background: #ffffff;
+      border: 1px solid var(--c-border);
+      background: var(--c-surface);
       display: flex;
       align-items: center;
       transition: border-color 120ms ease, box-shadow 120ms ease;
       box-shadow: none;
       padding: 0;
 
-      &:not(.p-disabled):hover { border-color: #cbd5e1; }
+      &:not(.p-disabled):hover { border-color: var(--c-border-strong); }
 
       &.p-focus {
         outline: none;
-        border-color: #465fff;
-        box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+        border-color: var(--c-accent);
+        box-shadow: var(--ring-accent);
       }
 
       // El label hereda .p-inputtext — hay que neutralizar SU borde, focus, height
@@ -152,7 +157,7 @@ body {
         padding: 0 0 0 1rem;
         display: flex;
         align-items: center;
-        color: #0f172a;
+        color: var(--c-ink);
         font-size: 0.94rem;
         background: transparent !important;
         border: 0 !important;
@@ -162,7 +167,7 @@ body {
         height: 100%;
         line-height: 1;
 
-        &.p-placeholder { color: #94a3b8; }
+        &.p-placeholder { color: var(--c-ink-3); }
 
         &:focus,
         &:hover { border: 0 !important; box-shadow: none !important; }
@@ -171,7 +176,7 @@ body {
       .p-dropdown-trigger {
         width: 44px;
         background: transparent;
-        color: #64748b;
+        color: var(--c-ink-2);
         border: 0;
         flex-shrink: 0;
 
@@ -180,7 +185,7 @@ body {
 
       .p-dropdown-clear-icon {
         right: 2.6rem;
-        color: #94a3b8;
+        color: var(--c-ink-3);
       }
     }
 
@@ -193,19 +198,19 @@ body {
         width: 100%;
         height: 46px;
         border-radius: 12px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--c-border);
         padding: 0 1rem;
         font-size: 0.94rem;
-        color: #0f172a;
+        color: var(--c-ink);
         box-sizing: border-box;
         transition: border-color 120ms ease, box-shadow 120ms ease;
         box-shadow: none;
 
-        &:hover { border-color: #cbd5e1; }
+        &:hover { border-color: var(--c-border-strong); }
         &:focus {
           outline: none;
-          border-color: #465fff;
-          box-shadow: 0 0 0 4px rgba(70, 95, 255, 0.12);
+          border-color: var(--c-accent);
+          box-shadow: var(--ring-accent);
         }
       }
 
@@ -216,12 +221,12 @@ body {
       }
       .p-inputnumber-button-group {
         .p-inputnumber-button {
-          background: #f8fafc;
-          color: #64748b;
-          border: 1px solid #e2e8f0;
+          background: var(--c-surface-2);
+          color: var(--c-ink-2);
+          border: 1px solid var(--c-border);
           width: 36px;
 
-          &:hover { background: #f1f5f9; color: #0f172a; }
+          &:hover { background: var(--c-surface-2); color: var(--c-ink); }
           &.p-inputnumber-button-up { border-top-right-radius: 12px; border-bottom: 0; }
           &.p-inputnumber-button-down { border-bottom-right-radius: 12px; }
         }
@@ -234,7 +239,7 @@ body {
     .nx-form-hint,
     .text-xs.text-color-secondary {
       font-size: 0.78rem;
-      color: #64748b;
+      color: var(--c-ink-2);
       margin-top: 0.35rem;
     }
   }
@@ -242,8 +247,8 @@ body {
   // ── Footer ────────────────────────────────────────────────────────────────
   .p-dialog-footer {
     padding: 1.25rem 1.6rem 1.5rem;
-    background: #ffffff;
-    border-top: 1px solid #f1f5f9;
+    background: var(--c-surface);
+    border-top: 1px solid var(--c-surface-2);
     flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
@@ -253,7 +258,7 @@ body {
     // Cancel / Volver — ghost
     .p-button.p-button-text {
       background: transparent;
-      color: #64748b;
+      color: var(--c-ink-2);
       border: 0;
       font-weight: 600;
       padding: 0 1.1rem;
@@ -261,88 +266,88 @@ body {
       height: 44px;
       box-shadow: none;
 
-      &:hover { background: #f1f5f9; color: #0f172a; }
+      &:hover { background: var(--c-surface-2); color: var(--c-ink); }
       &:focus { box-shadow: none; }
     }
 
     // Primario / Save / Aplicar — sólido oscuro (TailAdmin style)
     .p-button:not(.p-button-text):not(.p-button-danger):not(.p-button-warning):not(.p-button-secondary):not(.p-button-outlined) {
-      background: #1c2434;
-      color: #ffffff;
-      border: 1px solid #1c2434;
+      background: var(--c-accent);
+      color: var(--c-accent-on);
+      border: 1px solid var(--c-accent);
       font-weight: 600;
       padding: 0 1.5rem;
       border-radius: 10px;
       height: 44px;
       box-shadow: none;
 
-      &:hover:not(:disabled) { background: #0f172a; border-color: #0f172a; }
-      &:focus { box-shadow: 0 0 0 4px rgba(28, 36, 52, 0.18); }
+      &:hover:not(:disabled) { background: var(--c-accent-ink); border-color: var(--c-accent-ink); }
+      &:focus { box-shadow: var(--ring-accent); }
       &:disabled {
-        background: #cbd5e1;
-        border-color: #cbd5e1;
-        color: #ffffff;
+        background: var(--c-border-strong);
+        border-color: var(--c-border-strong);
+        color: var(--c-accent-on);
         opacity: 1;
         cursor: not-allowed;
       }
     }
 
     .p-button.p-button-danger {
-      background: #ef4444;
+      background: var(--nxa-coral-ink);
       color: #ffffff;
-      border: 1px solid #ef4444;
+      border: 1px solid var(--nxa-coral-ink);
       font-weight: 600;
       padding: 0 1.5rem;
       border-radius: 10px;
       height: 44px;
       box-shadow: none;
 
-      &:hover:not(:disabled) { background: #dc2626; border-color: #dc2626; }
+      &:hover:not(:disabled) { background: var(--nxa-coral-ink); border-color: var(--nxa-coral-ink); filter: brightness(0.92); }
     }
 
     .p-button.p-button-warning {
-      background: #f59e0b;
-      color: #ffffff;
-      border: 1px solid #f59e0b;
+      background: var(--nxa-amber);
+      color: var(--nxa-ink);
+      border: 1px solid var(--nxa-amber);
       font-weight: 600;
       padding: 0 1.5rem;
       border-radius: 10px;
       height: 44px;
       box-shadow: none;
 
-      &:hover:not(:disabled) { background: #d97706; border-color: #d97706; }
+      &:hover:not(:disabled) { background: var(--nxa-amber-d); border-color: var(--nxa-amber-d); }
     }
 
     .p-button.p-button-secondary {
-      background: #ffffff;
-      color: #334155;
-      border: 1px solid #e2e8f0;
+      background: var(--c-surface);
+      color: var(--c-ink-2);
+      border: 1px solid var(--c-border);
       font-weight: 600;
       padding: 0 1.2rem;
       border-radius: 10px;
       height: 44px;
       box-shadow: none;
 
-      &:hover { background: #f8fafc; border-color: #cbd5e1; }
+      &:hover { background: var(--c-surface-2); border-color: var(--c-border-strong); }
     }
 
     // Outlined (usado por "Cancelar" en algunos dialogs) — match al secondary
     .p-button.p-button-outlined {
-      background: #ffffff !important;
-      color: #334155 !important;
-      border: 1px solid #e2e8f0 !important;
+      background: var(--c-surface) !important;
+      color: var(--c-ink-2) !important;
+      border: 1px solid var(--c-border) !important;
       font-weight: 600 !important;
       padding: 0 1.2rem !important;
       border-radius: 10px !important;
       height: 44px !important;
       box-shadow: none !important;
 
-      .p-button-icon { color: #64748b !important; }
+      .p-button-icon { color: var(--c-ink-2) !important; }
 
       &:hover:not(:disabled) {
-        background: #f8fafc !important;
-        border-color: #cbd5e1 !important;
-        color: #0f172a !important;
+        background: var(--c-surface-2) !important;
+        border-color: var(--c-border-strong) !important;
+        color: var(--c-ink) !important;
       }
       &:focus { box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06) !important; }
     }
@@ -352,8 +357,8 @@ body {
 // ── Panel del dropdown (se monta en <body> con appendTo) ─────────────────────
 .p-dropdown-panel {
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22);
+  border: 1px solid var(--c-border);
+  box-shadow: 0 16px 40px -12px rgba(10, 22, 40, 0.22);
   margin-top: 6px;
   overflow: hidden;
 
@@ -364,17 +369,17 @@ body {
       padding: 0.7rem 0.85rem;
       border-radius: 8px;
       font-size: 0.92rem;
-      color: #0f172a;
+      color: var(--c-ink);
       transition: background 100ms ease, color 100ms ease;
       margin-bottom: 2px;
 
       &:last-child { margin-bottom: 0; }
 
-      &:hover { background: #f1f5f9; }
+      &:hover { background: var(--c-surface-2); }
 
       &.p-highlight {
-        background: rgba(70, 95, 255, 0.10);
-        color: #465fff;
+        background: var(--c-accent-soft);
+        color: var(--c-accent);
         font-weight: 500;
       }
     }
@@ -383,7 +388,7 @@ body {
 
 // Mask
 .p-dialog-mask.p-component-overlay {
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(10, 22, 40, 0.45);
   backdrop-filter: blur(3px);
 }
 
@@ -442,8 +447,8 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
+  border: 1px solid var(--c-border-strong);
+  background: var(--c-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,18 +458,18 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
 }
 
 .p-checkbox .p-checkbox-box .p-checkbox-icon {
-  color: #ffffff;
+  color: var(--c-accent-on);
   font-size: 0.7rem;
   line-height: 1;
 }
 
 .p-checkbox .p-checkbox-box.p-highlight {
-  background: #465fff;
-  border-color: #465fff;
+  background: var(--c-accent);
+  border-color: var(--c-accent);
 }
 
 .p-checkbox .p-checkbox-box:hover {
-  border-color: #465fff;
+  border-color: var(--c-accent);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -474,16 +479,16 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
 .p-dialog.nx-confirm {
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.30);
+  box-shadow: 0 25px 60px -15px rgba(10, 22, 40, 0.30);
   border: 0;
-  background: #ffffff;
+  background: var(--c-surface);
   max-width: 95vw;
   width: 440px;
 
   // ── Header con titulo ──────────────────────────────────────────────────────
   .p-dialog-header {
     padding: 1.5rem 1.6rem 0.5rem;
-    background: #ffffff;
+    background: var(--c-surface);
     border-bottom: 0;
     display: flex;
     align-items: center;
@@ -492,22 +497,22 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
     .p-dialog-title {
       font-size: 1.1rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--c-ink);
       letter-spacing: -0.01em;
     }
 
     .p-dialog-header-icons .p-dialog-header-icon {
       width: 34px; height: 34px; border-radius: 10px;
-      color: #64748b;
+      color: var(--c-ink-2);
       box-shadow: none;
-      &:hover { background: #f1f5f9; color: #0f172a; }
+      &:hover { background: var(--c-surface-2); color: var(--c-ink); }
       &:focus { box-shadow: none; outline: none; }
     }
   }
 
   // ── Content: icono circular + mensaje ──────────────────────────────────────
   .p-dialog-content {
-    background: #ffffff;
+    background: var(--c-surface);
     padding: 0.5rem 1.6rem 1rem !important;
     display: flex !important;
     align-items: flex-start;
@@ -520,8 +525,8 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(70, 95, 255, 0.10);
-    color: #465fff;
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -534,7 +539,7 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
     margin: 0 !important;
     flex: 1;
     font-size: 0.94rem;
-    color: #475569;
+    color: var(--c-ink-2);
     line-height: 1.5;
     padding-top: 0.4rem;
   }
@@ -542,7 +547,7 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
   // ── Footer ─────────────────────────────────────────────────────────────────
   .p-dialog-footer {
     padding: 1rem 1.6rem 1.5rem;
-    background: #ffffff;
+    background: var(--c-surface);
     border-top: 0;
     display: flex;
     justify-content: flex-end;
@@ -560,43 +565,44 @@ p-tableheadercheckbox .p-checkbox input[type="checkbox"],
 
     // Reject — outline gris
     .p-confirm-dialog-reject {
-      background: #ffffff !important;
-      color: #475569 !important;
-      border: 1px solid #e2e8f0 !important;
+      background: var(--c-surface) !important;
+      color: var(--c-ink-2) !important;
+      border: 1px solid var(--c-border) !important;
 
-      &:hover { background: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+      &:hover { background: var(--c-surface-2) !important; border-color: var(--c-border-strong) !important; color: var(--c-ink) !important; }
       &:focus { box-shadow: none !important; }
     }
 
     // Accept default — solido oscuro
     .p-confirm-dialog-accept {
-      background: #1c2434;
-      color: #ffffff;
-      border: 1px solid #1c2434;
+      background: var(--c-accent);
+      color: var(--c-accent-on);
+      border: 1px solid var(--c-accent);
 
-      &:hover { background: #0f172a; border-color: #0f172a; }
-      &:focus { box-shadow: 0 0 0 4px rgba(28, 36, 52, 0.18); }
+      &:hover { background: var(--c-accent-ink); border-color: var(--c-accent-ink); }
+      &:focus { box-shadow: var(--ring-accent); }
     }
 
     // Accept con clase danger
     .p-confirm-dialog-accept.p-button-danger {
-      background: #ef4444;
-      border-color: #ef4444;
-      &:hover { background: #dc2626; border-color: #dc2626; }
+      background: var(--nxa-coral-ink);
+      border-color: var(--nxa-coral-ink);
+      &:hover { background: var(--nxa-coral-ink); border-color: var(--nxa-coral-ink); filter: brightness(0.92); }
     }
 
     // Accept con clase warning
     .p-confirm-dialog-accept.p-button-warning {
-      background: #f59e0b;
-      border-color: #f59e0b;
-      &:hover { background: #d97706; border-color: #d97706; }
+      background: var(--nxa-amber);
+      border-color: var(--nxa-amber);
+      color: var(--nxa-ink);
+      &:hover { background: var(--nxa-amber-d); border-color: var(--nxa-amber-d); }
     }
   }
 
   // Variante "danger" del icono cuando se usa pi-exclamation-triangle
   &:has(.p-confirm-dialog-icon.pi-exclamation-triangle) .p-confirm-dialog-icon,
   &:has(.p-confirm-dialog-icon.pi-trash) .p-confirm-dialog-icon {
-    background: rgba(239, 68, 68, 0.10);
-    color: #ef4444;
+    background: var(--c-danger-soft);
+    color: var(--c-danger);
   }
 }

@@ -71,7 +71,7 @@
             <div *ngIf="detail.subscription?.cancelledAt" class="text-orange-500">
               <i class="pi pi-ban"></i> Cancelada: {{ detail.subscription?.cancelledAt | date:'dd/MM/yy' }} — {{ detail.subscription?.cancellationReason }}
             </div>
-            <div *ngIf="detail.subscription?.pendingPlan" class="mt-2 p-2" style="background: var(--surface-50, #f8fafc); border-radius: 6px;">
+            <div *ngIf="detail.subscription?.pendingPlan" class="mt-2 p-2" style="background: var(--c-surface-2); border-radius: 6px;">
               <i class="pi pi-clock"></i> Cambio pendiente a <strong>{{ detail.subscription?.pendingPlan?.displayName }}</strong>
             </div>
           </div>
@@ -249,7 +249,7 @@
     </div>
 
     <div class="card p-0" *ngIf="notes.length > 0">
-      <div *ngFor="let note of notes" class="p-3" style="border-bottom: 1px solid var(--surface-200, #e5e7eb);">
+      <div *ngFor="let note of notes" class="p-3" style="border-bottom: 1px solid var(--c-border);">
         <ng-container *ngIf="editingNoteId === note.id; else viewNote">
           <textarea pInputTextarea [(ngModel)]="editingNoteBody" rows="3" class="w-full"></textarea>
           <div class="flex justify-content-end gap-2 mt-2">
@@ -427,7 +427,7 @@
 <p-dialog [(visible)]="manualLinkDialog" header="Link de pago generado" [modal]="true" [style]="{width: '520px', maxWidth: '95vw'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2" *ngIf="manualLinkResult">
     <div class="text-sm">Link MercadoPago para que el cliente pague el período pendiente:</div>
-    <div class="p-2" style="background: var(--surface-50, #f8fafc); border-radius: 6px; word-break: break-all;">
+    <div class="p-2" style="background: var(--c-surface-2); border-radius: 6px; word-break: break-all;">
       <code class="text-xs">{{ manualLinkResult.checkoutUrl }}</code>
     </div>
     <div class="text-xs text-color-secondary">Preference ID: <code>{{ manualLinkResult.preferenceId }}</code></div>

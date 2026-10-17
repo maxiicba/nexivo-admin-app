@@ -412,8 +412,8 @@ export class AccountsComponent implements OnInit {
   }
 
   getAvatarColor(name: string): string {
-    if (!name) return '#6366f1';
-    const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6'];
+    if (!name) return '#0f2a47';
+    const colors = ['#0f2a47', '#0f7a4f', '#a8361f', '#0b5f8a', '#45546a', '#3f6a96', '#7a5800', '#17395e'];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);

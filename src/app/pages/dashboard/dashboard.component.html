@@ -1,71 +1,155 @@
-<section class="nx-hero-section">
-  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
-  <div class="nx-hero-section__content">
-    <div class="nx-page-header nx-page-header--hero">
-      <div class="nx-page-header__left">
-        <div class="nx-page-header__icon nx-page-header__icon--hero">
-          <i class="pi pi-th-large"></i>
-        </div>
-        <div>
-          <span class="nx-page-kicker">Nexivo Admin</span>
-          <h2 class="nx-page-header__title m-0">Dashboard</h2>
-          <p class="nx-page-header__subtitle m-0">Resumen unificado de todos los productos</p>
-        </div>
+<div class="ct">
+  <!-- 1. Header de una línea -->
+  <header class="nx-page-header">
+    <div class="nx-page-header__left">
+      <div class="nx-page-header__icon"><i class="pi pi-th-large"></i></div>
+      <div>
+        <h1 class="nx-page-header__title">Dashboard</h1>
+        <p class="nx-page-header__subtitle">Ingreso recurrente y estado de las suscripciones de todos los productos</p>
       </div>
     </div>
-  </div>
-</section>
+  </header>
 
-<!-- Total MRR -->
-<div class="grid mb-4">
-  <div class="col-12 md:col-3">
-    <div class="nx-stat-card">
-      <div class="nx-stat-card__icon nx-stat-card__icon--green">
-        <i class="pi pi-dollar"></i>
+  <!-- Cargando -->
+  <ng-container *ngIf="loading">
+    <p-skeleton height="132px" borderRadius="14px"></p-skeleton>
+    <p-skeleton height="84px" borderRadius="14px"></p-skeleton>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+    <!-- 2. Banda de acción -->
+    <section class="ct-band">
+      <div class="ct-band__main">
+        <span class="ct-band__label">MRR total · {{ onlineProducts }} de {{ productStats.length }} productos</span>
+        <div class="ct-band__figure">{{ formatCurrency(totalMrr) }}</div>
+
+        <p class="ct-band__why" *ngIf="totalPastDue > 0">
+          <strong>{{ totalPastDue }} {{ totalPastDue === 1 ? 'suscripción vencida' : 'suscripciones vencidas' }}</strong>
+          sin cobrar. Cada una vale en promedio {{ formatCurrency(avgTicket) }} por mes: si no se regularizan,
+          ese ingreso se cae del MRR del próximo ciclo.
+        </p>
+        <p class="ct-band__why" *ngIf="totalPastDue === 0">
+          Sale de {{ totalActive }} suscripciones activas a {{ formatCurrency(avgTicket) }} promedio.
+          <strong>No hay cobros vencidos</strong>: el ingreso del próximo ciclo está cubierto.
+        </p>
+
+        <div class="ct-band__actions" *ngIf="worstProduct as worst">
+          <a class="ct-btn ct-btn--primary" [routerLink]="[worst.product.routePath, 'subscriptions']">
+            <i class="pi pi-arrow-right"></i>
+            Ver vencidas en {{ worst.product.label }}
+          </a>
+        </div>
       </div>
-      <div class="nx-stat-card__info">
-        <span class="nx-stat-card__value">{{ formatCurrency(totalMrr) }}</span>
-        <span class="nx-stat-card__label">MRR Total</span>
+
+      <div class="ct-band__side">
+        <div class="ct-band__stat">
+          <span class="ct-band__label">Activas</span>
+          <b class="ct-band__statv">{{ totalActive }}</b>
+        </div>
+        <div class="ct-band__stat">
+          <span class="ct-band__label">En prueba</span>
+          <b class="ct-band__statv">{{ totalTrialing }}</b>
+        </div>
+        <div class="ct-band__stat">
+          <span class="ct-band__label">Ticket prom.</span>
+          <b class="ct-band__statv">{{ formatCurrency(avgTicket) }}</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- Producto sin respuesta: se avisa, no se esconde -->
+    <div class="ct-card" *ngIf="offlineProducts.length">
+      <div class="ct-alert ct-alert--last">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span class="ct-alert__label">Sin conexión</span>
+        <span class="ct-alert__text">
+          No respondió la API de <strong>{{ offlineProducts.length === 1 ? offlineProducts[0].product.label : offlineProducts.length + ' productos' }}</strong>:
+          sus números no están sumados arriba.
+        </span>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Per-product cards -->
-<div class="grid" *ngIf="!loading">
-  <div class="col-12 md:col-6" *ngFor="let stat of productStats">
-    <p-card [header]="stat.product.label">
-      <div *ngIf="stat.error" class="text-red-400">
-        <i class="pi pi-exclamation-triangle mr-2"></i>No se pudo conectar con la API
+    <!-- 3. Tira de stats -->
+    <section class="ct-stats">
+      <div class="ct-stats__cell">
+        <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Suscripciones</span></div>
+        <div class="ct-stats__value">{{ totalSubs }}</div>
+        <div class="ct-stats__foot">en {{ onlineProducts }} {{ onlineProducts === 1 ? 'producto' : 'productos' }}</div>
       </div>
-      <div *ngIf="!stat.error">
-        <div class="grid mb-3">
-          <div class="col-6">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--blue"><i class="pi pi-users"></i></div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ stat.total }}</span>
-                <span class="nx-stat-card__label">Total</span>
+      <div class="ct-stats__cell ct-stats__cell--success">
+        <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Activas</span></div>
+        <div class="ct-stats__value">{{ totalActive }}</div>
+        <div class="ct-stats__foot">{{ pct(totalActive, totalSubs) }}% del total paga al día</div>
+      </div>
+      <div class="ct-stats__cell ct-stats__cell--sky">
+        <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">En prueba</span></div>
+        <div class="ct-stats__value">{{ totalTrialing }}</div>
+        <div class="ct-stats__foot">pueden convertir antes del próximo cobro</div>
+      </div>
+      <div class="ct-stats__cell ct-stats__cell--warn">
+        <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Vencidas</span></div>
+        <div class="ct-stats__value">{{ totalPastDue }}</div>
+        <div class="ct-stats__foot">{{ totalPastDue ? 'cobro pendiente, todavía recuperables' : 'ningún cobro atrasado' }}</div>
+      </div>
+      <div class="ct-stats__cell ct-stats__cell--danger">
+        <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Suspendidas</span></div>
+        <div class="ct-stats__value">{{ totalSuspended }}</div>
+        <div class="ct-stats__foot">sin acceso hasta que paguen</div>
+      </div>
+    </section>
+
+    <!-- 4. Una card por producto -->
+    <div class="db-products">
+      <section class="ct-card" *ngFor="let stat of productStats">
+        <div class="ct-sec">
+          <span class="ct-sec__label">{{ stat.product.label }}</span>
+          <span class="ct-sec__hint" *ngIf="!stat.error">{{ stat.total }} suscripciones · {{ formatCurrency(stat.mrr) }} de MRR</span>
+          <span class="ct-sec__hint" *ngIf="stat.error">sin datos</span>
+          <div class="ct-sec__actions">
+            <a class="ct-btn ct-btn--ghost ct-btn--sm" [routerLink]="[stat.product.routePath, 'subscriptions']">
+              Suscripciones <i class="pi pi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="ct-alert ct-alert--last" *ngIf="stat.error">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span class="ct-alert__text">No se pudo conectar con la API de <strong>{{ stat.product.label }}</strong>. Revisá que el servicio esté arriba.</span>
+        </div>
+
+        <ng-container *ngIf="!stat.error">
+          <div class="ct-card__pad">
+            <!-- Distribución por estado: una sola barra apilada -->
+            <div class="db-dist" *ngIf="stat.total > 0; else noSubs">
+              <span
+                *ngFor="let s of slices(stat)"
+                class="db-dist__seg db-dist__seg--{{ s.tone }}"
+                [style.flex-grow]="s.value"
+                [attr.title]="s.label + ': ' + s.value"></span>
+            </div>
+            <ng-template #noSubs>
+              <p class="db-empty">Todavía no hay suscripciones en este producto.</p>
+            </ng-template>
+
+            <div class="ct-facts db-facts">
+              <div class="ct-fact" *ngFor="let s of slices(stat)">
+                <span class="ct-fact__label">
+                  <span class="db-dot db-dot--{{ s.tone }}"></span>{{ s.label }}
+                </span>
+                <span class="ct-fact__value">
+                  {{ s.value }}
+                  <span class="db-pct">{{ pct(s.value, stat.total) }}%</span>
+                </span>
               </div>
             </div>
           </div>
-          <div class="col-6">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--green"><i class="pi pi-dollar"></i></div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ formatCurrency(stat.mrr) }}</span>
-                <span class="nx-stat-card__label">MRR</span>
-              </div>
-            </div>
+
+          <div class="ct-foot" *ngIf="stat.past_due > 0">
+            <i class="pi pi-info-circle"></i>
+            <span><strong>{{ stat.past_due }} vencidas</strong> en {{ stat.product.label }}: entran a suspensión si no se cobran.</span>
           </div>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <p-tag value="Activas: {{ stat.active }}" severity="success" [rounded]="true"></p-tag>
-          <p-tag value="Trial: {{ stat.trialing }}" severity="info" [rounded]="true"></p-tag>
-          <p-tag value="Vencidas: {{ stat.past_due }}" severity="warning" [rounded]="true"></p-tag>
-          <p-tag value="Suspendidas: {{ stat.suspended }}" severity="danger" [rounded]="true"></p-tag>
-        </div>
-      </div>
-    </p-card>
-  </div>
+        </ng-container>
+      </section>
+    </div>
+  </ng-container>
 </div>

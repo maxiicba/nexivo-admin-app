@@ -294,10 +294,10 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
 
   // Stable color hash for the avatar — same business gets same color
   avatarColor(name: string | undefined | null): string {
-    if (!name) return '#94a3b8';
+    if (!name) return '#45546a';
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-    const palette = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const palette = ['#0f2a47', '#0f7a4f', '#a8361f', '#0b5f8a', '#45546a', '#3f6a96', '#7a5800', '#17395e'];
     return palette[hash % palette.length];
   }
 

@@ -59,10 +59,9 @@
   border-radius: var(--nx-radius-lg);
   padding: 1.1rem 1.2rem;
   box-shadow: var(--nx-shadow-card);
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
 
   &:hover {
-    transform: translateY(-2px);
     box-shadow: var(--nx-shadow-hover);
     border-color: color-mix(in srgb, var(--nx-kpi-accent, var(--nx-primary)) 35%, var(--nx-border));
   }
@@ -110,12 +109,12 @@
     line-height: 1;
 
     &--up {
-      color: #047857;
-      background: #d1fae5;
+      color: var(--c-success);
+      background: var(--c-success-soft);
     }
     &--down {
-      color: #b91c1c;
-      background: #fee2e2;
+      color: var(--c-danger);
+      background: var(--c-danger-soft);
     }
   }
 
@@ -136,26 +135,26 @@
     .pi { font-size: 0.65rem; }
     span { white-space: nowrap; }
 
-    &--up   { color: #047857; }
-    &--down { color: #b91c1c; }
+    &--up   { color: var(--c-success); }
+    &--down { color: var(--c-danger); }
   }
 
   // Color variants — soft pastel backgrounds like TailAdmin
   &--blue   {
-    --nx-kpi-accent: #3b82f6;
-    .nx-kpi__icon { background: #e0e7ff; color: #4f46e5; }
+    --nx-kpi-accent: var(--c-accent);
+    .nx-kpi__icon { background: var(--c-accent-soft); color: var(--c-accent); }
   }
   &--green  {
-    --nx-kpi-accent: #10b981;
-    .nx-kpi__icon { background: #d1fae5; color: #047857; }
+    --nx-kpi-accent: var(--c-success);
+    .nx-kpi__icon { background: var(--c-success-soft); color: var(--c-success); }
   }
   &--cyan   {
-    --nx-kpi-accent: #06b6d4;
-    .nx-kpi__icon { background: #ccfbf1; color: #0891b2; }
+    --nx-kpi-accent: var(--c-sky);
+    .nx-kpi__icon { background: var(--c-sky-soft); color: var(--c-sky); }
   }
   &--orange {
-    --nx-kpi-accent: #f59e0b;
-    .nx-kpi__icon { background: #fef3c7; color: #b45309; }
+    --nx-kpi-accent: var(--c-warn);
+    .nx-kpi__icon { background: var(--c-warn-soft); color: var(--c-warn); }
   }
 }
 
@@ -169,9 +168,9 @@
 
 // "Sincronizar MP" — light pill button
 ::ng-deep .nx-btn-ghost.p-button {
-  background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
+  background: var(--c-surface);
+  color: var(--c-accent);
+  border: 1px solid var(--c-border);
   border-radius: 10px;
   height: 40px;
   padding: 0 1rem;
@@ -180,19 +179,19 @@
   box-shadow: none;
   transition: background 140ms ease, border-color 140ms ease;
 
-  .p-button-icon { color: #64748b; font-size: 0.8rem; }
+  .p-button-icon { color: var(--c-ink-3); font-size: 0.8rem; }
 
   &:hover:not(:disabled) {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--c-surface-2);
+    border-color: var(--c-border-strong);
   }
 }
 
 // "Nueva suscripción" — dark solid button
 ::ng-deep .nx-btn-dark.p-button {
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid #0f172a;
+  background: var(--c-accent);
+  color: var(--c-accent-on);
+  border: 1px solid var(--c-accent);
   border-radius: 10px;
   height: 40px;
   padding: 0 1.1rem;
@@ -203,7 +202,7 @@
 
   .p-button-icon { font-size: 0.8rem; }
 
-  &:hover:not(:disabled) { background: #1e293b; border-color: #1e293b; }
+  &:hover:not(:disabled) { background: var(--c-accent-ink); border-color: var(--c-accent-ink); }
 }
 
 // ── Filters ──────────────────────────────────────────────────────────────────
@@ -334,7 +333,7 @@
 ::ng-deep .p-dropdown-panel {
   border-radius: 10px;
   border: 1px solid var(--nx-border);
-  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 10px 30px -10px rgba(10, 22, 40, 0.18);
   z-index: 11000 !important;
 
   .p-dropdown-items .p-dropdown-item {
@@ -371,11 +370,11 @@
   &__text { font-weight: 500; flex: 1; }
 
   &--warning {
-    background: color-mix(in srgb, #f59e0b 10%, transparent);
-    border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
-    border-left: 3px solid #f59e0b;
+    background: color-mix(in srgb, var(--c-warn) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c-warn) 25%, transparent);
+    border-left: 3px solid var(--c-warn);
 
-    .nx-banner__icon { color: #b45309; }
+    .nx-banner__icon { color: var(--c-warn); }
   }
 }
 
@@ -463,7 +462,7 @@
     min-width: 32px;
     min-height: 32px;
     font-size: 32px !important;
-    color: var(--accent, #4F46E5) !important;
+    color: var(--accent, var(--c-accent)) !important;
     stroke: currentColor;
     animation: nx-spin 0.9s linear infinite;
     display: block;
@@ -549,7 +548,7 @@
     transition: background 120ms ease, border-color 120ms ease;
 
     .p-checkbox-icon {
-      color: #fff;
+      color: var(--c-accent-on);
       font-size: 0.7rem;
       line-height: 1;
     }
@@ -589,7 +588,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    color: #fff;
+    color: #ffffff;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -597,7 +596,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 2px rgba(10, 22, 40, 0.1);
   }
 
   &__info { min-width: 0; }
@@ -633,8 +632,8 @@
   color: var(--nx-primary);
 
   &--annual {
-    background: color-mix(in srgb, #10b981 12%, transparent);
-    color: #059669;
+    background: color-mix(in srgb, var(--c-success) 12%, transparent);
+    color: var(--c-success);
   }
 }
 
@@ -650,17 +649,17 @@
   line-height: 1.2;
 
   // Estados de suscripción
-  &--active     { background: #d1fae5; color: #047857; }
-  &--trialing   { background: #dbeafe; color: #1d4ed8; }
-  &--past_due   { background: #fef3c7; color: #b45309; }
-  &--suspended  { background: #fee2e2; color: #b91c1c; }
-  &--cancelled  { background: #f1f5f9; color: #475569; }
+  &--active     { background: var(--c-success-soft); color: var(--c-success); }
+  &--trialing   { background: var(--c-sky-soft); color: var(--c-sky); }
+  &--past_due   { background: var(--c-warn-soft); color: var(--c-warn); }
+  &--suspended  { background: var(--c-danger-soft); color: var(--c-danger); }
+  &--cancelled  { background: var(--c-surface-2); color: var(--c-ink-2); }
 
   // Días badge
   &--days { padding: 3px 9px; min-width: 36px; justify-content: center; }
-  &--days-success { background: #d1fae5; color: #047857; }
-  &--days-warning { background: #fef3c7; color: #b45309; }
-  &--days-danger  { background: #fee2e2; color: #b91c1c; }
+  &--days-success { background: var(--c-success-soft); color: var(--c-success); }
+  &--days-warning { background: var(--c-warn-soft); color: var(--c-warn); }
+  &--days-danger  { background: var(--c-danger-soft); color: var(--c-danger); }
 }
 
 // ── Actions (layout estable: border siempre presente transparente) ──────────
@@ -706,13 +705,13 @@
   }
 
   &--view:hover   { color: var(--nx-primary); }
-  &--edit:hover   { color: #6366f1; }
+  &--edit:hover   { color: var(--c-accent); }
 
-  &--danger { color: #ef4444; }
+  &--danger { color: var(--c-danger); }
   &--danger:hover {
-    background-color: #fef2f2;
-    border-color: #fecaca;
-    color: #dc2626;
+    background-color: var(--c-danger-soft);
+    border-color: var(--c-danger);
+    color: var(--c-danger);
   }
 }
 
@@ -727,7 +726,7 @@
 
   &__icon {
     font-size: 2.4rem;
-    color: #cbd5e1;
+    color: var(--c-ink-3);
     margin-bottom: 0.8rem;
   }
 
@@ -748,7 +747,7 @@
 ::ng-deep .p-dialog.nx-dialog {
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(10, 22, 40, 0.25);
 
   .p-dialog-header {
     padding: 1.1rem 1.4rem;

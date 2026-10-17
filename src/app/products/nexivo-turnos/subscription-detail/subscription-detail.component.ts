@@ -315,9 +315,9 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
   }
 
   usageColor(pct: number): string {
-    if (pct >= 90) return 'var(--red-500, #ef4444)';
-    if (pct >= 70) return 'var(--yellow-500, #f59e0b)';
-    return 'var(--green-500, #10b981)';
+    if (pct >= 90) return 'var(--c-danger)';
+    if (pct >= 70) return 'var(--c-warn)';
+    return 'var(--c-success)';
   }
 
   moduleKeys(modules: any): string[] {

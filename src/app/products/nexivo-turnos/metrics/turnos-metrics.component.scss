@@ -1,126 +1,68 @@
-:host {
+// Métricas de Turnos: extensión delgada del base .ct-* (no declara colores propios).
+
+:host { display: block; }
+
+:host ::ng-deep .tm-range { min-width: 180px; height: 34px; align-items: center; }
+
+// Variación contra el mes anterior: verde si es buena para el negocio, coral si no.
+.tm-delta {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--c-accent-soft);
+  font-family: var(--c-mono);
+  font-size: 10.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink-2);
+  white-space: nowrap;
+
+  &--good { background: var(--c-success-soft); color: var(--c-success); }
+  &--bad  { background: var(--c-danger-soft);  color: var(--c-danger); }
+}
+
+.tm-cell--bad .ct-stats__dot { background: var(--c-danger); }
+
+.tm-spark {
   display: block;
-  --nx-surface:        var(--surface);
-  --nx-border:         var(--border);
-  --nx-text:           var(--ink-900);
-  --nx-text-secondary: var(--ink-500);
-  --nx-text-muted:     var(--ink-400);
-  --nx-primary:        var(--ink-900);
-  --nx-radius:         var(--r-card);
-  --nx-shadow-card:    var(--shadow-sm);
+  width: 100%;
+  height: 28px;
+  margin-top: 10px;
+  overflow: visible;
+
+  path {
+    fill: none;
+    stroke: var(--c-accent);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
 }
 
-.nx-page-header__actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-::ng-deep .nx-btn-ghost.p-button {
-  background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  height: 40px;
-  padding: 0 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  box-shadow: none;
-  .p-button-icon { color: #64748b; font-size: 0.8rem; }
-  &:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
-}
-
-// ── KPI cards row ────────────────────────────────────────────────────────────
-.nx-metrics-kpis {
+.tm-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
 
-  @media (max-width: 992px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 600px) { grid-template-columns: 1fr; }
+  &--1-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+
+  @media (max-width: 991px) {
+    &,
+    &--1-2 { grid-template-columns: minmax(0, 1fr); }
+  }
 }
 
-.nx-metric-card {
-  background: var(--nx-surface);
-  border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius);
-  padding: 1.1rem 1.2rem 0.9rem;
-  box-shadow: var(--nx-shadow-card);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+.tm-chart {
+  height: 260px;
+  padding: 14px 16px 12px;
 
-  &:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.12);
-  }
+  &--tall { height: 300px; }
 
-  &__head { line-height: 1.2; }
-
-  &__title {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--nx-text);
-  }
-
-  &__sub {
-    font-size: 0.75rem;
-    color: var(--nx-text-muted);
-    margin-top: 2px;
-  }
-
-  &__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-  }
-
-  &__value {
-    font-size: 1.85rem;
-    font-weight: 800;
-    color: var(--nx-text);
-    letter-spacing: -0.025em;
-    line-height: 1;
-  }
-
-  &__delta {
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    line-height: 1;
-
-    &--up   { color: #047857; background: #d1fae5; }
-    &--down { color: #b91c1c; background: #fee2e2; }
-  }
-
-  // Mini sparkline (SVG)
-  &__spark-svg {
-    width: 100%;
-    height: 40px;
+  // p-chart envuelve el canvas en un div sin alto: sin esto chart.js mide 150px.
+  ::ng-deep p-chart,
+  ::ng-deep p-chart > div {
     display: block;
-    overflow: visible;
-  }
-}
-
-// ── Chart cards (existing .card inside grid) ─────────────────────────────────
-::ng-deep .card {
-  background: var(--nx-surface);
-  border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius);
-  box-shadow: var(--nx-shadow-card);
-  padding: 1.2rem;
-
-  h4 {
-    margin: 0 0 0.85rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--nx-text);
-    letter-spacing: -0.005em;
+    height: 100% !important;
   }
 }

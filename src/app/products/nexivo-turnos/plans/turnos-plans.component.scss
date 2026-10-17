@@ -19,9 +19,9 @@
   display: inline-flex;
   align-items: center;
   padding: 4px;
-  background: #f1f5f9;
+  background: var(--c-surface-2);
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-border);
   gap: 2px;
 
   &__btn {
@@ -42,24 +42,24 @@
     &:hover { color: var(--nx-text); }
 
     &.is-active {
-      background: #ffffff;
+      background: var(--c-surface);
       color: var(--nx-text);
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 1px 2px rgba(10, 22, 40, 0.08), 0 1px 3px rgba(10, 22, 40, 0.05);
     }
   }
 
   &__badge {
     font-size: 0.7rem;
-    color: #047857;
+    color: var(--c-success);
     font-weight: 700;
   }
 }
 
 // Dark/primary "Nuevo plan" pill button
 ::ng-deep .nx-btn-dark.p-button {
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid #0f172a;
+  background: var(--c-accent);
+  color: var(--c-accent-on);
+  border: 1px solid var(--c-accent);
   border-radius: 10px;
   height: 40px;
   padding: 0 1.1rem;
@@ -69,7 +69,7 @@
   transition: background 140ms ease;
 
   .p-button-icon { font-size: 0.8rem; }
-  &:hover:not(:disabled) { background: #1e293b; border-color: #1e293b; }
+  &:hover:not(:disabled) { background: var(--c-accent-ink); border-color: var(--c-accent-ink); }
 }
 
 // ── Plan cards grid (refinements) ────────────────────────────────────────────
@@ -80,8 +80,8 @@
 }
 
 .nx-plan-card {
-  background: #ffffff !important;
-  border: 1px solid #e5e7eb !important;
+  background: var(--c-surface) !important;
+  border: 1px solid var(--c-border) !important;
   border-radius: 16px !important;
   padding: 18px 18px 16px !important;
   display: flex !important;
@@ -89,22 +89,22 @@
   gap: 14px !important;
   position: relative;
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 1px 2px rgba(10, 22, 40, 0.04) !important;
   overflow: visible !important;
 
   // Kill el accent strip legacy
   &::before { display: none !important; }
 
   &:hover {
-    border-color: #cbd5e1 !important;
-    box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.12) !important;
+    border-color: var(--c-border-strong) !important;
+    box-shadow: 0 8px 24px -10px rgba(10, 22, 40, 0.12) !important;
     transform: none !important;
   }
 
   &--featured {
     border-color: var(--ink-900);
     border-width: 1.5px;
-    box-shadow: 0 0 0 3px rgba(15, 17, 21, 0.06), var(--shadow-md);
+    box-shadow: 0 0 0 3px rgba(10, 22, 40, 0.06), var(--shadow-md);
   }
 
   &--inactive { opacity: 0.65; }
@@ -166,7 +166,7 @@
   border: 0;
   color: var(--nx-text-muted);
   cursor: grab;
-  &:hover { background: #f1f5f9; color: var(--nx-text-secondary); }
+  &:hover { background: var(--c-surface-2); color: var(--nx-text-secondary); }
 }
 
 .nx-plan-card__heading { flex: 1; min-width: 0; }
@@ -203,10 +203,10 @@
     background: currentColor;
   }
 
-  &--active   { background: #d1fae5; color: #047857; }
-  &--inactive { background: #f1f5f9; color: #64748b; }
-  &--private  { background: #fef3c7; color: #b45309; }
-  &--restricted { background: #ede9fe; color: #6d28d9; }
+  &--active   { background: var(--c-success-soft); color: var(--c-success); }
+  &--inactive { background: var(--c-surface-2); color: var(--c-ink-3); }
+  &--private  { background: var(--c-warn-soft); color: var(--c-warn); }
+  &--restricted { background: var(--c-accent-soft); color: var(--nxa-navy-3); }
 }
 
 // ── Pricing ─────────────────────────────────────────────────────────────────
@@ -214,7 +214,7 @@
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--c-surface-2);
   padding-top: 0.65rem;
 }
 
@@ -273,8 +273,8 @@
   width: 24px !important;
   height: 24px !important;
   border-radius: 7px !important;
-  background: #f1f5f9 !important;
-  color: #475569 !important;
+  background: var(--c-surface-2) !important;
+  color: var(--c-ink-2) !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -345,8 +345,8 @@
       width: 16px !important;
       height: 16px !important;
       border-radius: 50% !important;
-      background: #d1fae5 !important;
-      color: #047857 !important;
+      background: var(--c-success-soft) !important;
+      color: var(--c-success) !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -380,7 +380,7 @@
   border-radius: 9px !important;
   border: 1px solid var(--border) !important;
   background: var(--surface) !important;
-  color: var(--ink-900) !important;
+  color: var(--c-accent) !important;
   font-size: 12.5px !important;
   font-weight: 600 !important;
   cursor: pointer;
@@ -392,20 +392,20 @@
   &:hover {
     background: var(--surface-2) !important;
     border-color: var(--ink-300) !important;
-    color: var(--ink-900) !important;
+    color: var(--c-accent) !important;
   }
 
   &--edit {
-    background: var(--ink-900) !important;
-    border-color: var(--ink-900) !important;
-    color: #ffffff !important;
+    background: var(--c-accent) !important;
+    border-color: var(--c-accent) !important;
+    color: var(--c-accent-on) !important;
 
-    i { color: #ffffff; }
+    i { color: var(--c-accent-on); }
 
     &:hover {
-      background: #000 !important;
-      border-color: #000 !important;
-      color: #ffffff !important;
+      background: var(--c-accent-ink) !important;
+      border-color: var(--c-accent-ink) !important;
+      color: var(--c-accent-on) !important;
     }
   }
 
@@ -421,7 +421,7 @@
 
     &:hover {
       background: var(--danger-soft) !important;
-      border-color: #F5C2C2 !important;
+      border-color: var(--c-danger) !important;
       color: var(--danger) !important;
     }
   }

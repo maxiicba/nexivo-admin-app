@@ -36,107 +36,148 @@
     <!-- ═══ TAB 1: Dashboard ═══ -->
     <p-tabPanel header="Dashboard" leftIcon="pi pi-chart-bar">
       <ng-container *ngIf="stats">
-        <!-- Stat Cards -->
-        <div class="grid mb-3">
-          <div class="col-6 md:col-3">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--blue">
-                <i class="pi pi-building"></i>
+        <div class="ct pa-dash">
+          <!-- Banda de acción: lo que hay que mirar hoy -->
+          <section class="ct-band">
+            <div class="ct-band__main">
+              <span class="ct-band__label">MRR · Nexivo Gestión</span>
+              <div class="ct-band__figure">{{ formatCurrency(stats.subscriptions.mrr) }}</div>
+              <p class="ct-band__why" *ngIf="stats.subscriptions.pastDue > 0">
+                <strong>{{ stats.subscriptions.pastDue }} {{ stats.subscriptions.pastDue === 1 ? 'suscripción vencida' : 'suscripciones vencidas' }}</strong>
+                y {{ stats.subscriptions.suspended }} suspendidas. Las vencidas todavía se recuperan con un cobro;
+                las suspendidas ya no usan el sistema y salen del MRR.
+              </p>
+              <p class="ct-band__why" *ngIf="stats.subscriptions.pastDue === 0">
+                Sale de {{ stats.subscriptions.active }} suscripciones activas. <strong>No hay cobros vencidos</strong>
+                y entraron {{ stats.accounts.recentRegistrations }} cuentas nuevas en los últimos 7 días.
+              </p>
+            </div>
+            <div class="ct-band__side">
+              <div class="ct-band__stat">
+                <span class="ct-band__label">Nuevas 7 días</span>
+                <b class="ct-band__statv">{{ stats.accounts.recentRegistrations }}</b>
               </div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ stats.accounts.total }}</span>
-                <span class="nx-stat-card__label">Cuentas</span>
+              <div class="ct-band__stat">
+                <span class="ct-band__label">En prueba</span>
+                <b class="ct-band__statv">{{ stats.subscriptions.trialing }}</b>
+              </div>
+              <div class="ct-band__stat">
+                <span class="ct-band__label">Canceladas</span>
+                <b class="ct-band__statv">{{ stats.subscriptions.cancelled }}</b>
               </div>
             </div>
-          </div>
-          <div class="col-6 md:col-3">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--green">
-                <i class="pi pi-dollar"></i>
-              </div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ formatCurrency(stats.subscriptions.mrr) }}</span>
-                <span class="nx-stat-card__label">MRR</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 md:col-3">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--cyan">
-                <i class="pi pi-users"></i>
-              </div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ stats.users.total }}</span>
-                <span class="nx-stat-card__label">Usuarios</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 md:col-3">
-            <div class="nx-stat-card">
-              <div class="nx-stat-card__icon nx-stat-card__icon--orange">
-                <i class="pi pi-wifi"></i>
-              </div>
-              <div class="nx-stat-card__info">
-                <span class="nx-stat-card__value">{{ stats.users.activeSessions }}</span>
-                <span class="nx-stat-card__label">Sesiones activas</span>
-              </div>
-            </div>
-          </div>
-        </div>
+          </section>
 
-        <!-- Status Breakdown -->
-        <div class="grid mb-3">
-          <div class="col-12 md:col-6">
-            <div class="card">
-              <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">Cuentas por estado</h4>
-              <div class="flex gap-3 flex-wrap">
-                <p-tag value="Activas: {{ stats.accounts.active }}" severity="success"></p-tag>
-                <p-tag value="Suspendidas: {{ stats.accounts.suspended }}" severity="danger"></p-tag>
-                <p-tag value="Inactivas: {{ stats.accounts.inactive }}" severity="secondary"></p-tag>
-              </div>
+          <!-- Tira de stats -->
+          <section class="ct-stats">
+            <div class="ct-stats__cell">
+              <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Cuentas</span></div>
+              <div class="ct-stats__value">{{ stats.accounts.total }}</div>
+              <div class="ct-stats__foot">{{ stats.accounts.active }} activas · {{ pct(stats.accounts.active, stats.accounts.total) }}%</div>
             </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="card">
-              <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">Suscripciones por estado</h4>
-              <div class="flex gap-3 flex-wrap">
-                <p-tag value="Activas: {{ stats.subscriptions.active }}" severity="success"></p-tag>
-                <p-tag value="Trial: {{ stats.subscriptions.trialing }}" severity="info"></p-tag>
-                <p-tag value="Vencidas: {{ stats.subscriptions.pastDue }}" severity="warning"></p-tag>
-                <p-tag value="Suspendidas: {{ stats.subscriptions.suspended }}" severity="danger"></p-tag>
-              </div>
+            <div class="ct-stats__cell ct-stats__cell--success">
+              <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Suscripciones activas</span></div>
+              <div class="ct-stats__value">{{ stats.subscriptions.active }}</div>
+              <div class="ct-stats__foot">pagan al día este ciclo</div>
             </div>
-          </div>
-        </div>
+            <div class="ct-stats__cell ct-stats__cell--sky">
+              <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Usuarios</span></div>
+              <div class="ct-stats__value">{{ stats.users.total }}</div>
+              <div class="ct-stats__foot">{{ usersPerAccount }} por cuenta en promedio</div>
+            </div>
+            <div class="ct-stats__cell ct-stats__cell--warn">
+              <div class="ct-stats__head"><span class="ct-stats__dot"></span><span class="ct-stats__label">Sesiones activas</span></div>
+              <div class="ct-stats__value">{{ stats.users.activeSessions }}</div>
+              <div class="ct-stats__foot">usuarios conectados ahora</div>
+            </div>
+          </section>
 
-        <!-- Recent Accounts -->
-        <div class="card">
-          <h4 class="m-0 mb-3" style="color: var(--nx-text-secondary);">
-            <i class="pi pi-clock mr-2"></i>Registros recientes (últimos 7 días)
-          </h4>
-          <p-table [value]="stats.recentAccounts" styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Plan</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-acc>
-              <tr>
-                <td class="font-semibold">{{ acc.name }}</td>
-                <td>{{ acc.email }}</td>
-                <td>{{ acc.planName }}</td>
-                <td><p-tag [value]="getStatusLabel(acc.status)" [severity]="getStatusSeverity(acc.status)"></p-tag></td>
-                <td>{{ formatDate(acc.createdAt) }}</td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr><td colspan="5" class="text-center py-4" style="color: var(--nx-text-muted);">Sin registros recientes</td></tr>
-            </ng-template>
-          </p-table>
+          <!-- Estado de cuentas y suscripciones, lado a lado en UNA card -->
+          <section class="ct-card">
+            <div class="ct-cols ct-cols--2">
+              <div class="ct-cols__col">
+                <span class="ct-cols__title">Cuentas por estado</span>
+                <div class="pa-dist" *ngIf="stats.accounts.total > 0">
+                  <span class="pa-dist__seg pa-dist__seg--success" [style.flex-grow]="stats.accounts.active"></span>
+                  <span class="pa-dist__seg pa-dist__seg--danger" [style.flex-grow]="stats.accounts.suspended"></span>
+                  <span class="pa-dist__seg pa-dist__seg--muted" [style.flex-grow]="stats.accounts.inactive"></span>
+                </div>
+                <div class="ct-facts">
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--success"></span>Activas</span>
+                    <span class="ct-fact__value">{{ stats.accounts.active }} <span class="pa-pct">{{ pct(stats.accounts.active, stats.accounts.total) }}%</span></span>
+                  </div>
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--danger"></span>Suspendidas</span>
+                    <span class="ct-fact__value">{{ stats.accounts.suspended }} <span class="pa-pct">{{ pct(stats.accounts.suspended, stats.accounts.total) }}%</span></span>
+                  </div>
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--muted"></span>Inactivas</span>
+                    <span class="ct-fact__value">{{ stats.accounts.inactive }} <span class="pa-pct">{{ pct(stats.accounts.inactive, stats.accounts.total) }}%</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ct-cols__col">
+                <span class="ct-cols__title">Suscripciones por estado</span>
+                <div class="pa-dist" *ngIf="subsTotal > 0">
+                  <span class="pa-dist__seg pa-dist__seg--success" [style.flex-grow]="stats.subscriptions.active"></span>
+                  <span class="pa-dist__seg pa-dist__seg--sky" [style.flex-grow]="stats.subscriptions.trialing"></span>
+                  <span class="pa-dist__seg pa-dist__seg--warn" [style.flex-grow]="stats.subscriptions.pastDue"></span>
+                  <span class="pa-dist__seg pa-dist__seg--danger" [style.flex-grow]="stats.subscriptions.suspended"></span>
+                </div>
+                <div class="ct-facts">
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--success"></span>Activas</span>
+                    <span class="ct-fact__value">{{ stats.subscriptions.active }} <span class="pa-pct">{{ pct(stats.subscriptions.active, subsTotal) }}%</span></span>
+                  </div>
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--sky"></span>En prueba</span>
+                    <span class="ct-fact__value">{{ stats.subscriptions.trialing }} <span class="pa-pct">{{ pct(stats.subscriptions.trialing, subsTotal) }}%</span></span>
+                  </div>
+                  <div class="ct-fact" [class.ct-fact--missing]="stats.subscriptions.pastDue > 0">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--warn"></span>Vencidas</span>
+                    <span class="ct-fact__value">{{ stats.subscriptions.pastDue }} <span class="pa-pct">{{ pct(stats.subscriptions.pastDue, subsTotal) }}%</span></span>
+                  </div>
+                  <div class="ct-fact">
+                    <span class="ct-fact__label"><span class="pa-dot pa-dot--danger"></span>Suspendidas</span>
+                    <span class="ct-fact__value">{{ stats.subscriptions.suspended }} <span class="pa-pct">{{ pct(stats.subscriptions.suspended, subsTotal) }}%</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Registros recientes -->
+          <section class="ct-card">
+            <div class="ct-sec">
+              <span class="ct-sec__label">Registros recientes</span>
+              <span class="ct-sec__hint">Cuentas creadas en los últimos 7 días, con el plan que eligieron</span>
+            </div>
+            <p-table [value]="stats.recentAccounts" styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Plan</th>
+                  <th>Estado</th>
+                  <th class="text-right">Fecha</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-acc>
+                <tr>
+                  <td class="font-semibold">{{ acc.name }}</td>
+                  <td>{{ acc.email }}</td>
+                  <td>{{ acc.planName }}</td>
+                  <td><p-tag [value]="getStatusLabel(acc.status)" [severity]="getStatusSeverity(acc.status)"></p-tag></td>
+                  <td class="text-right ct-mono">{{ formatDate(acc.createdAt) }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr><td colspan="5">No se registró ninguna cuenta en los últimos 7 días.</td></tr>
+              </ng-template>
+            </p-table>
+          </section>
         </div>
       </ng-container>
 
@@ -253,7 +294,7 @@
         </div>
         <div class="col-6 md:col-3">
           <div class="nx-stat-card">
-            <div class="nx-stat-card__icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+            <div class="nx-stat-card__icon" style="background: var(--c-danger-soft); color: var(--c-danger);">
               <i class="pi pi-exclamation-triangle"></i>
             </div>
             <div class="nx-stat-card__info">
@@ -278,7 +319,7 @@
         <div class="col-12" *ngIf="paymentStats.awaitingTransfer?.count">
           <div class="nx-stat-card cursor-pointer" (click)="filterAwaitingTransfers()"
             pTooltip="Ver solo las transferencias informadas sin confirmar">
-            <div class="nx-stat-card__icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+            <div class="nx-stat-card__icon" style="background: var(--c-warn-soft); color: var(--c-warn);">
               <i class="pi pi-inbox"></i>
             </div>
             <div class="nx-stat-card__info">
@@ -915,7 +956,7 @@
 <p-dialog header="Marcar pago como recibido" [(visible)]="showConfirmTransferDialog"
           [modal]="true" [style]="{width: '520px', maxWidth: '95vw'}">
   <ng-container *ngIf="transferPayment">
-    <div class="mb-3 p-3 border-round" style="background: var(--nx-hover, #f9fafb);">
+    <div class="mb-3 p-3 border-round" style="background: var(--c-surface-2);">
       <div class="flex justify-content-between mb-2">
         <span style="color: var(--nx-text-muted);">Cuenta</span>
         <span class="font-semibold">{{ transferPayment.subscription?.account?.name || '-' }}</span>
@@ -935,7 +976,7 @@
     </div>
 
     <div *ngIf="transferPayment.transferReportedAt" class="mb-3 p-3 border-round"
-         style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b;">
+         style="background: var(--c-warn-soft); border: 1px solid color-mix(in srgb, var(--c-warn) 30%, transparent);">
       <p class="m-0 text-sm">
         El cliente informo la transferencia el <strong>{{ formatDate(transferPayment.transferReportedAt) }}</strong>.
       </p>
@@ -948,7 +989,7 @@
     </div>
 
     <div *ngIf="!transferPayment.transferReportedAt" class="mb-3 p-3 border-round"
-         style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6;">
+         style="background: var(--c-sky-soft); border: 1px solid color-mix(in srgb, var(--c-sky) 30%, transparent);">
       <p class="m-0 text-sm">
         El cliente no informo ninguna transferencia para este pago. Confirmalo solo si verificaste
         el ingreso en la cuenta bancaria.
@@ -983,7 +1024,7 @@
   </p>
 
   <div class="flex align-items-center justify-content-between p-3 mb-3 border-round"
-       style="background: var(--nx-hover, #f9fafb);">
+       style="background: var(--c-surface-2);">
     <div>
       <span class="font-semibold">Ofrecer pago por transferencia</span>
       <p class="text-sm m-0 mt-1" style="color: var(--nx-text-muted);">
