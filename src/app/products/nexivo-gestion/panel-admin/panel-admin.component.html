@@ -273,6 +273,51 @@
             </div>
           </div>
         </div>
+        <!-- Cola de trabajo manual: clickeable porque es lo unico de esta pantalla
+             que requiere una accion del superadmin, no solo mirar. -->
+        <div class="col-12" *ngIf="paymentStats.awaitingTransfer?.count">
+          <div class="nx-stat-card cursor-pointer" (click)="filterAwaitingTransfers()"
+            pTooltip="Ver solo las transferencias informadas sin confirmar">
+            <div class="nx-stat-card__icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+              <i class="pi pi-inbox"></i>
+            </div>
+            <div class="nx-stat-card__info">
+              <span class="nx-stat-card__value">{{ paymentStats.awaitingTransfer.count }}</span>
+              <span class="nx-stat-card__label">
+                Transferencias por confirmar ({{ formatCurrency(paymentStats.awaitingTransfer.totalAmount) }})
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos bancarios que ve el cliente. Se editan aca, no por variables de
+           entorno: cambiar un alias no deberia necesitar un redeploy. -->
+      <div class="card mb-3">
+        <div class="flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="flex align-items-center gap-3">
+            <i class="pi pi-building" style="font-size: 1.3rem; color: var(--nx-primary);"></i>
+            <div>
+              <div class="flex align-items-center gap-2">
+                <span class="font-semibold" style="color: var(--nx-text-primary);">Datos para transferencias</span>
+                <p-tag [value]="transferSettingsActive ? 'Activa' : 'Desactivada'"
+                  [severity]="transferSettingsActive ? 'success' : 'secondary'"></p-tag>
+              </div>
+              <p class="text-sm m-0 mt-1" style="color: var(--nx-text-muted);">
+                <ng-container *ngIf="transferSettingsActive">
+                  {{ transferSettings?.alias || transferSettings?.cbu }}
+                  <span *ngIf="transferSettings?.bankName"> &middot; {{ transferSettings?.bankName }}</span>
+                  <span *ngIf="transferSettings?.accountHolder"> &middot; {{ transferSettings?.accountHolder }}</span>
+                </ng-container>
+                <ng-container *ngIf="!transferSettingsActive">
+                  Los clientes no ven la opcion de pagar por transferencia. Carga CBU o alias y activala.
+                </ng-container>
+              </p>
+            </div>
+          </div>
+          <button pButton label="Editar" icon="pi pi-pencil" class="p-button-sm p-button-outlined"
+            (click)="openTransferSettings()"></button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -283,6 +328,13 @@
             placeholder="Todos" [showClear]="true" appendTo="body"
             (onChange)="onPaymentStatusFilterChange()"
             [style]="{'min-width': '180px'}"></p-dropdown>
+        </div>
+        <div class="field m-0">
+          <label class="block text-sm mb-1" style="color: var(--nx-text-muted);">Metodo</label>
+          <p-dropdown [options]="paymentMethodOptions" [(ngModel)]="paymentMethodFilter"
+            placeholder="Todos" [showClear]="true" appendTo="body"
+            (onChange)="onPaymentStatusFilterChange()"
+            [style]="{'min-width': '220px'}"></p-dropdown>
         </div>
         <div class="flex gap-2" style="align-self: flex-end;">
           <button pButton icon="pi pi-filter-slash" label="Limpiar"
@@ -304,10 +356,12 @@
               <th>Monto</th>
               <th>Periodo</th>
               <th>Estado</th>
+              <th>Metodo</th>
               <th>MP Status</th>
               <th>Tipo</th>
               <th>Fecha</th>
               <th>ID MP</th>
+              <th style="width: 10rem;">Acciones</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-payment>
@@ -320,6 +374,15 @@
               </td>
               <td>
                 <p-tag [value]="getPaymentStatusLabel(payment.status)" [severity]="getPaymentStatusSeverity(payment.status)"></p-tag>
+              </td>
+              <td>
+                <div class="flex flex-column gap-1">
+                  <span class="text-sm">{{ getPaymentMethodLabel(payment) }}</span>
+                  <p-tag *ngIf="isAwaitingTransfer(payment)" value="Informada - a confirmar" severity="warning"
+                    [pTooltip]="'Informada el ' + formatDate(payment.transferReportedAt) +
+                      (payment.transferReference ? ' - comprobante ' + payment.transferReference : '') +
+                      (payment.transferNotes ? ' - ' + payment.transferNotes : '')"></p-tag>
+                </div>
               </td>
               <td>
                 <p-tag *ngIf="payment.mercadoPagoStatus" [value]="getMpStatusLabel(payment.mercadoPagoStatus)" [severity]="getMpStatusSeverity(payment.mercadoPagoStatus)"></p-tag>
@@ -335,10 +398,17 @@
                 </span>
                 <span *ngIf="!payment.mercadoPagoTransactionId" class="text-500">-</span>
               </td>
+              <td>
+                <button *ngIf="canConfirmTransfer(payment)" pButton label="Marcar pagado" icon="pi pi-check"
+                  class="p-button-sm" [class.p-button-outlined]="!isAwaitingTransfer(payment)"
+                  (click)="openConfirmTransfer(payment)"
+                  pTooltip="Acreditar el pago manualmente (transferencia recibida)"></button>
+                <span *ngIf="!canConfirmTransfer(payment)" class="text-500 text-sm">-</span>
+              </td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
-            <tr><td colspan="9" class="text-center py-5" style="color: var(--nx-text-muted);">
+            <tr><td colspan="11" class="text-center py-5" style="color: var(--nx-text-muted);">
               <i class="pi pi-inbox text-3xl mb-2 block"></i>Sin pagos registrados
             </td></tr>
           </ng-template>
@@ -752,6 +822,10 @@
             <span class="detail-label">Muestra stock</span>
             <span class="detail-value">{{ detailStore.homeConfig?.showStock ? 'Sí' : 'No' }}</span>
           </div>
+          <div class="detail-item">
+            <span class="detail-label">Oculta agotados</span>
+            <span class="detail-value">{{ detailStore.homeConfig?.hideOutOfStock ? 'Sí' : 'No' }}</span>
+          </div>
         </div>
         <div class="flex gap-2" *ngIf="detailStore.slug">
           <a [href]="getStoreUrl(detailStore.slug)" target="_blank" rel="noopener noreferrer"
@@ -798,5 +872,136 @@
     <button pButton label="Cancelar" class="p-button-text" (click)="showNoteDialog = false"></button>
     <button pButton label="Guardar" icon="pi pi-check" [loading]="savingNote"
             [disabled]="!noteContent.trim()" (click)="saveNote()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- ═══ Confirmar transferencia recibida ═══
+     Accion irreversible: acredita el pago, avanza el periodo de la suscripcion y
+     reactiva la cuenta si estaba suspendida. Por eso el resumen antes del boton. -->
+<p-dialog header="Marcar pago como recibido" [(visible)]="showConfirmTransferDialog"
+          [modal]="true" [style]="{width: '520px', maxWidth: '95vw'}">
+  <ng-container *ngIf="transferPayment">
+    <div class="mb-3 p-3 border-round" style="background: var(--nx-hover, #f9fafb);">
+      <div class="flex justify-content-between mb-2">
+        <span style="color: var(--nx-text-muted);">Cuenta</span>
+        <span class="font-semibold">{{ transferPayment.subscription?.account?.name || '-' }}</span>
+      </div>
+      <div class="flex justify-content-between mb-2">
+        <span style="color: var(--nx-text-muted);">Plan</span>
+        <span class="font-semibold">{{ transferPayment.subscription?.plan?.displayName || '-' }}</span>
+      </div>
+      <div class="flex justify-content-between mb-2">
+        <span style="color: var(--nx-text-muted);">Periodo</span>
+        <span class="font-semibold">{{ formatDate(transferPayment.periodStart) }} - {{ formatDate(transferPayment.periodEnd) }}</span>
+      </div>
+      <div class="flex justify-content-between">
+        <span style="color: var(--nx-text-muted);">Importe</span>
+        <span class="font-bold text-lg">{{ formatCurrency(transferPayment.amount) }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="transferPayment.transferReportedAt" class="mb-3 p-3 border-round"
+         style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b;">
+      <p class="m-0 text-sm">
+        El cliente informo la transferencia el <strong>{{ formatDate(transferPayment.transferReportedAt) }}</strong>.
+      </p>
+      <p *ngIf="transferPayment.transferReference" class="m-0 mt-1 text-sm">
+        Comprobante: <strong>{{ transferPayment.transferReference }}</strong>
+      </p>
+      <p *ngIf="transferPayment.transferNotes" class="m-0 mt-1 text-sm">
+        Comentario: {{ transferPayment.transferNotes }}
+      </p>
+    </div>
+
+    <div *ngIf="!transferPayment.transferReportedAt" class="mb-3 p-3 border-round"
+         style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6;">
+      <p class="m-0 text-sm">
+        El cliente no informo ninguna transferencia para este pago. Confirmalo solo si verificaste
+        el ingreso en la cuenta bancaria.
+      </p>
+    </div>
+
+    <div class="field">
+      <label>Nota interna <span style="color: var(--nx-text-muted);">(opcional)</span></label>
+      <textarea pInputTextarea [(ngModel)]="transferAdminNotes" rows="3" class="w-full" maxlength="500"
+                placeholder="Ej: acreditado en Galicia el 01/08, comprobante verificado"></textarea>
+    </div>
+
+    <p class="text-sm m-0" style="color: var(--nx-text-muted);">
+      Al confirmar se acredita el pago, la suscripcion avanza al proximo periodo y la cuenta se
+      reactiva si estaba suspendida.
+    </p>
+  </ng-container>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showConfirmTransferDialog = false"></button>
+    <button pButton label="Confirmar pago recibido" icon="pi pi-check" [loading]="confirmingTransfer"
+            (click)="confirmTransfer()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- ═══ Editor de datos bancarios ═══ -->
+<p-dialog header="Datos para transferencias" [(visible)]="showTransferSettingsDialog"
+          [modal]="true" [style]="{width: '560px', maxWidth: '95vw'}">
+  <p class="text-sm mt-0 mb-3" style="color: var(--nx-text-muted);">
+    Es lo que ve el cliente cuando elige pagar la suscripcion por transferencia.
+    Los campos vacios no se muestran.
+  </p>
+
+  <div class="flex align-items-center justify-content-between p-3 mb-3 border-round"
+       style="background: var(--nx-hover, #f9fafb);">
+    <div>
+      <span class="font-semibold">Ofrecer pago por transferencia</span>
+      <p class="text-sm m-0 mt-1" style="color: var(--nx-text-muted);">
+        Necesita CBU o alias cargado para activarse.
+      </p>
+    </div>
+    <p-inputSwitch [(ngModel)]="editingTransferSettings.isEnabled"></p-inputSwitch>
+  </div>
+
+  <div class="grid">
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">Alias</label>
+      <input pInputText class="w-full" maxlength="60" [(ngModel)]="editingTransferSettings.alias"
+             placeholder="nexivo.pagos" />
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">CBU / CVU</label>
+      <input pInputText class="w-full" maxlength="34" [(ngModel)]="editingTransferSettings.cbu"
+             placeholder="0000003100010000000001" />
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">Banco</label>
+      <input pInputText class="w-full" maxlength="120" [(ngModel)]="editingTransferSettings.bankName" />
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">Titular</label>
+      <input pInputText class="w-full" maxlength="160" [(ngModel)]="editingTransferSettings.accountHolder" />
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">CUIT</label>
+      <input pInputText class="w-full" maxlength="20" [(ngModel)]="editingTransferSettings.cuit" />
+    </div>
+    <div class="col-12 md:col-6 field">
+      <label class="block text-sm mb-1">Nro. de cuenta</label>
+      <input pInputText class="w-full" maxlength="60" [(ngModel)]="editingTransferSettings.accountNumber" />
+    </div>
+    <div class="col-12 field">
+      <label class="block text-sm mb-1">Contacto para el comprobante</label>
+      <input pInputText class="w-full" maxlength="160" [(ngModel)]="editingTransferSettings.contact"
+             placeholder="WhatsApp 11 5555-5555 / pagos@nexivo.com.ar" />
+    </div>
+    <div class="col-12 field">
+      <label class="block text-sm mb-1">Aclaraciones</label>
+      <textarea pInputTextarea class="w-full" rows="2" maxlength="1000"
+                [(ngModel)]="editingTransferSettings.instructions"
+                placeholder="La acreditacion puede demorar hasta 24hs habiles."></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="showTransferSettingsDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" [loading]="savingTransferSettings"
+            (click)="saveTransferSettings()"></button>
   </ng-template>
 </p-dialog>

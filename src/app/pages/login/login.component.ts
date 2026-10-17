@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService, SessionConflictResponse, isSessionConflict } from '../../core/services/auth.service';
+import { deviceKindLabel, deviceLabel } from '../../core/utils/device-label.util';
 
 @Component({
   selector: 'app-login',
@@ -79,6 +80,39 @@ import { AuthService } from '../../core/services/auth.service';
           Requiere permisos de Super Administrador.<br>
           En producción el acceso es vía SSO.
         </p>
+      </div>
+
+      <!--
+        Sesión única: las credenciales YA se validaron, pero la cuenta tiene una
+        sesión abierta en otro dispositivo. Todavía no hay sesión emitida acá ni
+        se tocó la otra: si cancela, el otro dispositivo no se entera de nada.
+      -->
+      <div class="nx-takeover" *ngIf="sessionConflict" role="dialog" aria-modal="true">
+        <div class="nx-takeover-card">
+          <h2 class="nx-takeover-title">Ya tenés una sesión abierta en {{ conflictDeviceKindLabel }}</h2>
+          <p class="nx-takeover-sub">
+            Podés usar la cuenta en una computadora y en un celular a la vez, pero no en dos
+            del mismo tipo.
+          </p>
+
+          <div class="nx-takeover-device">
+            <strong>{{ conflictDeviceLabel }}</strong>
+            <span *ngIf="conflictIp">IP {{ conflictIp }}</span>
+          </div>
+
+          <p class="nx-takeover-warning">
+            Si continuás, <strong>esa sesión se va a cerrar</strong>.
+          </p>
+
+          <div class="nx-takeover-actions">
+            <button type="button" class="nx-takeover-btn" (click)="cancelSessionTakeover()"
+              [disabled]="takeoverLoading">Cancelar</button>
+            <button type="button" class="nx-login-btn nx-takeover-btn" (click)="confirmSessionTakeover()"
+              [disabled]="takeoverLoading">
+              {{ takeoverLoading ? 'Cerrando...' : 'Cerrar la otra e ingresar' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -282,6 +316,97 @@ import { AuthService } from '../../core/services/auth.service';
       text-align: center;
       line-height: 1.6;
     }
+
+    /* ── Aviso de sesión abierta en otro dispositivo ── */
+    .nx-takeover {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(3px);
+    }
+
+    .nx-takeover-card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem 1.5rem;
+      box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.35);
+    }
+
+    .nx-takeover-title {
+      margin: 0 0 0.35rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #09090B;
+      letter-spacing: -0.02em;
+    }
+
+    .nx-takeover-sub {
+      margin: 0 0 1rem;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .nx-takeover-device {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.75rem 0.9rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+
+    .nx-takeover-device strong { color: #0f172a; }
+
+    .nx-takeover-warning {
+      margin: 0 0 1.25rem;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: #475569;
+    }
+
+    .nx-takeover-warning strong { color: #0f172a; }
+
+    .nx-takeover-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 0.6rem;
+    }
+
+    /* Anula el margen que el botón primario trae del formulario. */
+    .nx-takeover-btn { margin-top: 0; }
+
+    /* Secundario: visible sobre la tarjeta sin competir con el primario. */
+    button.nx-takeover-btn:not(.nx-login-btn) {
+      padding: 0.7rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+    }
+
+    button.nx-takeover-btn:not(.nx-login-btn):hover:not(:disabled) {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    button.nx-takeover-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   `],
 })
 export class LoginComponent {
@@ -290,7 +415,31 @@ export class LoginComponent {
   loading = false;
   errorMsg = '';
 
+  /**
+   * Login válido pero FRENADO porque la cuenta ya tiene una sesión abierta.
+   * Mientras esto no sea null no hay sesión emitida: si se cancela, el otro
+   * dispositivo sigue intacto.
+   */
+  sessionConflict: SessionConflictResponse | null = null;
+  takeoverLoading = false;
+
   constructor(private authService: AuthService, private router: Router) {}
+
+  get conflictDeviceLabel(): string {
+    return deviceLabel(this.sessionConflict?.activeSession?.userAgent ?? null);
+  }
+
+  /**
+   * "otra computadora" / "otro celular": con el cupo doble hay que decir CUÁL
+   * se cierra, si no la persona no sabe qué está por perder.
+   */
+  get conflictDeviceKindLabel(): string {
+    return deviceKindLabel(this.sessionConflict?.activeSession?.deviceKind ?? null);
+  }
+
+  get conflictIp(): string | null {
+    return this.sessionConflict?.activeSession?.ip ?? null;
+  }
 
   login(): void {
     if (!this.email || !this.password) {
@@ -301,18 +450,55 @@ export class LoginComponent {
     this.errorMsg = '';
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        const user = res.user ?? res;
         this.loading = false;
-        if (!user.isSuperAdmin) {
-          this.errorMsg = 'Tu usuario no tiene permisos de Super Administrador.';
+        // Sesión abierta en otro dispositivo: avisamos antes de cerrarla.
+        if (isSessionConflict(res)) {
+          this.sessionConflict = res;
           return;
         }
-        this.router.navigate(['/']);
+        this.enterPanel(res);
       },
       error: (err) => {
         this.loading = false;
         this.errorMsg = err?.error?.message || 'Credenciales inválidas.';
       },
     });
+  }
+
+  /** Confirma: cierra la otra sesión y termina el login que quedó frenado. */
+  confirmSessionTakeover(): void {
+    const takeoverToken = this.sessionConflict?.takeoverToken;
+    if (!takeoverToken || this.takeoverLoading) return;
+
+    this.takeoverLoading = true;
+    this.authService.confirmSessionTakeover(takeoverToken).subscribe({
+      next: (res) => {
+        this.takeoverLoading = false;
+        this.sessionConflict = null;
+        this.enterPanel(res);
+      },
+      error: (err) => {
+        this.takeoverLoading = false;
+        this.sessionConflict = null;
+        this.password = '';
+        // 401 = el token de confirmación (5 min) venció.
+        this.errorMsg = err?.error?.message || 'No se pudo cerrar la otra sesión. Intentá de nuevo.';
+      },
+    });
+  }
+
+  /** Cancela el ingreso: la otra sesión queda abierta y acá no se entra. */
+  cancelSessionTakeover(): void {
+    this.sessionConflict = null;
+    this.password = '';
+  }
+
+  private enterPanel(res: any): void {
+    const user = res.user ?? res;
+    if (!user?.isSuperAdmin) {
+      this.errorMsg = 'Tu usuario no tiene permisos de Super Administrador.';
+      return;
+    }
+    this.router.navigate(['/']);
   }
 }

@@ -38,6 +38,7 @@ export const PRODUCTS: ProductConfig[] = [
     routePath: '/products/nexivo-turnos',
     menuItems: [
       { label: 'Suscripciones', icon: 'pi pi-list',        routeSuffix: 'subscriptions' },
+      { label: 'Cobranzas',     icon: 'pi pi-wallet',      routeSuffix: 'collections' },
       { label: 'Planes',        icon: 'pi pi-tag',         routeSuffix: 'plans' },
       { label: 'Métricas',      icon: 'pi pi-chart-line',  routeSuffix: 'metrics' },
       { label: 'Mantenimiento', icon: 'pi pi-wrench',      routeSuffix: 'maintenance' },

@@ -2,7 +2,7 @@ import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -41,11 +41,14 @@ export class ReferralsComponent implements OnInit {
   referrers: Referrer[] = [];
   loadingReferrers = false;
 
-  // Commissions
+  // Commissions (paginado en servidor)
   commissions: ReferralCommission[] = [];
   loadingCommissions = false;
   commissionStatusFilter = '';
   selectedCommissions: ReferralCommission[] = [];
+  totalCommissions = 0;
+  commissionFirst = 0;
+  commissionRows = 20;
 
   // Referrer dialog
   showReferrerDialog = false;
@@ -100,20 +103,28 @@ export class ReferralsComponent implements OnInit {
       });
   }
 
-  loadCommissions(): void {
+  /**
+   * Paginado en servidor: la tabla dispara este handler al inicializarse
+   * (`lazy`) y en cada cambio de página.
+   */
+  loadCommissions(event?: TableLazyLoadEvent): void {
+    const rows = event?.rows ?? this.commissionRows;
+    const first = event?.first ?? this.commissionFirst;
+    this.commissionRows = rows;
+    this.commissionFirst = first;
+    const page = Math.floor(first / rows) + 1;
+
     this.loadingCommissions = true;
-    this.referralService.getAllCommissions(this.commissionStatusFilter || undefined)
+    this.referralService.getAllCommissions(this.commissionStatusFilter || undefined, page, rows)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => { this.commissions = data; this.loadingCommissions = false; },
+        next: (res) => {
+          this.commissions = res.items;
+          this.totalCommissions = res.total;
+          this.loadingCommissions = false;
+        },
         error: () => { this.loadingCommissions = false; this.toast('error', 'Error al cargar comisiones'); },
       });
-  }
-
-  onTabChange(event: any): void {
-    if (event.index === 1 && this.commissions.length === 0) {
-      this.loadCommissions();
-    }
   }
 
   // ─── REFERRER CRUD ─────────────────────────────────────
@@ -129,7 +140,19 @@ export class ReferralsComponent implements OnInit {
   }
 
   openEditReferrer(r: Referrer): void {
-    this.referrer = { ...r };
+    // Solo los campos editables: la API rechaza cualquier extra
+    // (forbidNonWhitelisted) y los decimales llegan como string.
+    this.referrer = {
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      phone: r.phone,
+      code: r.code,
+      status: r.status,
+      commissionType: r.commissionType,
+      discountPercentage: Number(r.discountPercentage),
+      commissionValue: Number(r.commissionValue),
+    };
     this.editingReferrer = true;
     this.showReferrerDialog = true;
   }
@@ -190,6 +213,8 @@ export class ReferralsComponent implements OnInit {
   // ─── COMMISSIONS ──────────────────────────────────────
 
   filterCommissions(): void {
+    this.commissionFirst = 0;
+    this.selectedCommissions = [];
     this.loadCommissions();
   }
 
@@ -206,11 +231,12 @@ export class ReferralsComponent implements OnInit {
     this.referralService.markCommissionsPaid(ids)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
+          const updated = res?.updated ?? ids.length;
           this.selectedCommissions = [];
           this.loadCommissions();
           this.loadStats();
-          this.toast('success', `${ids.length} comisiones marcadas como pagadas`);
+          this.toast('success', updated === 1 ? '1 comisión marcada como pagada' : `${updated} comisiones marcadas como pagadas`);
         },
         error: () => this.toast('error', 'Error al marcar comisiones'),
       });

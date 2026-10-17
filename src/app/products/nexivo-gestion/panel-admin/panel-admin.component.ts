@@ -6,6 +6,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
@@ -29,7 +30,7 @@ import {
   AccountNote,
   StoreOverview,
 } from '../interfaces/admin-panel.interface';
-import { AdminPayment, PaymentStats } from '../interfaces/subscription.interface';
+import { AdminPayment, PaymentStats, TransferSettings } from '../interfaces/subscription.interface';
 import { environment } from '../../../../environments/environment';
 
 interface DropdownOption {
@@ -43,7 +44,7 @@ interface DropdownOption {
   imports: [
     CommonModule, FormsModule,
     TableModule, ButtonModule, DialogModule,
-    InputTextModule, InputTextareaModule, DropdownModule,
+    InputTextModule, InputSwitchModule, InputTextareaModule, DropdownModule,
     TagModule, TabViewModule, CalendarModule,
     ToastModule, TooltipModule, ConfirmDialogModule,
     PaginatorModule, DividerModule, RouterModule,
@@ -110,6 +111,26 @@ export class PanelAdminComponent implements OnInit {
     { label: 'Completado', value: 'completed' },
     { label: 'Vencido', value: 'overdue' },
   ];
+  paymentMethodFilter: string | null = null;
+  paymentMethodOptions: DropdownOption[] = [
+    // 'awaiting_transfer' no es un metodo sino la bandeja de trabajo: transferencias
+    // informadas por el cliente que todavia no confirmamos.
+    { label: 'Transferencias por confirmar', value: 'awaiting_transfer' },
+    { label: 'Transferencia', value: 'bank_transfer' },
+    { label: 'Mercado Pago', value: 'mercado_pago' },
+  ];
+
+  // Confirmacion manual de transferencia
+  showConfirmTransferDialog = false;
+  transferPayment: AdminPayment | null = null;
+  transferAdminNotes = '';
+  confirmingTransfer = false;
+
+  // Datos bancarios que se le muestran al cliente para transferir
+  transferSettings: TransferSettings | null = null;
+  showTransferSettingsDialog = false;
+  editingTransferSettings: Partial<TransferSettings> = {};
+  savingTransferSettings = false;
 
   // Demos
   demoStats: any = {};
@@ -135,6 +156,7 @@ export class PanelAdminComponent implements OnInit {
       this.loadPayments();
       this.loadPaymentStats();
     }
+    if (index === 2 && !this.transferSettings) this.loadTransferSettings();
     if (index === 3 && this.activityLogs.length === 0) {
       this.loadActivity();
       this.loadControllerOptions();
@@ -396,6 +418,7 @@ export class PanelAdminComponent implements OnInit {
     this.loadingPayments = true;
     this.subscriptionService.getAllPayments({
       status: this.paymentStatusFilter || undefined,
+      method: this.paymentMethodFilter || undefined,
       page: this.paymentsPage,
       limit: this.paymentsLimit,
     }).subscribe({
@@ -431,8 +454,128 @@ export class PanelAdminComponent implements OnInit {
 
   clearPaymentFilters(): void {
     this.paymentStatusFilter = null;
+    this.paymentMethodFilter = null;
     this.paymentsPage = 1;
     this.loadPayments();
+  }
+
+  /** Atajo del KPI: deja la tabla mostrando solo lo que hay que confirmar a mano. */
+  filterAwaitingTransfers(): void {
+    this.paymentStatusFilter = null;
+    this.paymentMethodFilter = 'awaiting_transfer';
+    this.paymentsPage = 1;
+    this.loadPayments();
+  }
+
+  // ─── Datos bancarios para transferencias ───
+
+  loadTransferSettings(): void {
+    this.subscriptionService.getTransferSettings().subscribe({
+      next: (s) => this.transferSettings = s,
+      error: () => {},
+    });
+  }
+
+  /** True si el cliente realmente va a ver la opcion de transferir. */
+  get transferSettingsActive(): boolean {
+    return !!this.transferSettings?.isEnabled
+      && !!(this.transferSettings?.cbu || this.transferSettings?.alias);
+  }
+
+  openTransferSettings(): void {
+    this.editingTransferSettings = { ...(this.transferSettings || { isEnabled: false }) } as Partial<TransferSettings>;
+    this.showTransferSettingsDialog = true;
+  }
+
+  saveTransferSettings(): void {
+    this.savingTransferSettings = true;
+    const d = this.editingTransferSettings;
+
+    this.subscriptionService.updateTransferSettings({
+      isEnabled: !!d.isEnabled,
+      bankName: d.bankName ?? null,
+      accountHolder: d.accountHolder ?? null,
+      cuit: d.cuit ?? null,
+      cbu: d.cbu ?? null,
+      alias: d.alias ?? null,
+      accountNumber: d.accountNumber ?? null,
+      contact: d.contact ?? null,
+      instructions: d.instructions ?? null,
+    }).subscribe({
+      next: (s) => {
+        this.savingTransferSettings = false;
+        this.transferSettings = s;
+        this.showTransferSettingsDialog = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Datos guardados',
+          detail: s.isEnabled ? 'La opcion de transferencia esta activa' : 'La opcion de transferencia quedo desactivada',
+        });
+      },
+      error: (err) => {
+        this.savingTransferSettings = false;
+        const msg = err?.error?.message;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: Array.isArray(msg) ? msg.join(' ') : (msg || 'No se pudieron guardar los datos'),
+        });
+      },
+    });
+  }
+
+  // ─── Confirmacion manual de transferencias ───
+
+  /**
+   * Se puede acreditar cualquier pago no completado, lo haya informado el cliente o
+   * no: muchos avisan por WhatsApp y la transferencia se carga igual.
+   */
+  canConfirmTransfer(payment: AdminPayment): boolean {
+    return payment.status !== 'completed';
+  }
+
+  isAwaitingTransfer(payment: AdminPayment): boolean {
+    return !!payment.transferReportedAt && payment.status !== 'completed';
+  }
+
+  openConfirmTransfer(payment: AdminPayment): void {
+    this.transferPayment = payment;
+    this.transferAdminNotes = '';
+    this.showConfirmTransferDialog = true;
+  }
+
+  confirmTransfer(): void {
+    if (!this.transferPayment) return;
+    this.confirmingTransfer = true;
+
+    this.subscriptionService.confirmTransferPayment(this.transferPayment.id, this.transferAdminNotes.trim() || undefined)
+      .subscribe({
+        next: () => {
+          this.confirmingTransfer = false;
+          this.showConfirmTransferDialog = false;
+          this.transferPayment = null;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Pago acreditado',
+            detail: 'La suscripcion avanzo de periodo y la cuenta quedo al dia',
+          });
+          this.loadPayments();
+          this.loadPaymentStats();
+        },
+        error: (err) => {
+          this.confirmingTransfer = false;
+          const msg = err?.error?.message;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: Array.isArray(msg) ? msg.join(' ') : (msg || 'No se pudo acreditar el pago'),
+          });
+        },
+      });
+  }
+
+  getPaymentMethodLabel(payment: AdminPayment): string {
+    return payment.paymentMethod === 'bank_transfer' ? 'Transferencia' : 'Mercado Pago';
   }
 
   getPaymentStatusLabel(status: string): string {

@@ -18,6 +18,10 @@ import { RouterModule } from '@angular/router';
         loadComponent: () => import('./subscription-detail/subscription-detail.component').then(m => m.SubscriptionDetailComponent),
       },
       {
+        path: 'collections',
+        loadComponent: () => import('./collections/turnos-collections.component').then(m => m.TurnosCollectionsComponent),
+      },
+      {
         path: 'plans',
         loadComponent: () => import('./plans/turnos-plans.component').then(m => m.TurnosPlansComponent),
       },

@@ -79,7 +79,7 @@
   </div>
 
   <!-- Tabs -->
-  <p-tabView (onChange)="onTabChange($event)">
+  <p-tabView>
 
     <!-- TAB 1: Referentes -->
     <p-tabPanel header="Referentes" leftIcon="pi pi-user">
@@ -166,7 +166,12 @@
                 (click)="markSelectedPaid()"></button>
       </div>
 
-      <p-table [value]="commissions" [loading]="loadingCommissions" [paginator]="true" [rows]="15"
+      <p-table [value]="commissions" [loading]="loadingCommissions" [paginator]="true"
+               [lazy]="true" (onLazyLoad)="loadCommissions($event)"
+               [totalRecords]="totalCommissions" [first]="commissionFirst" [rows]="commissionRows"
+               [rowsPerPageOptions]="[20, 50, 100]"
+               currentPageReportTemplate="{first} - {last} de {totalRecords}"
+               [showCurrentPageReport]="true"
                styleClass="p-datatable-sm" [rowHover]="true" responsiveLayout="scroll"
                [scrollable]="true" scrollDirection="horizontal"
                [(selection)]="selectedCommissions" dataKey="id">
@@ -175,12 +180,15 @@
             <th style="width: 3rem">
               <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
-            <th pSortableColumn="referral.referrer.name">Referente <p-sortIcon field="referral.referrer.name"></p-sortIcon></th>
+            <!-- Sin columnas ordenables: la tabla pagina en servidor y siempre
+                 viene ordenada por fecha desc; ordenar solo la página visible
+                 daría un resultado engañoso. -->
+            <th>Referente</th>
             <th>Cuenta Referida</th>
-            <th pSortableColumn="amount">Monto <p-sortIcon field="amount"></p-sortIcon></th>
+            <th>Monto</th>
             <th>Estado</th>
-            <th pSortableColumn="paidAt">Fecha Pago <p-sortIcon field="paidAt"></p-sortIcon></th>
-            <th pSortableColumn="createdAt">Fecha <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th>Fecha Pago</th>
+            <th>Fecha</th>
           </tr>
         </ng-template>
 

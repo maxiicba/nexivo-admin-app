@@ -130,6 +130,8 @@
               <p-tag *ngIf="plan.hasVisualEditor" value="Editor Visual" severity="success" [rounded]="true" icon="pi pi-palette"></p-tag>
               <p-tag *ngIf="plan.hasChatBot" value="Chat Bot" severity="success" [rounded]="true" icon="pi pi-comment"></p-tag>
               <p-tag *ngIf="plan.hasMarketing" value="Marketing" severity="success" [rounded]="true" icon="pi pi-megaphone"></p-tag>
+              <p-tag *ngIf="plan.hasLoyalty" value="Club de Socios" severity="success" [rounded]="true" icon="pi pi-star"></p-tag>
+              <p-tag *ngIf="plan.hasCrm" value="CRM" severity="success" [rounded]="true" icon="pi pi-users"></p-tag>
               <p-tag *ngIf="plan.hasSupportAgent" value="Soporte Agente" severity="success" [rounded]="true" icon="pi pi-headphones"></p-tag>
               <p-tag *ngIf="plan.hasMercadoPago" value="Mercado Pago" severity="success" [rounded]="true" icon="pi pi-credit-card"></p-tag>
               <p-tag *ngIf="plan.hasInvoiceFlexibility" value="Fact. Flexible" severity="success" [rounded]="true" icon="pi pi-receipt"></p-tag>
@@ -343,6 +345,24 @@
         <div class="flex align-items-center gap-2">
           <p-inputSwitch [(ngModel)]="editingPlan.hasPaymentMethodFees"></p-inputSwitch>
           <label class="text-sm">Comisiones de Pago</label>
+        </div>
+      </div>
+      <!--
+        Club de Socios: flag propio (hasLoyalty), NO cuelga de Marketing. Prenderlo acá es lo
+        único que hace visible el módulo en la app: el menú lo filtra por planFeature y el plan
+        queda cacheado 15 min en Redis, así que el cambio puede tardar en verse.
+      -->
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasLoyalty"></p-inputSwitch>
+          <label class="text-sm">Club de Socios</label>
+        </div>
+      </div>
+      <!-- CRM: flag propio (hasCrm). Si no se prende en algún plan, el módulo es inalcanzable. -->
+      <div class="col-6 md:col-4">
+        <div class="flex align-items-center gap-2">
+          <p-inputSwitch [(ngModel)]="editingPlan.hasCrm"></p-inputSwitch>
+          <label class="text-sm">CRM</label>
         </div>
       </div>
     </div>

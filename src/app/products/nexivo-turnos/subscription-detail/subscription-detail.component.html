@@ -153,6 +153,13 @@
     </div>
   </p-tabPanel>
 
+  <!-- ── ESTADO DE CUENTA (cargos / cobranza) ───────────────────────────────── -->
+  <p-tabPanel header="Estado de cuenta" leftIcon="pi pi-receipt">
+    <ng-template pTemplate="content">
+      <app-subscription-statement [subscriptionId]="id" (changed)="loadAll()"></app-subscription-statement>
+    </ng-template>
+  </p-tabPanel>
+
   <!-- ── PAYMENTS ──────────────────────────────────────────────────────────── -->
   <p-tabPanel [header]="'Pagos (' + payments.length + ')'" leftIcon="pi pi-dollar">
     <div class="card">
@@ -343,7 +350,7 @@
 
     <div class="nx-credit-hint">
       <i class="pi pi-info-circle"></i>
-      <span>Consumo automático en el próximo cron de facturación. El crédito puede revertirse antes del cobro.</span>
+      <span>Se descuenta del cargo del período vigente (o del próximo que se genere). Mientras no se aplique, se puede eliminar.</span>
     </div>
   </div>
   <ng-template pTemplate="footer">

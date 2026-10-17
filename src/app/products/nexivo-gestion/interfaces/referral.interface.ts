@@ -41,6 +41,25 @@ export interface ReferralCommission {
   createdAt: string;
 }
 
+/** Campos que la API acepta al crear/editar un referente (whitelist del DTO). */
+export interface ReferrerPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  code?: string;
+  discountPercentage?: number;
+  commissionType?: CommissionType;
+  commissionValue?: number;
+  status?: string;
+}
+
+export interface PaginatedCommissions {
+  items: ReferralCommission[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface ReferralDashboardStats {
   totalReferrers: number;
   activeReferrals: number;

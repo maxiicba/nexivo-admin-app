@@ -384,31 +384,25 @@
 <p-dialog [(visible)]="bulkNotifyDialog" header="Notificar (masivo)" [modal]="true"
           [style]="{width: '500px'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
   <div class="flex flex-column gap-3 py-2">
-    <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas</div>
-    <div class="grid">
-      <div class="col-6 field">
-        <label class="nx-form-label">Canal</label>
-        <p-dropdown [options]="notifyChannelOptions" [(ngModel)]="bulkNotifyChannel"
-                    optionLabel="label" optionValue="value"
-                    appendTo="body" class="w-full" styleClass="nx-dd"></p-dropdown>
-      </div>
-      <div class="col-6 field">
-        <label class="nx-form-label">Plantilla</label>
-        <input pInputText [(ngModel)]="bulkNotifyTemplate" placeholder="reminder | overdue | trial_ending" class="w-full">
-      </div>
-    </div>
+    <div class="text-sm text-color-secondary">{{ selected.length }} suscripciones seleccionadas · se envía por email</div>
     <div class="field">
-      <label class="nx-form-label">Mensaje custom (opcional)</label>
-      <textarea pInputTextarea [(ngModel)]="bulkNotifyMessage" rows="3" class="w-full"></textarea>
+      <label class="nx-form-label">Plantilla</label>
+      <p-dropdown [options]="notifyTemplateOptions" [(ngModel)]="bulkNotifyTemplate"
+                  optionLabel="label" optionValue="value"
+                  appendTo="body" class="w-full" styleClass="nx-dd"></p-dropdown>
     </div>
-    <div class="text-xs text-color-secondary">
-      El envío real está diferido — por ahora se registra la intención en auditoría.
+    <div class="field" *ngIf="bulkNotifyTemplate === 'custom'">
+      <label class="nx-form-label">Mensaje</label>
+      <textarea pInputTextarea [(ngModel)]="bulkNotifyMessage" rows="4" class="w-full"></textarea>
+    </div>
+    <div class="text-xs text-color-secondary" *ngIf="bulkNotifyTemplate === 'payment_reminder'">
+      Cada negocio recibe su saldo y próximo vencimiento. Los que no deben nada quedan como error ("No tiene saldo pendiente").
     </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton label="Volver" class="p-button-text" (click)="bulkNotifyDialog = false"></button>
     <button pButton label="Notificar" [loading]="saving"
-            [disabled]="!bulkNotifyTemplate.trim()"
+            [disabled]="bulkNotifyTemplate === 'custom' && !bulkNotifyMessage.trim()"
             (click)="confirmBulkNotify()"></button>
   </ng-template>
 </p-dialog>

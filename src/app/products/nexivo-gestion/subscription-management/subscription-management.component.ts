@@ -150,6 +150,8 @@ export class SubscriptionManagementComponent implements OnInit {
       hasOnlineStore: false, hasWhatsapp: false, hasAdvancedReports: false,
       hasCompras: false, hasGastos: false, hasWhatsappAlerts: false, hasGranularPermissions: false, hasPayroll: false, hasTreasury: false,
       hasMarketing: false, marketingAiDailyLimit: 0, marketingAiMonthlyLimit: 0,
+      hasLoyalty: false,
+      hasCrm: false,
       hasAiDescriptions: false, maxAiDescriptionsDaily: 0, maxAiDescriptionsMonthly: 0,
       hasAiImageAnalysis: false, maxMonthlyAiAnalysis: 0, maxDailyAiAnalysis: 0,
       hasChatBot: false, hasSupportAgent: false, hasMercadoPago: false, hasInvoiceFlexibility: false, hasPaymentMethodFees: false, hasStockTransfers: true, hasModuleManagement: true, hasWarehouse: false,
@@ -347,6 +349,8 @@ export class SubscriptionManagementComponent implements OnInit {
       const limits = [daily, monthly].filter(Boolean).join(', ');
       lines.push(`Marketing${limits ? ` (IA: ${limits})` : ''}`);
     }
+    if (p.hasLoyalty) lines.push('Club de Socios (fidelización + CRM)');
+    if (p.hasCrm) lines.push('CRM (contactos, bandeja y clientes para contactar)');
     if (p.hasSupportAgent) lines.push('Soporte con agente');
     if (p.hasMercadoPago) lines.push('Mercado Pago');
     lines.push('Soporte por email');

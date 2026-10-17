@@ -27,6 +27,7 @@ export class AppTopBarComponent implements OnInit, OnDestroy {
     'subscriptions': 'Suscripciones',
     'plans': 'Planes',
     'metrics': 'Métricas',
+    'collections': 'Cobranzas',
     'dashboard': 'Dashboard',
     'users': 'Usuarios',
     'billing': 'Facturación',

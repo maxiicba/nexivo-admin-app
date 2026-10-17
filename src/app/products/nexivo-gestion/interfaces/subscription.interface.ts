@@ -35,6 +35,10 @@ export interface Plan {
   hasMarketing?: boolean;
   marketingAiDailyLimit?: number;
   marketingAiMonthlyLimit?: number;
+  /** Club de Socios (fidelización + CRM). Flag propio: no cuelga de hasMarketing. */
+  hasLoyalty?: boolean;
+  /** CRM (contactos, bandeja, clientes para contactar). Flag propio, no cuelga de hasLoyalty. */
+  hasCrm?: boolean;
   hasChatBot?: boolean;
   hasSupportAgent?: boolean;
   hasMercadoPago?: boolean;
@@ -90,8 +94,30 @@ export interface PaymentStats {
   pending: { count: number; totalAmount: number };
   completed: { count: number; totalAmount: number };
   overdue: { count: number; totalAmount: number };
+  /** Transferencias que el cliente informo y todavia nadie acredito: cola de trabajo manual. */
+  awaitingTransfer: { count: number; totalAmount: number };
   autoDebitActive: number;
   revenueLastMonth: number;
+}
+
+/**
+ * Datos bancarios para cobrar la suscripcion por transferencia. Fila unica de la
+ * tabla subscription_transfer_settings, editable desde este panel (antes eran
+ * variables de entorno, que obligaban a redeploy para cambiar un alias).
+ */
+export interface TransferSettings {
+  id?: string;
+  isEnabled: boolean;
+  bankName: string | null;
+  accountHolder: string | null;
+  cuit: string | null;
+  cbu: string | null;
+  alias: string | null;
+  accountNumber: string | null;
+  contact: string | null;
+  instructions: string | null;
+  updatedAt?: string;
+  updatedByUserId?: string | null;
 }
 
 export interface AllPaymentsResponse {
@@ -112,6 +138,15 @@ export interface AdminPayment {
   mercadoPagoStatus?: string;
   mercadoPagoAuthorizedPaymentId?: string;
   upgradeToPlanId?: string;
+  /** 'mercado_pago' (default) | 'bank_transfer'. */
+  paymentMethod?: string;
+  /** Con valor = el cliente aviso que transfirio y espera que lo acreditemos. */
+  transferReportedAt?: string | null;
+  transferReference?: string | null;
+  transferNotes?: string | null;
+  confirmedAt?: string | null;
+  confirmedByUserId?: string | null;
+  adminNotes?: string | null;
   subscription?: {
     id: string;
     billingCycle: string;

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Plan, PlanUsage, Subscription, MpAutoSubscriptionResult, PaymentStats, AllPaymentsResponse, AdminPayment, UpgradeResult, DashboardStats } from '../interfaces/subscription.interface';
+import { Plan, PlanUsage, Subscription, MpAutoSubscriptionResult, PaymentStats, AllPaymentsResponse, AdminPayment, UpgradeResult, DashboardStats, TransferSettings } from '../interfaces/subscription.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -117,9 +117,11 @@ export class ManagementSubscriptionService {
 
   // ─── Admin Payment Endpoints ───
 
-  getAllPayments(params?: { status?: string; page?: number; limit?: number }): Observable<AllPaymentsResponse> {
+  /** `method`: 'mercado_pago' | 'bank_transfer' | 'awaiting_transfer' (informadas sin acreditar). */
+  getAllPayments(params?: { status?: string; method?: string; page?: number; limit?: number }): Observable<AllPaymentsResponse> {
     const queryParts: string[] = [];
     if (params?.status) queryParts.push(`status=${params.status}`);
+    if (params?.method) queryParts.push(`method=${params.method}`);
     if (params?.page) queryParts.push(`page=${params.page}`);
     if (params?.limit) queryParts.push(`limit=${params.limit}`);
     const qs = queryParts.length ? `?${queryParts.join('&')}` : '';
@@ -128,5 +130,27 @@ export class ManagementSubscriptionService {
 
   getPaymentStats(): Observable<PaymentStats> {
     return this.http.get<PaymentStats>(`${this.baseUrl}/mercado-pago/payments/stats`, { withCredentials: true });
+  }
+
+  // ─── Datos bancarios para transferencias ───
+
+  getTransferSettings(): Observable<TransferSettings> {
+    return this.http.get<TransferSettings>(`${this.baseUrl}/subscriptions/transfer-settings`, { withCredentials: true });
+  }
+
+  updateTransferSettings(data: Partial<TransferSettings>): Observable<TransferSettings> {
+    return this.http.put<TransferSettings>(`${this.baseUrl}/subscriptions/transfer-settings`, data, { withCredentials: true });
+  }
+
+  /**
+   * Marca un pago como recibido por transferencia: lo pasa a COMPLETED, avanza el
+   * periodo de la suscripcion y reactiva la cuenta si estaba suspendida.
+   */
+  confirmTransferPayment(paymentId: string, notes?: string): Observable<AdminPayment> {
+    return this.http.post<AdminPayment>(
+      `${this.baseUrl}/subscriptions/payments/${paymentId}/confirm-transfer`,
+      { notes },
+      { withCredentials: true },
+    );
   }
 }

@@ -21,6 +21,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { forkJoin, Subscription as RxSub } from 'rxjs';
 import { NexivoTurnosAdminService } from '../services/nexivo-turnos-admin.service';
+import { SubscriptionStatementComponent } from './statement/subscription-statement.component';
 
 const ACTION_LABELS: Record<string, string> = {
   plan_changed: 'Cambio de plan',
@@ -37,6 +38,19 @@ const ACTION_LABELS: Record<string, string> = {
   trial_expired: 'Trial vencido',
   auto_suspended_past_due: 'Auto suspensión (vencida)',
   bulk_notification_sent: 'Notificación masiva',
+  auto_cancelled_after_suspension: 'Auto cancelación (30 d suspendida)',
+  charge_created: 'Cargo generado',
+  charge_updated: 'Cargo actualizado',
+  charge_paid: 'Cargo pagado',
+  charge_voided: 'Cargo anulado',
+  charge_restored: 'Cargo restaurado',
+  charge_reverted: 'Pago revertido',
+  transfer_reported: 'Transferencia informada',
+  transfer_withdrawn: 'Transferencia retirada',
+  transfer_confirmed: 'Transferencia acreditada',
+  transfer_rejected: 'Transferencia rechazada',
+  payment_rejected: 'Débito rechazado',
+  preapproval_updated: 'Débito automático (MP)',
 };
 
 const ACTION_ICONS: Record<string, string> = {
@@ -54,6 +68,19 @@ const ACTION_ICONS: Record<string, string> = {
   trial_expired: 'pi pi-hourglass',
   auto_suspended_past_due: 'pi pi-exclamation-triangle',
   bulk_notification_sent: 'pi pi-send',
+  auto_cancelled_after_suspension: 'pi pi-ban',
+  charge_created: 'pi pi-file',
+  charge_updated: 'pi pi-file-edit',
+  charge_paid: 'pi pi-check-circle',
+  charge_voided: 'pi pi-ban',
+  charge_restored: 'pi pi-replay',
+  charge_reverted: 'pi pi-undo',
+  transfer_reported: 'pi pi-building-columns',
+  transfer_withdrawn: 'pi pi-times',
+  transfer_confirmed: 'pi pi-check',
+  transfer_rejected: 'pi pi-times-circle',
+  payment_rejected: 'pi pi-exclamation-circle',
+  preapproval_updated: 'pi pi-sync',
 };
 
 @Component({
@@ -63,7 +90,7 @@ const ACTION_ICONS: Record<string, string> = {
     CommonModule, FormsModule, TabViewModule, ButtonModule, TagModule, TableModule,
     CardModule, DialogModule, InputTextModule, InputTextareaModule, InputNumberModule,
     DropdownModule, CheckboxModule, ChipModule, ProgressBarModule, ToastModule, ConfirmDialogModule,
-    TooltipModule,
+    TooltipModule, SubscriptionStatementComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './subscription-detail.component.html',
@@ -234,6 +261,19 @@ export class SubscriptionDetailComponent implements OnInit, OnDestroy {
       cancelled: 'danger',
       auto_suspended_past_due: 'danger',
       payment_refunded: 'danger',
+      auto_cancelled_after_suspension: 'danger',
+      charge_created: 'neutral',
+      charge_updated: 'neutral',
+      charge_paid: 'success',
+      transfer_confirmed: 'success',
+      charge_restored: 'info',
+      transfer_reported: 'info',
+      preapproval_updated: 'info',
+      charge_voided: 'warning',
+      charge_reverted: 'warning',
+      transfer_withdrawn: 'warning',
+      transfer_rejected: 'danger',
+      payment_rejected: 'danger',
     };
     return map[action] || 'neutral';
   }

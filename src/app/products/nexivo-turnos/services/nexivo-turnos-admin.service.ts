@@ -8,6 +8,99 @@ export interface BulkResult {
   failed: { id: string; error: string }[];
 }
 
+// ── Cobranzas (turnos-api /subscriptions/admin/billing, /admin/charges) ──
+
+export type ChargePaymentMethod = 'mercado_pago' | 'bank_transfer' | 'manual';
+
+export interface BillingSummary {
+  debtAmount: number;
+  overdueAmount: number;
+  overdueCount: number;
+  pendingAmount: number;
+  pendingCount: number;
+  paidAmount: number;
+  voidedAmount: number;
+  awaitingTransferCount: number;
+  oldestDueDate: string | null;
+  nextDueDate: string | null;
+  nextDueAmount: number;
+  daysOverdue: number;
+  lastPaymentDate: string | null;
+  lastPaymentAmount: number;
+}
+
+export interface AdminCharge {
+  id: string;
+  kind: 'period' | 'activation' | 'manual';
+  concept: string;
+  planId: string | null;
+  billingCycle: 'monthly' | 'annual' | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  dueDate: string;
+  grossAmount: number;
+  discountAmount: number;
+  amount: number;
+  status: 'pending' | 'overdue' | 'paid' | 'voided';
+  paidAt: string | null;
+  paymentMethod: ChargePaymentMethod | null;
+  transferReportedAt: string | null;
+  transferReference: string | null;
+  transferNotes: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+  isCurrentPeriod: boolean;
+  adminNotes: string | null;
+  createdAt: string;
+}
+
+export interface AdminStatement {
+  subscription: any;
+  business: { id: string; name: string; slug: string; email: string } | null;
+  summary: BillingSummary;
+  charges: AdminCharge[];
+  payments: any[];
+}
+
+export interface BillingOverview {
+  debtAmount: number;
+  overdueAmount: number;
+  debtorsCount: number;
+  awaitingTransferCount: number;
+  dueNext7DaysAmount: number;
+  collectedThisMonth: number;
+  paymentsThisMonth: number;
+}
+
+export interface Debtor {
+  subscriptionId: string;
+  businessId: string;
+  businessName: string;
+  businessSlug: string;
+  businessEmail: string;
+  status: string;
+  billingCycle: string;
+  planName: string | null;
+  autoDebit: boolean;
+  debtAmount: number;
+  overdueAmount: number;
+  openCount: number;
+  oldestDueDate: string;
+  oldestOverdueDate: string | null;
+  awaitingTransferCount: number;
+  daysOverdue: number;
+}
+
+export interface TransferSettings {
+  isEnabled: boolean;
+  bankName?: string | null;
+  accountHolder?: string | null;
+  cuit?: string | null;
+  cbu?: string | null;
+  alias?: string | null;
+  instructions?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NexivoTurnosAdminService {
   private base = `${environment.turnosApiUrl}/subscriptions`;
@@ -122,6 +215,63 @@ export class NexivoTurnosAdminService {
 
   markRefunded(paymentId: string, reason: string): Observable<any> {
     return this.http.post<any>(`${this.base}/admin/payments/${paymentId}/mark-refunded`, { reason }, { withCredentials: true });
+  }
+
+  // ── Cobranzas: estado de cuenta y cargos (devengamientos) ─────────────────
+
+  getStatement(id: string): Observable<AdminStatement> {
+    return this.http.get<AdminStatement>(`${this.base}/admin/${id}/statement`, { withCredentials: true });
+  }
+
+  createCharge(id: string, body: { concept: string; amount: number; dueDate: string; adminNotes?: string }): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/${id}/charges`, body, { withCredentials: true });
+  }
+
+  updateCharge(chargeId: string, body: { concept?: string; amount?: number; dueDate?: string; adminNotes?: string }): Observable<any> {
+    return this.http.patch<any>(`${this.base}/admin/charges/${chargeId}`, body, { withCredentials: true });
+  }
+
+  markChargePaid(chargeId: string, body: { method: ChargePaymentMethod; notes?: string }): Observable<AdminStatement> {
+    return this.http.post<AdminStatement>(`${this.base}/admin/charges/${chargeId}/mark-paid`, body, { withCredentials: true });
+  }
+
+  voidCharge(chargeId: string, reason: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/charges/${chargeId}/void`, { reason }, { withCredentials: true });
+  }
+
+  restoreCharge(chargeId: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/charges/${chargeId}/restore`, {}, { withCredentials: true });
+  }
+
+  revertCharge(chargeId: string, reason: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/admin/charges/${chargeId}/revert`, { reason }, { withCredentials: true });
+  }
+
+  rejectTransfer(chargeId: string, reason: string): Observable<AdminStatement> {
+    return this.http.post<AdminStatement>(`${this.base}/admin/charges/${chargeId}/reject-transfer`, { reason }, { withCredentials: true });
+  }
+
+  getBillingOverview(): Observable<BillingOverview> {
+    return this.http.get<BillingOverview>(`${this.base}/admin/billing/overview`, { withCredentials: true });
+  }
+
+  getDebtors(params: { onlyOverdue?: boolean; search?: string } = {}): Observable<Debtor[]> {
+    let httpParams = new HttpParams();
+    if (params.onlyOverdue) httpParams = httpParams.set('onlyOverdue', 'true');
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    return this.http.get<Debtor[]>(`${this.base}/admin/billing/debtors`, { params: httpParams, withCredentials: true });
+  }
+
+  getReportedTransfers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/admin/billing/transfers`, { withCredentials: true });
+  }
+
+  getTransferSettings(): Observable<TransferSettings> {
+    return this.http.get<TransferSettings>(`${this.base}/admin/billing/transfer-settings`, { withCredentials: true });
+  }
+
+  updateTransferSettings(body: TransferSettings): Observable<TransferSettings> {
+    return this.http.put<TransferSettings>(`${this.base}/admin/billing/transfer-settings`, body, { withCredentials: true });
   }
 
   // ── Bulk ──────────────────────────────────────────────────────────────────

@@ -1,0 +1,204 @@
+<div *ngIf="loading && !statement" class="card p-6 text-center">
+  <i class="pi pi-spin pi-spinner text-2xl"></i>
+</div>
+
+<ng-container *ngIf="statement as st">
+  <!-- Resumen -->
+  <div class="grid">
+    <div class="col-6 md:col-3">
+      <div class="card h-full mb-0">
+        <div class="text-color-secondary text-sm">Saldo total</div>
+        <div class="text-2xl font-bold mt-1">{{ formatCurrency(st.summary.debtAmount) }}</div>
+        <div class="text-xs text-color-secondary mt-1">{{ st.summary.overdueCount + st.summary.pendingCount }} cargos abiertos</div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="card h-full mb-0">
+        <div class="text-color-secondary text-sm">Vencido</div>
+        <div class="text-2xl font-bold mt-1" [class.text-red-500]="st.summary.overdueAmount > 0">{{ formatCurrency(st.summary.overdueAmount) }}</div>
+        <div class="text-xs text-color-secondary mt-1" *ngIf="st.summary.overdueAmount > 0">
+          desde {{ st.summary.oldestDueDate | date:'dd/MM/yy' }} · {{ st.summary.daysOverdue }} días
+        </div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="card h-full mb-0">
+        <div class="text-color-secondary text-sm">Próximo vencimiento</div>
+        <div class="text-2xl font-bold mt-1">{{ st.summary.nextDueDate ? formatCurrency(st.summary.nextDueAmount) : '—' }}</div>
+        <div class="text-xs text-color-secondary mt-1" *ngIf="st.summary.nextDueDate">el {{ st.summary.nextDueDate | date:'dd/MM/yy' }}</div>
+      </div>
+    </div>
+    <div class="col-6 md:col-3">
+      <div class="card h-full mb-0">
+        <div class="text-color-secondary text-sm">Cobrado (histórico)</div>
+        <div class="text-2xl font-bold mt-1">{{ formatCurrency(st.summary.paidAmount) }}</div>
+        <div class="text-xs text-color-secondary mt-1" *ngIf="st.summary.lastPaymentDate">
+          último {{ formatCurrency(st.summary.lastPaymentAmount) }} el {{ st.summary.lastPaymentDate | date:'dd/MM/yy' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cargos -->
+  <div class="card mt-3">
+    <div class="flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h4 class="m-0"><i class="pi pi-receipt mr-2"></i>Cargos (devengamientos)</h4>
+      <div class="flex flex-wrap align-items-center gap-3">
+        <div class="flex align-items-center gap-2">
+          <p-checkbox [(ngModel)]="showVoided" [binary]="true" inputId="showVoided"></p-checkbox>
+          <label for="showVoided" class="text-sm">Ver anulados</label>
+        </div>
+        <button pButton label="Exportar CSV" icon="pi pi-download" class="p-button-sm p-button-secondary p-button-outlined" (click)="exportCsv()"></button>
+        <button pButton label="Nuevo cargo" icon="pi pi-plus" class="p-button-sm" (click)="openNewCharge()"></button>
+      </div>
+    </div>
+
+    <p-table [value]="visibleCharges" styleClass="p-datatable-sm" [paginator]="visibleCharges.length > 20" [rows]="20">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Concepto</th>
+          <th>Vence</th>
+          <th class="text-right">Importe</th>
+          <th>Estado</th>
+          <th>Pago</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-c>
+        <tr [class.opacity-60]="c.status === 'voided'">
+          <td>
+            <div class="font-medium">{{ c.concept }}</div>
+            <div class="text-xs text-color-secondary">
+              {{ kindLabel(c) }}
+              <ng-container *ngIf="c.periodStart && c.periodEnd"> · {{ c.periodStart | date:'dd/MM/yy' }} → {{ c.periodEnd | date:'dd/MM/yy' }}</ng-container>
+            </div>
+            <div class="text-xs text-color-secondary" *ngIf="c.adminNotes"><i class="pi pi-pencil text-xs"></i> {{ c.adminNotes }}</div>
+            <div class="text-xs text-color-secondary" *ngIf="c.voidReason"><i class="pi pi-ban text-xs"></i> {{ c.voidReason }}</div>
+          </td>
+          <td>{{ c.dueDate | date:'dd/MM/yy' }}</td>
+          <td class="text-right">
+            <strong>{{ formatCurrency(c.amount) }}</strong>
+            <div class="text-xs text-green-600" *ngIf="c.discountAmount > 0" [pTooltip]="'Lista ' + formatCurrency(c.grossAmount)">
+              −{{ formatCurrency(c.discountAmount) }} desc.
+            </div>
+          </td>
+          <td>
+            <p-tag [value]="statusLabel(c)" [severity]="statusSeverity(c)"></p-tag>
+            <div class="text-xs text-color-secondary mt-1" *ngIf="c.transferReportedAt && isOpen(c)">
+              {{ c.transferReportedAt | date:'dd/MM HH:mm' }}<ng-container *ngIf="c.transferReference"> · ref {{ c.transferReference }}</ng-container>
+              <div *ngIf="c.transferNotes">"{{ c.transferNotes }}"</div>
+            </div>
+          </td>
+          <td class="text-xs">
+            <ng-container *ngIf="c.paidAt">{{ c.paidAt | date:'dd/MM/yy' }} · {{ methodLabel(c.paymentMethod) }}</ng-container>
+            <ng-container *ngIf="!c.paidAt">—</ng-container>
+          </td>
+          <td class="text-right white-space-nowrap">
+            <ng-container *ngIf="isOpen(c)">
+              <button pButton icon="pi pi-check" class="p-button-rounded p-button-text p-button-success p-button-sm"
+                      pTooltip="Acreditar pago" (click)="openMarkPaid(c)"></button>
+              <button *ngIf="c.transferReportedAt" pButton icon="pi pi-times-circle" class="p-button-rounded p-button-text p-button-warning p-button-sm"
+                      pTooltip="Rechazar transferencia" (click)="openReason(c, 'reject')"></button>
+              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="Editar" (click)="openEditCharge(c)"></button>
+              <button pButton icon="pi pi-ban" class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                      [pTooltip]="c.isCurrentPeriod ? 'El período vigente no se anula: regalá tiempo o cambiá el plan' : 'Anular'"
+                      [disabled]="c.isCurrentPeriod && c.kind === 'period'"
+                      (click)="openReason(c, 'void')"></button>
+            </ng-container>
+            <button *ngIf="c.status === 'paid'" pButton icon="pi pi-undo" class="p-button-rounded p-button-text p-button-warning p-button-sm"
+                    pTooltip="Revertir pago" (click)="openReason(c, 'revert')"></button>
+            <button *ngIf="c.status === 'voided'" pButton icon="pi pi-replay" class="p-button-rounded p-button-text p-button-sm"
+                    pTooltip="Restaurar" (click)="restore(c)"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="6" class="text-center p-4 text-color-secondary">Sin cargos</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</ng-container>
+
+<!-- Acreditar -->
+<p-dialog [(visible)]="markPaidDialog" header="Acreditar pago" [modal]="true" [style]="{width: '460px', maxWidth: '95vw'}"
+          [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="flex flex-column gap-3 py-2" *ngIf="markPaidCharge">
+    <div>
+      <strong>{{ markPaidCharge.concept }}</strong> · {{ formatCurrency(markPaidCharge.amount) }}
+      <div class="text-sm text-color-secondary mt-1" *ngIf="markPaidCharge.isCurrentPeriod || markPaidCharge.kind === 'activation'">
+        <i class="pi pi-info-circle"></i>
+        {{ markPaidCharge.kind === 'activation'
+          ? 'Aplica el plan y arranca un período nuevo, igual que un pago por Mercado Pago.'
+          : 'Renueva la suscripción: extiende el período y la deja activa.' }}
+      </div>
+      <div class="text-sm text-color-secondary mt-1" *ngIf="markPaidCharge.transferReportedAt">
+        Transferencia informada el {{ markPaidCharge.transferReportedAt | date:'dd/MM HH:mm' }}
+        <ng-container *ngIf="markPaidCharge.transferReference"> · ref {{ markPaidCharge.transferReference }}</ng-container>
+      </div>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Medio de pago</label>
+      <p-dropdown [options]="methodOptions" [(ngModel)]="markPaidMethod" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-dropdown>
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Nota (opcional)</label>
+      <textarea pInputTextarea [(ngModel)]="markPaidNotes" rows="2" class="w-full" placeholder="Ej: verificada en el extracto del Galicia"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="markPaidDialog = false"></button>
+    <button pButton label="Acreditar" icon="pi pi-check" [loading]="saving" (click)="confirmMarkPaid()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Motivo -->
+<p-dialog [(visible)]="reasonDialog" [header]="reasonTitle" [modal]="true" [style]="{width: '440px', maxWidth: '95vw'}"
+          [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="flex flex-column gap-3 py-2" *ngIf="reasonCharge">
+    <div><strong>{{ reasonCharge.concept }}</strong> · {{ formatCurrency(reasonCharge.amount) }}</div>
+    <div class="text-sm text-color-secondary">{{ reasonHint }}</div>
+    <div>
+      <label class="block mb-1 font-medium">Motivo</label>
+      <textarea pInputTextarea [(ngModel)]="reasonText" rows="3" class="w-full" placeholder="Queda registrado en la auditoría"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="reasonDialog = false"></button>
+    <button pButton label="Confirmar" [loading]="saving" [disabled]="!reasonText.trim()"
+            [class.p-button-danger]="reasonAction !== 'revert'" [class.p-button-warning]="reasonAction === 'revert'"
+            (click)="confirmReason()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Nuevo / editar cargo -->
+<p-dialog [(visible)]="chargeDialog" [header]="editingCharge ? 'Editar cargo' : 'Nuevo cargo manual'" [modal]="true"
+          [style]="{width: '460px', maxWidth: '95vw'}" [draggable]="false" [resizable]="false" styleClass="nx-dialog">
+  <div class="flex flex-column gap-3 py-2">
+    <div *ngIf="!editingCharge || editingCharge.kind === 'manual'">
+      <label class="block mb-1 font-medium">Concepto</label>
+      <input pInputText [(ngModel)]="chargeConcept" class="w-full" maxlength="200" placeholder="Ej: Configuración inicial" />
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Importe (ARS)</label>
+      <p-inputNumber [(ngModel)]="chargeAmount" [min]="0" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="2"
+                     locale="es-AR" [style]="{width: '100%'}"></p-inputNumber>
+      <small class="text-color-secondary" *ngIf="editingCharge?.kind === 'period'">
+        Precio de lista {{ formatCurrency(editingCharge?.grossAmount) }}. Un importe menor queda como descuento.
+      </small>
+    </div>
+    <div *ngIf="!editingCharge || editingCharge.kind !== 'period'">
+      <label class="block mb-1 font-medium">Vencimiento</label>
+      <input pInputText type="date" [(ngModel)]="chargeDueDate" class="w-full" />
+    </div>
+    <div>
+      <label class="block mb-1 font-medium">Nota interna (opcional)</label>
+      <textarea pInputTextarea [(ngModel)]="chargeNotes" rows="2" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="chargeDialog = false"></button>
+    <button pButton [label]="editingCharge ? 'Guardar' : 'Crear cargo'" [loading]="saving" [disabled]="!chargeFormValid"
+            (click)="saveCharge()"></button>
+  </ng-template>
+</p-dialog>

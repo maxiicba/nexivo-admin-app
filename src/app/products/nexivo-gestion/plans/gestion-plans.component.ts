@@ -40,6 +40,8 @@ const DEFAULT_PLAN = () => ({
   maxDailyDocumentScan: 0, maxMonthlyDocumentScan: 0,
   hasChatBot: false, maxChatBotQueriesDaily: 0, maxChatBotQueriesMonthly: 0,
   hasMarketing: false, marketingAiDailyLimit: 0, marketingAiMonthlyLimit: 0,
+  hasLoyalty: false,
+  hasCrm: false,
   hasTrialPeriod: false, trialDays: 0,
   features: [] as string[],
 });
@@ -189,6 +191,8 @@ export class GestionPlansComponent implements OnInit {
       const limits = [daily, monthly].filter(Boolean).join(', ');
       lines.push(`Marketing${limits ? ` (IA: ${limits})` : ''}`);
     }
+    if (p.hasLoyalty) lines.push('Club de Socios (fidelización + CRM)');
+    if (p.hasCrm) lines.push('CRM (contactos, bandeja y clientes para contactar)');
     if (p.hasSupportAgent) lines.push('Soporte con agente');
     if (p.hasMercadoPago) lines.push('Mercado Pago');
     lines.push('Soporte por email');

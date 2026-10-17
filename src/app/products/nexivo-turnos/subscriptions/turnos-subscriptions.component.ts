@@ -77,8 +77,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   bulkStatusReason = '';
 
   bulkNotifyDialog = false;
-  bulkNotifyChannel: 'email' | 'whatsapp' = 'email';
-  bulkNotifyTemplate = 'reminder';
+  bulkNotifyTemplate: 'payment_reminder' | 'custom' = 'payment_reminder';
   bulkNotifyMessage = '';
 
   // Bulk failures dialog
@@ -113,9 +112,9 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
     { label: 'Suspender',   value: 'suspended' },
     { label: 'Marcar past_due', value: 'past_due' },
   ];
-  notifyChannelOptions = [
-    { label: 'Email',    value: 'email' },
-    { label: 'WhatsApp', value: 'whatsapp' },
+  notifyTemplateOptions = [
+    { label: 'Recordatorio de saldo', value: 'payment_reminder' },
+    { label: 'Mensaje libre',         value: 'custom' },
   ];
   mpStatusOptions = [
     { label: 'Todos',      value: null },
@@ -468,8 +467,7 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
 
   openBulkNotify(): void {
     if (!this.selected.length) return;
-    this.bulkNotifyChannel = 'email';
-    this.bulkNotifyTemplate = 'reminder';
+    this.bulkNotifyTemplate = 'payment_reminder';
     this.bulkNotifyMessage = '';
     this.bulkNotifyDialog = true;
   }
@@ -477,7 +475,8 @@ export class TurnosSubscriptionsComponent implements OnInit, OnDestroy {
   confirmBulkNotify(): void {
     const ids = this.selected.map((s) => s.id);
     this.saving = true;
-    this.svc.bulkNotify(ids, this.bulkNotifyChannel, this.bulkNotifyTemplate, this.bulkNotifyMessage || undefined).subscribe({
+    const message = this.bulkNotifyTemplate === 'custom' ? this.bulkNotifyMessage.trim() || undefined : undefined;
+    this.svc.bulkNotify(ids, 'email', this.bulkNotifyTemplate, message).subscribe({
       next: (res) => {
         this.handleBulkResult(res, 'notificadas');
         this.bulkNotifyDialog = false;
