@@ -1,0 +1,178 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<section class="nx-hero-section">
+  <div class="nx-hero-section__glow nx-hero-section__glow--primary"></div>
+  <div class="nx-hero-section__content">
+    <div class="nx-page-header nx-page-header--hero">
+      <div class="nx-page-header__left">
+        <div class="nx-page-header__icon nx-page-header__icon--hero"><i class="pi pi-megaphone"></i></div>
+        <div>
+          <span class="nx-page-kicker">Nexivo Turnos</span>
+          <h2 class="nx-page-header__title m-0">Notificaciones</h2>
+          <p class="nx-page-header__subtitle m-0">Mandá un aviso a los negocios: aparece en su campana y les llega por push</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="nx-tn-grid">
+  <div class="nx-tn-main">
+    <!-- ── Destinatarios ── -->
+    <div class="card mb-3">
+      <h4 class="mt-0 mb-3">¿A quién?</h4>
+      <p-selectButton [options]="targets" [(ngModel)]="target" optionLabel="label" optionValue="value"
+        [allowEmpty]="false" (onChange)="onAudienceChange()" styleClass="nx-tn-targets">
+        <ng-template let-item pTemplate>
+          <i [class]="item.icon"></i><span>{{ item.label }}</span>
+        </ng-template>
+      </p-selectButton>
+
+      <div class="nx-tn-target-detail" [ngSwitch]="target">
+        <p *ngSwitchCase="'all'" class="nx-tn-hint">Todos los negocios que no se dieron de baja, con cualquier estado de suscripción.</p>
+
+        <div *ngSwitchCase="'status'">
+          <label class="nx-tn-label">Estado de la suscripción</label>
+          <p-multiSelect [options]="statusOptions" [(ngModel)]="statuses" optionLabel="label" optionValue="value"
+            placeholder="Elegí uno o más estados" display="chip" styleClass="w-full"
+            (onChange)="onAudienceChange()"></p-multiSelect>
+        </div>
+
+        <div *ngSwitchCase="'businesses'">
+          <label class="nx-tn-label">Negocios</label>
+          <p-autoComplete [(ngModel)]="selectedBusinesses" [suggestions]="businessSuggestions" [multiple]="true"
+            field="name" [minLength]="2" placeholder="Buscá por nombre o slug" styleClass="w-full"
+            (completeMethod)="searchBusinesses($event)" (onSelect)="onAudienceChange()" (onUnselect)="onAudienceChange()">
+            <ng-template let-b pTemplate="item">
+              <div class="nx-tn-opt"><strong>{{ b.name }}</strong><small>/{{ b.slug }}</small></div>
+            </ng-template>
+          </p-autoComplete>
+        </div>
+
+        <div *ngSwitchCase="'emails'">
+          <label class="nx-tn-label">Emails de los usuarios</label>
+          <textarea pInputTextarea rows="3" class="w-full" [(ngModel)]="emailsText" (ngModelChange)="onAudienceChange()"
+            placeholder="uno@negocio.com, otro@negocio.com"></textarea>
+          <small class="nx-tn-hint">Separados por coma, espacio o renglón. Le llega al negocio de cada usuario.</small>
+          <small class="nx-tn-error" *ngIf="parsedEmails.invalid.length">
+            Emails inválidos: {{ parsedEmails.invalid.join(', ') }}
+          </small>
+        </div>
+      </div>
+
+      <div class="nx-tn-reach" [class.is-empty]="preview && !preview.businesses">
+        <i class="pi" [ngClass]="previewLoading ? 'pi-spin pi-spinner' : 'pi-users'"></i>
+        <ng-container *ngIf="audience; else incompleteTpl">
+          <ng-container *ngIf="preview">
+            <span><strong>{{ preview.businesses }}</strong> negocio{{ preview.businesses === 1 ? '' : 's' }}</span>
+            <span class="nx-tn-reach__sep">·</span>
+            <span><strong>{{ preview.devices }}</strong> equipo{{ preview.devices === 1 ? '' : 's' }} con push activado</span>
+          </ng-container>
+        </ng-container>
+        <ng-template #incompleteTpl><span>Completá el destino para ver a cuántos llega.</span></ng-template>
+      </div>
+      <small class="nx-tn-error" *ngIf="preview && !preview.pushEnabled && viaPush">
+        El push está apagado en turnos-api (faltan las credenciales FIREBASE_*). Sólo saldría por la campana.
+      </small>
+    </div>
+
+    <!-- ── Mensaje ── -->
+    <div class="card mb-3">
+      <h4 class="mt-0 mb-3">Mensaje</h4>
+
+      <label class="nx-tn-label" for="tn-title">Título</label>
+      <input pInputText id="tn-title" class="w-full" [(ngModel)]="title" maxlength="160"
+        placeholder="Ej.: Nueva función: recordatorios por WhatsApp" />
+      <small class="nx-tn-count">{{ title.length }}/160</small>
+
+      <label class="nx-tn-label" for="tn-body">Texto <span class="nx-tn-optional">(opcional)</span></label>
+      <textarea pInputTextarea id="tn-body" rows="4" class="w-full" [(ngModel)]="body" maxlength="1000"
+        placeholder="Contá en una o dos frases qué pasa y qué tiene que hacer el negocio."></textarea>
+      <small class="nx-tn-count">{{ body.length }}/1000</small>
+
+      <label class="nx-tn-label" for="tn-link">Al tocarlo, abrir <span class="nx-tn-optional">(opcional)</span></label>
+      <input pInputText id="tn-link" class="w-full" [(ngModel)]="link" placeholder="/admin/plans" />
+      <small class="nx-tn-error" *ngIf="linkInvalid">Tiene que ser una ruta del panel que empiece con "/", ej. /admin/plans</small>
+      <small class="nx-tn-hint" *ngIf="!linkInvalid">Ruta del panel de Turnos. Vacío: abre el panel.</small>
+
+      <label class="nx-tn-label">Canales</label>
+      <div class="nx-tn-channels">
+        <label class="nx-tn-channel">
+          <p-checkbox [(ngModel)]="viaInbox" [binary]="true"></p-checkbox>
+          <span><strong>Campana del panel</strong><small>Queda guardado en sus avisos.</small></span>
+        </label>
+        <label class="nx-tn-channel">
+          <p-checkbox [(ngModel)]="viaPush" [binary]="true"></p-checkbox>
+          <span><strong>Push</strong><small>Sólo a quien lo activó en su equipo.</small></span>
+        </label>
+      </div>
+      <small class="nx-tn-error" *ngIf="!viaInbox && !viaPush">Elegí al menos un canal.</small>
+
+      <div class="nx-tn-actions">
+        <button pButton type="button" icon="pi pi-send" label="Enviar" [loading]="sending"
+          [disabled]="!canSend" (click)="confirmSend()"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Vista previa ── -->
+  <aside class="nx-tn-side">
+    <div class="card">
+      <h4 class="mt-0 mb-3">Vista previa</h4>
+      <div class="nx-tn-push">
+        <img src="https://turnos.nexivo.com.ar/assets/icons/nexivo-turnos-192.png" alt="" />
+        <div>
+          <div class="nx-tn-push__app">Nexivo - Turnos · ahora</div>
+          <div class="nx-tn-push__title">{{ title || 'Título del aviso' }}</div>
+          <div class="nx-tn-push__body">{{ body || 'Texto del aviso' }}</div>
+        </div>
+      </div>
+      <small class="nx-tn-hint">Así se ve el push. En la campana aparece con el ícono de megáfono.</small>
+    </div>
+  </aside>
+</div>
+
+<!-- ── Historial ── -->
+<div class="card mt-3">
+  <h4 class="mt-0 mb-3">Enviadas</h4>
+  <p-table [value]="history" [lazy]="true" [paginator]="true" [rows]="historyPageSize"
+    [totalRecords]="historyTotal" [loading]="historyLoading" (onLazyLoad)="onHistoryPage($event)"
+    [tableStyle]="{ 'min-width': '52rem' }" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Fecha</th>
+        <th>Mensaje</th>
+        <th>Destino</th>
+        <th>Canales</th>
+        <th class="text-right">Negocios</th>
+        <th class="text-right">Push</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-b>
+      <tr>
+        <td class="white-space-nowrap">{{ b.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <div class="font-semibold">{{ b.title }}</div>
+          <small class="nx-tn-hint" *ngIf="b.body">{{ b.body }}</small>
+          <small class="nx-tn-hint" *ngIf="b.link"><i class="pi pi-link"></i> {{ b.link }}</small>
+        </td>
+        <td class="nx-tn-audience">{{ audienceLabel(b.audience) }}</td>
+        <td>
+          <p-tag *ngIf="b.viaInbox" value="Campana" severity="info" styleClass="mr-1"></p-tag>
+          <p-tag *ngIf="b.viaPush" value="Push" severity="success"></p-tag>
+        </td>
+        <td class="text-right">{{ b.businessCount }}</td>
+        <td class="text-right white-space-nowrap">
+          <ng-container *ngIf="b.viaPush; else noPush">
+            {{ b.pushSent }}<span *ngIf="b.pushFailed" class="nx-tn-error"> · {{ b.pushFailed }} fallidos</span>
+          </ng-container>
+          <ng-template #noPush>—</ng-template>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="6" class="text-center p-4">Todavía no se envió ninguna notificación.</td></tr>
+    </ng-template>
+  </p-table>
+</div>

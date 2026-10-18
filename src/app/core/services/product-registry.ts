@@ -41,6 +41,7 @@ export const PRODUCTS: ProductConfig[] = [
       { label: 'Cobranzas',     icon: 'pi pi-wallet',      routeSuffix: 'collections' },
       { label: 'Planes',        icon: 'pi pi-tag',         routeSuffix: 'plans' },
       { label: 'Métricas',      icon: 'pi pi-chart-line',  routeSuffix: 'metrics' },
+      { label: 'Notificaciones', icon: 'pi pi-megaphone', routeSuffix: 'notifications' },
       { label: 'Mantenimiento', icon: 'pi pi-wrench',      routeSuffix: 'maintenance' },
     ],
   },

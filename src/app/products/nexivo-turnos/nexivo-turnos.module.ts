@@ -30,6 +30,10 @@ import { RouterModule } from '@angular/router';
         loadComponent: () => import('./metrics/turnos-metrics.component').then(m => m.TurnosMetricsComponent),
       },
       {
+        path: 'notifications',
+        loadComponent: () => import('./notifications/turnos-notifications.component').then(m => m.TurnosNotificationsComponent),
+      },
+      {
         path: 'maintenance',
         loadComponent: () => import('./maintenance/maintenance.component').then(m => m.MaintenanceComponent),
       },
